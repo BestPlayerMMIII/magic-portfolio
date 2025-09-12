@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import MagicLaboratory from "../scenes/MagicLaboratory.vue";
+import MagicPortfolio from "../scenes/MagicPortfolio.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -7,7 +7,7 @@ const router = createRouter({
     {
       path: "/",
       name: "home",
-      component: MagicLaboratory,
+      component: MagicPortfolio,
     },
   ],
 });

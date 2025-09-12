@@ -215,8 +215,6 @@ export class InteractionManager {
     const intersects = this.updateMouseAndRaycast(event);
     if (!intersects || !this._objectManager) return;
 
-    console.log("Mouse up detected!");
-
     if (intersects.length > 0 && this._mouseDownObject) {
       const mouseUpObject = intersects[0].object as THREE.Mesh;
 

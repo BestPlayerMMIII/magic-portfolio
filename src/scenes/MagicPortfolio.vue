@@ -403,7 +403,7 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import ContentModal from "../components/ContentModal.vue";
 import { Scene3DManager } from "../services/core";
-import { wizardLabTheme } from "../themes/wizard-lab";
+import { default as defaultTheme } from "../themes";
 import type { InteractiveObject, PreloaderState } from "../types/3d";
 
 // Import UI interaction styles
@@ -461,14 +461,14 @@ const initThreeJS = async () => {
     });
 
     // Initialize with wizard lab theme
-    await scene3DManager.initialize(threeContainer.value, wizardLabTheme);
+    await scene3DManager.initialize(threeContainer.value, defaultTheme);
 
     // Update day/night mode state
     isDayMode.value = scene3DManager.getCurrentLightingMode() === "day";
 
-    console.log("✅ Magic Laboratory initialized successfully");
+    console.log("✅ Magic Portfolio initialized successfully");
   } catch (error) {
-    console.error("❌ Failed to initialize Magic Laboratory:", error);
+    console.error("❌ Failed to initialize Magic Portfolio:", error);
     preloaderState.value.isLoading = false;
     preloaderState.value.status = "Failed to initialize";
   }

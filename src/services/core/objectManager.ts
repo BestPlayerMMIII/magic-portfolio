@@ -61,7 +61,12 @@ export class ObjectManager {
 
         // Handle text objects
         if (config.type === "text" && config.text) {
-          console.log(`📝 Creating 3D text: "${config.text.content}"`);
+          console.log(
+            `📝 Creating 3D text: "${config.text.content.replace(
+              /\n/g,
+              "\\n"
+            )}"`
+          );
           objectToAdd = await this.createTextObject(config.text);
         }
         // Handle 3D model objects
