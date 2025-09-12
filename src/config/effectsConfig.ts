@@ -125,9 +125,68 @@ const effectTemplates: EffectConfig[] = [
       enabled: true,
     },
   },
+  {
+    id: "liquidBubbles",
+    description:
+      "Bubbling liquid effect with dynamic bubbles rising from surface",
+    particles: {
+      name: "liquidBubbles", // Will be overridden per instance
+      particleCount: 25, // Moderate amount for realistic bubbling
+      geometry: {
+        type: "sphere",
+        size: 0.02, // Small bubble size
+        randomness: 0.6, // Some size variation for realism
+      },
+      material: {
+        color: 0x66ffcc, // Aqua/teal for magical liquid
+        size: 0.08, // Visual bubble size
+        transparent: true,
+        opacity: 0.7, // Semi-transparent bubbles
+        blending: "additive",
+        alphaTest: 0.1,
+      },
+      distribution: {
+        type: "ring", // Bubbles emerge from liquid surface in circular pattern
+        innerRadius: 0.5, // Small inner area
+        outerRadius: 1.2, // Cauldron surface area
+      },
+      animation: {
+        enabled: true,
+        speed: 1.2, // Moderate bubble rising speed
+        direction: [0, 1.5, 0], // Bubbles rise upward
+        rotationSpeed: 0.01, // Slight rotation for natural movement
+        floatingAmplitude: 0.3, // Small lateral movement
+        floatingSpeed: 2.0, // Quick bubble movement
+      },
+      position: [0, 0, 0], // Will be overridden per instance
+      enabled: true,
+      timeToLive: {
+        enabled: true,
+        minLifetime: 2.0, // Short-lived bubbles
+        maxLifetime: 4.0, // Varied bubble lifetime
+        respawn: true, // Continuous bubbling effect
+      },
+      fade: {
+        enabled: true,
+        fadeInPercentage: 0.1, // Quick bubble formation
+        fadeOutPercentage: 0.4, // Gradual bubble pop/dissolve
+      },
+    },
+    lighting: {
+      type: "point",
+      name: "liquidBubbles", // Will be overridden per instance
+      color: 0x00ffaa, // Bright aqua glow from magical liquid
+      intensity: 1.5, // Strong magical glow
+      position: [0, 0, 0], // Will be overridden per instance
+      distance: 6, // Wide glow radius for cauldron effect
+      decay: 1.8,
+      castShadow: false, // Performance optimization
+      enabled: true,
+    },
+  },
 ];
 
-const getTemplateById = (id: string): EffectConfig | undefined => {
+export const getTemplateById = (id: string): EffectConfig | undefined => {
   return effectTemplates.find((template) => template.id === id);
 };
 
@@ -435,6 +494,53 @@ const effectInstances: EffectInstance[] = [
       },
     },
     ["effect-book"]
+  ),
+
+  // Magical liquid bubbling in the cauldron
+  ...createEffectInstances(
+    "cauldron-bubbles",
+    getTemplateById("liquidBubbles"),
+    [
+      [7, 1.1, 7], // Position slightly above cauldron base (same x,z as cauldron, higher y)
+    ],
+    {
+      // Customize liquid properties
+      lighting: {
+        color: 0x00cc88, // Deep emerald magical glow
+        intensity: 2.0, // Strong mystical light
+        distance: 8, // Wide area effect
+      },
+      particles: {
+        particleCount: 20, // Moderate bubbling
+        material: {
+          color: 0x44ffaa, // Bright magical aqua bubbles
+          size: 0.06, // Slightly larger bubbles for visibility
+          opacity: 0.8,
+        },
+        distribution: {
+          type: "ring",
+          innerRadius: 0.3, // Inner cauldron area
+          outerRadius: 0.8, // Outer cauldron rim
+        },
+        animation: {
+          speed: 0.8, // Moderate bubble speed
+          direction: [0, 1.2, 0], // Bubbles rise upward from liquid
+          rotationSpeed: 0.01, // Gentle swirling motion
+          floatingAmplitude: 0.3, // Natural bubble wobble
+          floatingSpeed: 1.5, // Realistic bubble movement
+        },
+        timeToLive: {
+          minLifetime: 1.5, // Quick bubble lifecycle
+          maxLifetime: 4.0, // Varied bubble lifetime
+          respawn: true, // Continuous magical bubbling
+        },
+        fade: {
+          fadeInPercentage: 0.2, // Bubble formation
+          fadeOutPercentage: 0.5, // Bubble bursting/dissolving
+        },
+      },
+    },
+    ["effect-cauldron"]
   ),
 ];
 
