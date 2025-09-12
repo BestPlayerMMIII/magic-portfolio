@@ -19,6 +19,12 @@ export interface ObjectConfig {
     hover: {
       scaleMultiplier: number; // how much bigger when hovered (only for interactive objects)
     };
+    glb: {
+      playOnHover: boolean; // play GLB animation on mouse enter
+      animationName?: string; // specific animation name to play (optional)
+      loop: boolean; // whether to loop the animation
+      speed: number; // animation playback speed (1.0 = normal)
+    };
   };
 }
 
@@ -45,6 +51,11 @@ export const objectsConfig: ObjectConfig[] = [
       hover: {
         scaleMultiplier: 1.1, // 1.1 = 10% bigger when hovered
       },
+      glb: {
+        playOnHover: true, // play animation on hover
+        loop: true, // loop the animation
+        speed: 1.0, // normal speed
+      },
     },
   },
   {
@@ -66,6 +77,11 @@ export const objectsConfig: ObjectConfig[] = [
       },
       hover: {
         scaleMultiplier: 1.1,
+      },
+      glb: {
+        playOnHover: true, // cauldron might have bubbling animation
+        loop: true,
+        speed: 1.0,
       },
     },
   },
@@ -89,6 +105,11 @@ export const objectsConfig: ObjectConfig[] = [
       hover: {
         scaleMultiplier: 1.08,
       },
+      glb: {
+        playOnHover: true, // book might have page-turning animation
+        loop: false, // page turn shouldn't loop
+        speed: 1.2,
+      },
     },
   },
   {
@@ -110,6 +131,11 @@ export const objectsConfig: ObjectConfig[] = [
       },
       hover: {
         scaleMultiplier: 1.12,
+      },
+      glb: {
+        playOnHover: true, // magic circle might have glowing/pulsing animation
+        loop: true,
+        speed: 1.5, // faster magic effect
       },
     },
   },
@@ -133,6 +159,11 @@ export const objectsConfig: ObjectConfig[] = [
       hover: {
         scaleMultiplier: 1.05,
       },
+      glb: {
+        playOnHover: false, // library is more static
+        loop: true,
+        speed: 1.0,
+      },
     },
   },
   {
@@ -154,6 +185,11 @@ export const objectsConfig: ObjectConfig[] = [
       },
       hover: {
         scaleMultiplier: 1.1,
+      },
+      glb: {
+        playOnHover: true, // owl might have wing flapping or head turning
+        loop: false, // owls shouldn't constantly animate
+        speed: 1.0,
       },
     },
   },
@@ -181,6 +217,11 @@ export const objectsConfig: ObjectConfig[] = [
       hover: {
         scaleMultiplier: 1.0, // no hover effect for rooms
       },
+      glb: {
+        playOnHover: false, // rooms don't need animations
+        loop: false,
+        speed: 1.0,
+      },
     },
   },
   {
@@ -203,6 +244,11 @@ export const objectsConfig: ObjectConfig[] = [
       },
       hover: {
         scaleMultiplier: 1.0, // no hover effect for furniture
+      },
+      glb: {
+        playOnHover: false, // furniture doesn't need animations
+        loop: false,
+        speed: 1.0,
       },
     },
   },

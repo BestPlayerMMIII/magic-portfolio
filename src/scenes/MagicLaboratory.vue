@@ -368,7 +368,7 @@ const threeContainer = ref<HTMLDivElement>();
 const hoveredObject = ref<InteractiveObject | null>(null);
 const selectedObject = ref<InteractiveObject | null>(null);
 const showModal = ref(false);
-const modalContent = ref<any>(null);
+const modalContent = ref<any[]>([]); // Initialize as empty array instead of null
 const isLoadingContent = ref(false);
 
 // UI state management
@@ -393,6 +393,10 @@ let gltfLoader: GLTFLoader;
 let dracoLoader: DRACOLoader;
 const loadedModels = new Map<string, THREE.Group>();
 const modelLoadingPromises = new Map<string, Promise<THREE.Group>>();
+
+// Animation system for GLB animations
+const animationMixers = new Map<string, THREE.AnimationMixer>();
+const hoveredAnimations = new Map<string, THREE.AnimationAction[]>();
 
 // Particle system manager
 let particleManager: ParticleSystemManager;
@@ -537,6 +541,12 @@ const loadModel = async (modelPath: string): Promise<THREE.Group> => {
   // Check if model is already loaded
   if (loadedModels.has(modelPath)) {
     const originalModel = loadedModels.get(modelPath)!;
+    console.log(
+      "✅ Model loaded from cache:",
+      modelPath,
+      " => ",
+      originalModel
+    );
     return createDeepClone(originalModel);
   }
 
@@ -587,8 +597,27 @@ const loadModel = async (modelPath: string): Promise<THREE.Group> => {
           }
         });
 
+        // Store animations if available for later use
+        if (gltf.animations && gltf.animations.length > 0) {
+          console.log(
+            `🎬 Found ${gltf.animations.length} animations in ${modelPath}:`,
+            gltf.animations.map((anim) => anim.name || "unnamed")
+          );
+
+          // Store animations in the model's userData for later access
+          // Don't store directly - they will be cloned when needed
+          originalModel.userData.animationNames = gltf.animations.map(
+            (anim) => ({
+              name: anim.name || `animation_${gltf.animations.indexOf(anim)}`,
+              duration: anim.duration,
+            })
+          );
+          originalModel.userData.gltfAnimations = gltf.animations;
+        }
+
         // Cache the prepared model
         loadedModels.set(modelPath, originalModel);
+        console.log("🟨 Model cached:", modelPath, " => ", originalModel);
         modelLoadingPromises.delete(modelPath);
 
         console.log(`✅ Loaded 3D model: ${modelPath}`);
@@ -641,11 +670,154 @@ const createDeepClone = (originalModel: THREE.Group): THREE.Group => {
     }
   });
 
+  // Clone animations properly for this instance
+  if (originalModel.userData.gltfAnimations) {
+    try {
+      clonedModel.userData.animations =
+        originalModel.userData.gltfAnimations.map((anim: THREE.AnimationClip) =>
+          anim.clone()
+        );
+      clonedModel.userData.animationNames =
+        originalModel.userData.animationNames;
+      console.log(
+        `🎬 Cloned ${clonedModel.userData.animations.length} animations for instance`
+      );
+    } catch (error) {
+      console.warn(`⚠️ Failed to clone animations:`, error);
+      clonedModel.userData.animations = null;
+    }
+  }
+
   // Ensure the cloned model has its own transform matrix
   clonedModel.matrixAutoUpdate = true;
   clonedModel.updateMatrix();
 
   return clonedModel;
+};
+
+// Setup animations for a model instance
+const setupModelAnimations = (
+  model: THREE.Group,
+  config: (typeof objectsConfig)[0],
+  objectId: string
+) => {
+  console.log(
+    `🎬 Setting up animations for ${config.type} (${objectId}):`,
+    model.userData.animations
+  );
+
+  // Check if model has animations and config allows hover animations
+  if (!model.userData.animations || !config.animation.glb.playOnHover) {
+    return;
+  }
+
+  try {
+    const animations: THREE.AnimationClip[] = model.userData.animations;
+
+    // Create animation mixer for this object
+    const mixer = new THREE.AnimationMixer(model);
+    animationMixers.set(objectId, mixer);
+
+    // Prepare animation actions
+    const actions: THREE.AnimationAction[] = [];
+
+    animations.forEach((clip, index) => {
+      try {
+        // Clone the animation clip to avoid sharing between instances
+        const clonedClip = clip.clone();
+
+        // Use specific animation name if provided, otherwise use first animation or all animations
+        if (config.animation.glb.animationName) {
+          if (clonedClip.name === config.animation.glb.animationName) {
+            const action = mixer.clipAction(clonedClip);
+            action.setLoop(
+              config.animation.glb.loop ? THREE.LoopRepeat : THREE.LoopOnce,
+              Infinity
+            );
+            action.timeScale = config.animation.glb.speed;
+            actions.push(action);
+          }
+        } else {
+          // If no specific name, use the first animation
+          if (index === 0) {
+            const action = mixer.clipAction(clonedClip);
+            action.setLoop(
+              config.animation.glb.loop ? THREE.LoopRepeat : THREE.LoopOnce,
+              Infinity
+            );
+            action.timeScale = config.animation.glb.speed;
+            actions.push(action);
+          }
+        }
+      } catch (clipError) {
+        console.warn(
+          `⚠️ Failed to setup animation clip "${clip.name}" for ${config.type}:`,
+          clipError
+        );
+      }
+    });
+
+    if (actions.length > 0) {
+      hoveredAnimations.set(objectId, actions);
+      console.log(
+        `🎬 Setup ${actions.length} animations for ${config.type} (${objectId})`
+      );
+    } else {
+      console.log(
+        `🎬 No valid animations found for ${config.type} (${objectId})`
+      );
+    }
+  } catch (error) {
+    console.warn(`⚠️ Failed to setup animations for ${config.type}:`, error);
+    // Clean up any partial setup
+    animationMixers.delete(objectId);
+    hoveredAnimations.delete(objectId);
+  }
+};
+
+// Play animation on hover start
+const playHoverAnimation = (objectId: string) => {
+  try {
+    const actions = hoveredAnimations.get(objectId);
+    if (actions && actions.length > 0) {
+      actions.forEach((action) => {
+        try {
+          action.reset();
+          action.play();
+        } catch (actionError) {
+          console.warn(
+            `⚠️ Failed to play individual animation action for ${objectId}:`,
+            actionError
+          );
+        }
+      });
+      console.log(`🎬 Playing hover animation for ${objectId}`);
+    }
+  } catch (error) {
+    console.warn(`⚠️ Failed to play hover animation for ${objectId}:`, error);
+  }
+};
+
+// Stop animation on hover end
+const stopHoverAnimation = (objectId: string) => {
+  try {
+    const actions = hoveredAnimations.get(objectId);
+    if (actions && actions.length > 0) {
+      actions.forEach((action) => {
+        try {
+          action.fadeOut(0.3); // Smooth fade out over 0.3 seconds
+        } catch (actionError) {
+          console.warn(
+            `⚠️ Failed to stop individual animation action for ${objectId}:`,
+            actionError
+          );
+        }
+      });
+      console.log(`🛑 Stopping hover animation for ${objectId}`);
+    }
+  } catch (error) {
+    console.warn(`⚠️ Failed to stop hover animation for ${objectId}:`, error);
+  }
 };
 
 // Fallback to create simple geometric shapes if models fail to load
@@ -822,6 +994,7 @@ const createAllObjects = async () => {
     const isInteractive =
       config.isInteractive !== false && config.contentType !== "";
 
+    const uniqueId = `${config.type}_${index}_${Date.now()}_${Math.random()}`;
     try {
       console.log(
         `🔄 Loading 3D model for ${config.type}${
@@ -838,8 +1011,8 @@ const createAllObjects = async () => {
       model.scale.setScalar(config.scale);
 
       // Create unique userData for this instance (no sharing!)
-      const uniqueId = `${config.type}_${index}_${Date.now()}_${Math.random()}`;
       model.userData = {
+        ...model.userData,
         index,
         type: config.type,
         contentType: config.contentType,
@@ -869,6 +1042,10 @@ const createAllObjects = async () => {
       });
 
       scene.add(model);
+
+      // Setup GLB animations for this model
+      setupModelAnimations(model, config, uniqueId);
+
       console.log(
         `✅ Successfully loaded 3D model for ${
           config.type
@@ -886,9 +1063,6 @@ const createAllObjects = async () => {
       fallbackMesh.rotation.set(...config.rotation);
       fallbackMesh.scale.setScalar(config.scale);
 
-      const uniqueId = `${
-        config.type
-      }_${index}_fallback_${Date.now()}_${Math.random()}`;
       fallbackMesh.userData = {
         index,
         type: config.type,
@@ -919,7 +1093,7 @@ const createAllObjects = async () => {
     // Only create interactive object data for interactive objects
     if (isInteractive) {
       interactiveObjects.push({
-        id: `object-${index}`,
+        id: uniqueId,
         type: config.type as any,
         position: config.position as [number, number, number],
         rotation: config.rotation as [number, number, number],
@@ -967,6 +1141,9 @@ const setupEventListeners = () => {
     return false;
   };
 
+  // Track previous hovered object for animation control
+  let previousHoveredObjectId: string | null = null;
+
   const onMouseMove = (event: MouseEvent) => {
     if (isEventBlocked(event)) return;
 
@@ -980,6 +1157,8 @@ const setupEventListeners = () => {
     interactiveObjects.forEach((obj) => (obj.isHovered = false));
     hoveredObject.value = null;
 
+    let currentHoveredObjectId: string | null = null;
+
     if (intersects.length > 0) {
       const intersected = intersects[0].object as THREE.Mesh;
       // Get the parent index from the new userData structure
@@ -991,13 +1170,31 @@ const setupEventListeners = () => {
       if (index !== undefined && interactiveObjects[index]) {
         interactiveObjects[index].isHovered = true;
         hoveredObject.value = interactiveObjects[index];
+        currentHoveredObjectId = interactiveObjects[index].id;
 
         // Change cursor
         document.body.style.cursor = "pointer";
+
+        // Play hover animation if object changed and has GLB animations
+        if (currentHoveredObjectId !== previousHoveredObjectId) {
+          console.log("onEnter for", currentHoveredObjectId);
+          playHoverAnimation(currentHoveredObjectId);
+        }
       }
     } else {
       document.body.style.cursor = "default";
     }
+
+    // Stop animation for previously hovered object if it changed
+    if (
+      previousHoveredObjectId &&
+      previousHoveredObjectId !== currentHoveredObjectId
+    ) {
+      stopHoverAnimation(previousHoveredObjectId);
+    }
+
+    // Update the previous hovered object
+    previousHoveredObjectId = currentHoveredObjectId;
   };
 
   const onMouseDown = (event: MouseEvent) => {
@@ -1139,7 +1336,7 @@ const loadContentForObject = async (obj: InteractiveObject) => {
     // Show modal immediately with loading state
     showModal.value = true;
     isLoadingContent.value = true;
-    modalContent.value = null; // Clear previous content
+    modalContent.value = []; // Clear previous content with empty array
 
     // Disable OrbitControls immediately
     if (controls) {
@@ -1309,6 +1506,21 @@ const animate = () => {
   lastTime = currentTime;
   animateParticles(deltaTime);
 
+  // Update GLB animation mixers
+  animationMixers.forEach((mixer, objectId) => {
+    try {
+      mixer.update(deltaTime);
+    } catch (error) {
+      console.warn(
+        `⚠️ Failed to update animation mixer for ${objectId}:`,
+        error
+      );
+      // Remove the problematic mixer to prevent further errors
+      animationMixers.delete(objectId);
+      hoveredAnimations.delete(objectId);
+    }
+  });
+
   // Update controls
   controls.update();
 
@@ -1324,7 +1536,7 @@ const resetCamera = () => {
 const closeModal = () => {
   showModal.value = false;
   selectedObject.value = null;
-  modalContent.value = null;
+  modalContent.value = []; // Reset to empty array instead of null
   isLoadingContent.value = false;
 
   // Re-enable OrbitControls when modal is closed

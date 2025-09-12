@@ -48,7 +48,7 @@ export const lightingConfig: LightingConfiguration = {
   mainDirectionalLight: {
     type: "directional",
     color: 0xffffff,
-    intensity: 1.2,
+    intensity: 1.6,
     position: [10, 10, 5],
     target: [0, 0, 0],
     castShadow: true,
