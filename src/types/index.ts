@@ -84,28 +84,17 @@ export interface ApiResponse<T> {
   message?: string;
 }
 
-// Three.js related types
-export interface InteractiveObject {
-  id: string;
-  type: "crystal" | "cauldron" | "book" | "circle" | "library" | "owl";
-  position: [number, number, number];
-  rotation: [number, number, number];
-  scale: [number, number, number];
-  contentType:
-    | "projects"
-    | "wip"
-    | "blog"
-    | "collaborations"
-    | "learning"
-    | "fun-facts";
-  isHovered: boolean;
-  isClicked: boolean;
-}
-
-export interface SceneState {
-  isLoading: boolean;
-  selectedObject: InteractiveObject | null;
-  hoveredObject: InteractiveObject | null;
-  modalOpen: boolean;
-  modalContent: any;
-}
+// Re-export 3D types for backwards compatibility
+export type {
+  InteractiveObject,
+  SceneState,
+  ObjectConfig,
+  LightConfig,
+  LightingConfiguration,
+  ParticleSystemConfig,
+  ParticlesConfiguration,
+  AnimationConfig,
+  TextConfig,
+  LightingMode,
+  SceneConfig,
+} from "./3d";

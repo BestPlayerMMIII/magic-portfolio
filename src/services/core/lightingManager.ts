@@ -1,8 +1,5 @@
 import * as THREE from "three";
-import { retrieveLighting } from "../config/effectsConfig";
-import type { LightConfig } from "../config/lightingConfig";
-
-export type LightingMode = "day" | "night";
+import type { LightConfig, LightingConfiguration, LightingMode } from ".";
 
 export class LightingManager {
   // Static helpers
@@ -30,11 +27,14 @@ export class LightingManager {
   /**
    * Initialize all lights and set up the lighting system
    */
-  public initialize(lightingConfig: any): void {
+  public initialize(lightingConfig: LightingConfiguration): void {
     this.setupAmbientLight(lightingConfig.ambientLight);
-    this.setupDirectionalLight(lightingConfig.mainDirectionalLight);
-    this.setupMagicalLights(lightingConfig.magicalPointLights);
-    this.setupDynamicLights(); // Candles and torches from effects config
+    this.setupDirectionalLight(lightingConfig.directionalLight);
+
+    // Setup dynamic lights if provided
+    if (lightingConfig.dynamicLights) {
+      this.setupDynamicLights(lightingConfig.dynamicLights);
+    }
 
     // Apply initial lighting mode
     this.applyLightingMode(this.lightingMode);
@@ -126,38 +126,8 @@ export class LightingManager {
     }
   }
 
-  private setupMagicalLights(configs: LightConfig[]): void {
-    configs.forEach((config, index) => {
-      if (config.enabled && config.position) {
-        const light = new THREE.PointLight(
-          config.color,
-          config.intensity,
-          config.distance,
-          config.decay
-        );
-
-        light.position.set(...config.position);
-
-        if (config.castShadow) {
-          light.castShadow = true;
-          this.configureShadows(light, config);
-        }
-
-        this.scene.add(light);
-        this.magicalLights.push(light);
-
-        const lightKey = `magical-${index}`;
-        this.lights.set(lightKey, light);
-        this.originalIntensities.set(lightKey, config.intensity);
-        this.lightConfigs.set(lightKey, config);
-      }
-    });
-  }
-
-  private setupDynamicLights(): void {
-    const dynamicLights = retrieveLighting();
-
-    dynamicLights.forEach((config, index) => {
+  private setupDynamicLights(dynamicLights: LightConfig[]): void {
+    dynamicLights.forEach((config: LightConfig, index: number) => {
       if (config.enabled && config.position) {
         let light: THREE.Light;
 
@@ -169,7 +139,11 @@ export class LightingManager {
               config.distance,
               config.decay
             );
-            light.position.set(...config.position);
+            light.position.set(
+              config.position[0],
+              config.position[1],
+              config.position[2]
+            );
             break;
 
           case "spot":
@@ -181,9 +155,17 @@ export class LightingManager {
               config.penumbra,
               config.decay
             );
-            light.position.set(...config.position);
+            light.position.set(
+              config.position[0],
+              config.position[1],
+              config.position[2]
+            );
             if (config.target) {
-              (light as THREE.SpotLight).target.position.set(...config.target);
+              (light as THREE.SpotLight).target.position.set(
+                config.target[0],
+                config.target[1],
+                config.target[2]
+              );
               this.scene.add((light as THREE.SpotLight).target);
             }
             break;
@@ -204,6 +186,9 @@ export class LightingManager {
         const lightTags = config.tags || [];
         if (lightTags.includes("night-only")) {
           this.nightOnly.push(light);
+        }
+        if (lightTags.includes("magical-light")) {
+          this.magicalLights.push(light);
         }
 
         const lightKey = config.name ?? `light_${index}`;

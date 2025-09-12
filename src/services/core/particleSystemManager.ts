@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import type { ParticleSystemConfig } from "../config/specialEffectsConfig";
+import type { ParticleSystemConfig } from ".";
 
 interface ParticleData {
   particleSystem: THREE.Points;

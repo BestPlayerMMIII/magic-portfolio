@@ -1,0 +1,263 @@
+/**
+ * UI Interaction Classes
+ * 
+ * These CSS classes are used by the InteractionManager service to distinguish
+ * between UI interactions and 3D scene interactions. When elements have these
+ * classes, mouse events are blocked from reaching the 3D scene.
+ * 
+ * IMPORTANT: Do not remove these classes as they are critical for proper
+ * event handling in the 3D environment.
+ */
+
+/* ==========================================================================
+   Core UI Interaction Classes
+   ========================================================================== */
+
+/**
+ * .ui-overlay
+ * Applied to the main UI overlay container that sits above the 3D scene.
+ * Ensures all child UI elements properly block 3D interactions.
+ */
+.ui-overlay {
+  /* This class is primarily used for event delegation */
+  position: relative;
+  z-index: 10;
+}
+
+/**
+ * .ui-nav
+ * Applied to navigation elements to prevent 3D scene interactions
+ * when users interact with navigation controls.
+ */
+.ui-nav {
+  /* Navigation specific styles can be added here */
+  position: relative;
+}
+
+/**
+ * .nav-container
+ * Applied to navigation containers for proper event blocking.
+ */
+.nav-container {
+  /* Container specific styles */
+  position: relative;
+}
+
+/**
+ * .ui-button
+ * Applied to all interactive buttons in the UI overlay.
+ * Ensures button clicks don't trigger 3D object interactions.
+ */
+.ui-button {
+  /* Button specific interaction styles */
+  position: relative;
+  cursor: pointer;
+}
+
+/* Enhanced button hover state for better UX */
+.ui-button:hover {
+  /* Subtle hover indication */
+  transform: translateY(-1px);
+  transition: transform 0.2s ease;
+}
+
+/* Button active state */
+.ui-button:active {
+  transform: translateY(0);
+}
+
+/**
+ * .ui-title
+ * Applied to title elements that should block 3D interactions.
+ */
+.ui-title {
+  /* Title specific styles */
+  position: relative;
+  user-select: none; /* Prevent text selection */
+}
+
+/* Enhanced Gradient Text Animation */
+.gradient-text {
+  background-size: 200% auto;
+  animation: gradient-shift 4s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* ==========================================================================
+   Enhanced UI Component Styles
+   ========================================================================== */
+
+/**
+ * Enhanced hints container with magical effects
+ */
+.hints-container {
+  position: relative;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.hints-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  background: linear-gradient(
+    45deg,
+    rgba(168, 85, 247, 0.4),
+    rgba(236, 72, 153, 0.4),
+    rgba(99, 102, 241, 0.4)
+  );
+  border-radius: inherit;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+}
+
+/**
+ * Enhanced navigation styles for full-width header
+ */
+.nav-container.full-width {
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-container.full-width::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/**
+ * Enhanced day/night toggle animations
+ */
+.day-night-toggle {
+  position: relative;
+  overflow: hidden;
+}
+
+.day-night-toggle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+.day-night-toggle:hover::after {
+  width: 100px;
+  height: 100px;
+}
+
+/* ==========================================================================
+   Specialized UI Classes
+   ========================================================================== */
+
+/**
+ * .ui-panel
+ * For modal panels and floating UI elements.
+ */
+.ui-panel {
+  position: relative;
+  z-index: 20;
+}
+
+/**
+ * .ui-control
+ * For input controls and form elements.
+ */
+.ui-control {
+  position: relative;
+  z-index: 15;
+}
+
+/**
+ * .ui-hint
+ * For tooltip and hint elements.
+ */
+.ui-hint {
+  position: relative;
+  z-index: 25;
+  pointer-events: none; /* Allow clicks to pass through hints */
+}
+
+/* ==========================================================================
+   Utility Classes for Event Management
+   ========================================================================== */
+
+/**
+ * .block-3d-interaction
+ * Utility class to explicitly block 3D scene interactions
+ * for any element.
+ */
+.block-3d-interaction {
+  position: relative;
+  z-index: 10;
+}
+
+/**
+ * .allow-3d-interaction
+ * Utility class to explicitly allow 3D scene interactions
+ * even within UI overlay elements.
+ */
+.allow-3d-interaction {
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Developer Notes
+   ========================================================================== */
+
+/*
+USAGE GUIDELINES:
+
+1. Apply .ui-overlay to the main UI container
+2. Apply .ui-nav to navigation elements
+3. Apply .ui-button to all interactive buttons
+4. Apply .ui-title to title/heading elements
+5. Apply .nav-container to navigation containers
+
+INTERACTION MANAGER SELECTORS:
+The InteractionManager service uses these selectors in its isEventBlocked method:
+- "nav, button, .ui-nav, .ui-button, .ui-title, .nav-container, .ui-overlay"
+
+If you add new UI interaction classes, make sure to update the
+InteractionManager's selector string accordingly.
+
+DEBUGGING:
+- Add border: 2px solid red; to any class to visually debug event blocking
+- Use browser dev tools to inspect event propagation
+- Check console for InteractionManager event logs
+*/
