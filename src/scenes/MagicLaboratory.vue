@@ -340,7 +340,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
-import { apiService } from "../services/api";
+import apiWithCache from "../services/apiWithCache";
 import ContentModal from "../components/ContentModal.vue";
 import { objectsConfig } from "../config/objectsConfig";
 import { lightingConfig } from "../config/lightingConfig";
@@ -1162,27 +1162,27 @@ const loadContentForObject = async (obj: InteractiveObject) => {
     switch (obj.contentType) {
       case "projects":
         console.log("Fetching projects...");
-        content = await apiService.getProjects();
+        content = await apiWithCache.getProjects();
         break;
       case "wip":
         console.log("Fetching WIP items...");
-        content = await apiService.getWIPItems();
+        content = await apiWithCache.getWIPItems();
         break;
       case "blog":
         console.log("Fetching blog posts...");
-        content = await apiService.getBlogPosts();
+        content = await apiWithCache.getBlogPosts();
         break;
       case "collaborations":
         console.log("Fetching collaborations...");
-        content = await apiService.getCollaborations();
+        content = await apiWithCache.getCollaborations();
         break;
       case "learning":
         console.log("Fetching learning paths...");
-        content = await apiService.getLearningPaths();
+        content = await apiWithCache.getLearningPaths();
         break;
       case "fun-facts":
         console.log("Fetching fun facts...");
-        content = await apiService.getFunFacts();
+        content = await apiWithCache.getFunFacts();
         break;
       default:
         content = [];
