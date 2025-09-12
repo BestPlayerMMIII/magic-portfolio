@@ -184,6 +184,24 @@ const effectTemplates: EffectConfig[] = [
       enabled: true,
     },
   },
+  {
+    id: "library",
+    description: "Focused reading light for the magical library",
+    lighting: {
+      type: "spot",
+      name: "library", // Will be overridden per instance
+      color: 0xffd700, // Warm golden light for knowledge and wisdom
+      intensity: 3.0, // Higher intensity for focused beam
+      position: [0, 0, 0], // Will be overridden per instance
+      target: [0, 0, 0], // Will be overridden per instance (where the light points)
+      distance: 15, // Good range for spotlight
+      decay: 1.2, // Sharp falloff for focused beam
+      angle: Math.PI / 6, // 30 degrees cone angle (π/6 radians)
+      penumbra: 0.3, // Soft edges on the light cone (0-1, 0 = sharp, 1 = very soft)
+      castShadow: true, // Creates dramatic shadows
+      enabled: true,
+    },
+  },
 ];
 
 export const getTemplateById = (id: string): EffectConfig | undefined => {
@@ -541,6 +559,27 @@ const effectInstances: EffectInstance[] = [
       },
     },
     ["effect-cauldron"]
+  ),
+  ...createEffectInstances(
+    "library-light",
+    getTemplateById("library"),
+    [
+      // Positions above the library for ambient lighting
+      [-6, 5.2, -6],
+    ],
+    {
+      // Customize library lighting
+      lighting: {
+        color: 0xffd700, // Warm golden light for scholarly atmosphere
+        intensity: 5, // Higher intensity for focused spotlight beam
+        target: [-8, 5, -6], // Point directly at the library center
+        distance: 12, // Good range for spotlight
+        decay: 1.1, // Sharp falloff for focused effect
+        angle: Math.PI / 3, // 60 degrees cone angle (slightly wider for multiple lights)
+        penumbra: 0.4, // Soft edges for natural look
+      },
+    },
+    ["effect-library", "ambient-lighting"]
   ),
 ];
 
