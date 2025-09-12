@@ -1,11 +1,28 @@
 export interface ObjectConfig {
   type: string;
   contentType: string; // empty string "" means non-interactive decorative object
-  modelPath: string;
+  modelPath?: string; // optional for text objects
   position: [number, number, number];
   rotation: [number, number, number]; // in radians
   scale: number;
   isInteractive?: boolean; // optional: explicitly control interactivity (defaults to contentType !== "")
+  text?: {
+    content: string; // the text to display
+    font?: string; // font family or font URL (optional, defaults to built-in)
+    size?: number; // text size (optional, defaults to 1)
+    height?: number; // text extrusion depth (optional, defaults to 0.1)
+    lineSpacing?: number; // line spacing for multiline text (optional, defaults to 1.2)
+    material?: {
+      color?: string; // text color (optional, defaults to white)
+      emissive?: string; // emissive color for glow effect (optional)
+      metalness?: number; // metalness for PBR material (optional)
+      roughness?: number; // roughness for PBR material (optional)
+    };
+    alignment?: {
+      horizontal: "left" | "center" | "right"; // horizontal alignment
+      vertical: "top" | "middle" | "bottom"; // vertical alignment
+    };
+  };
   animation: {
     floating: {
       enabled: boolean;
@@ -252,6 +269,65 @@ export const objectsConfig: ObjectConfig[] = [
       },
     },
   },
+
+  // TABLE EASTEREGG
+  {
+    type: "text",
+    contentType: "", // non-interactive decorative text
+    position: [-4.5, 0.5, 0], // position in 3D space [x, y, z]
+    rotation: [0, Math.PI / 2, 0], // facing +X direction (viewer at [6,5,5] sees it orthogonal)
+    scale: 1,
+    text: {
+      content: "look at\nthe other side",
+      size: 0.3,
+      height: 0.01,
+      material: {
+        color: "#ffffff",
+        emissive: "#4a90e2",
+        metalness: 0.3,
+        roughness: 0.4,
+      },
+      alignment: {
+        horizontal: "center",
+        vertical: "middle",
+      },
+    },
+    animation: {
+      floating: { enabled: true, amplitude: 0.1, speed: 0.8 },
+      rotation: { enabled: true, speed: 0.01 },
+      hover: { scaleMultiplier: 1.0 },
+      glb: { playOnHover: false, loop: false, speed: 1.0 },
+    },
+  },
+  {
+    type: "text",
+    contentType: "", // non-interactive decorative text
+    position: [4.5, 0.5, 0], // position in 3D space [x, y, z]
+    rotation: [0, -Math.PI / 2, 0], // facing +X direction (viewer at [6,5,5] sees it orthogonal)
+    scale: 1,
+    text: {
+      content: "what are you doing here?\nthe world is outside",
+      size: 0.25,
+      height: 0.01,
+      lineSpacing: 2,
+      material: {
+        color: "#ffffff",
+        emissive: "#4a90e2",
+        metalness: 0.3,
+        roughness: 0.4,
+      },
+      alignment: {
+        horizontal: "center",
+        vertical: "middle",
+      },
+    },
+    animation: {
+      floating: { enabled: true, amplitude: 0.1, speed: 0.8 },
+      rotation: { enabled: true, speed: 0.01 },
+      hover: { scaleMultiplier: 1.0 },
+      glb: { playOnHover: false, loop: false, speed: 1.0 },
+    },
+  },
 ];
 
 // 🎨 HELPER FUNCTIONS FOR COMMON ADJUSTMENTS
@@ -391,3 +467,64 @@ export const applyPreset = (
 // objectsConfig[0].position = [-5, 3, 1]; // Move crystal
 // objectsConfig[1].scale = 2.0; // Make cauldron bigger
 // objectsConfig[2].animation.floating.enabled = false; // Stop book floating
+
+// 📝 TEXT OBJECT EXAMPLES:
+// Add these to objectsConfig array to create 3D text in your scene:
+
+// Example 1: Non-interactive decorative text
+// {
+//   type: "text",
+//   contentType: "", // non-interactive
+//   position: [5, 5, 5], // position in 3D space
+//   rotation: [0, Math.PI / 2, 0], // facing +X direction from viewer at [6,5,5]
+//   scale: 1,
+//   text: {
+//     content: "Hello World",
+//     size: 1,
+//     height: 0.2,
+//     material: {
+//       color: "#ffffff",
+//       emissive: "#4a90e2",
+//       metalness: 0.3,
+//       roughness: 0.4
+//     },
+//     alignment: {
+//       horizontal: 'center',
+//       vertical: 'middle'
+//     }
+//   },
+//   animation: {
+//     floating: { enabled: false, amplitude: 0, speed: 0 },
+//     rotation: { enabled: true, speed: 0.01 },
+//     hover: { scaleMultiplier: 1.0 },
+//     glb: { playOnHover: false, loop: false, speed: 1.0 }
+//   }
+// },
+
+// Example 2: Interactive text that opens projects modal
+// {
+//   type: "text",
+//   contentType: "projects", // interactive
+//   position: [-3, 2, 0],
+//   rotation: [0, 0, 0], // facing camera
+//   scale: 0.8,
+//   text: {
+//     content: "My Projects",
+//     size: 0.8,
+//     height: 0.1,
+//     material: {
+//       color: "#ffd700",
+//       emissive: "#ff6b35"
+//     },
+//     alignment: {
+//       horizontal: 'center',
+//       vertical: 'middle'
+//     }
+//   },
+//   animation: {
+//     floating: { enabled: true, amplitude: 0.1, speed: 0.8 },
+//     rotation: { enabled: false, speed: 0 },
+//     hover: { scaleMultiplier: 1.2 },
+//     glb: { playOnHover: false, loop: false, speed: 1.0 }
+//   }
+// }

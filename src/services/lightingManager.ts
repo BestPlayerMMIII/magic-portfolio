@@ -309,7 +309,7 @@ export class LightingManager {
   private transitionToNight(duration: number): void {
     // Night mode multipliers
     const nightMultipliers = {
-      directional: 0.1, // Greatly reduce directional light (moonlight)
+      directional: 0.2, // Greatly reduce directional light (moonlight)
       ambient: 1.0, // Full ambient for visibility
       magical: 1.0, // Full magical lights
       nightOnly: 1.0, // Full intensity for night-only lights

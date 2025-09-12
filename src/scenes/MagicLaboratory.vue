@@ -340,6 +340,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
+import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import apiWithCache from "../services/apiWithCache";
 import ContentModal from "../components/ContentModal.vue";
 import { objectsConfig } from "../config/objectsConfig";
@@ -414,7 +416,9 @@ const preloadStatus = ref("Initializing magical assets...");
 
 // Preload all models at startup
 const preloadAllModels = async () => {
-  const modelPaths = objectsConfig.map((config) => config.modelPath);
+  const modelPaths = objectsConfig
+    .filter((config) => config.modelPath) // Only preload objects with model paths
+    .map((config) => config.modelPath!); // Non-null assertion since we filtered
   const totalModels = modelPaths.length;
   let loadedCount = 0;
 
@@ -820,6 +824,251 @@ const stopHoverAnimation = (objectId: string) => {
   }
 };
 
+// Create 3D text mesh from configuration
+const createTextMesh = (
+  config: (typeof objectsConfig)[0]
+): Promise<THREE.Mesh> => {
+  return new Promise((resolve, reject) => {
+    if (!config.text) {
+      reject(new Error("No text configuration found"));
+      return;
+    }
+
+    try {
+      // For now, create text using basic geometry as fallback
+      // In a full implementation, you would use FontLoader + TextGeometry
+      const textConfig = config.text;
+
+      // Create a simple box geometry as text fallback
+      const width = textConfig.content.length * 0.6 * (textConfig.size || 1);
+      const height = 1 * (textConfig.size || 1);
+      const depth = textConfig.height || 0.1;
+
+      const geometry = new THREE.BoxGeometry(width, height, depth);
+
+      // Apply alignment by translating geometry
+      const alignment = textConfig.alignment;
+      if (alignment) {
+        let offsetX = 0;
+        let offsetY = 0;
+
+        // Horizontal alignment
+        switch (alignment.horizontal) {
+          case "center":
+            offsetX = 0; // Already centered by default
+            break;
+          case "left":
+            offsetX = width / 2;
+            break;
+          case "right":
+            offsetX = -width / 2;
+            break;
+        }
+
+        // Vertical alignment
+        switch (alignment.vertical) {
+          case "middle":
+            offsetY = 0; // Already centered by default
+            break;
+          case "top":
+            offsetY = -height / 2;
+            break;
+          case "bottom":
+            offsetY = height / 2;
+            break;
+        }
+
+        // Apply the offset to center the geometry properly
+        geometry.translate(offsetX, offsetY, 0);
+      }
+
+      // Create material based on text configuration
+      const materialProps: any = {
+        color: textConfig.material?.color || "#ffffff",
+      };
+
+      if (textConfig.material?.emissive) {
+        materialProps.emissive = textConfig.material.emissive;
+      }
+
+      if (textConfig.material?.metalness !== undefined) {
+        materialProps.metalness = textConfig.material.metalness;
+      }
+
+      if (textConfig.material?.roughness !== undefined) {
+        materialProps.roughness = textConfig.material.roughness;
+      }
+
+      const material = new THREE.MeshStandardMaterial(materialProps);
+      const mesh = new THREE.Mesh(geometry, material);
+
+      // Apply shadows
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+
+      // Store text content in userData for debugging
+      mesh.userData.textContent = textConfig.content;
+      mesh.userData.isTextMesh = true;
+
+      console.log(
+        `✅ Created text mesh: "${textConfig.content}" (alignment: ${
+          alignment?.horizontal || "default"
+        }/${alignment?.vertical || "default"})`
+      );
+      resolve(mesh);
+    } catch (error) {
+      console.error(`❌ Failed to create text mesh:`, error);
+      reject(error);
+    }
+  });
+};
+
+// Advanced text creation with proper TextGeometry (when font is available)
+const createAdvancedTextMesh = async (
+  config: (typeof objectsConfig)[0]
+): Promise<THREE.Mesh> => {
+  return new Promise((resolve, reject) => {
+    if (!config.text) {
+      reject(new Error("No text configuration found"));
+      return;
+    }
+
+    const fontLoader = new FontLoader();
+
+    // Try to load a font, fallback to simple geometry if unavailable
+    const fontUrl =
+      "https://threejs.org/examples/fonts/helvetiker_regular.typeface.json";
+
+    fontLoader.load(
+      fontUrl,
+      (font) => {
+        try {
+          const textConfig = config.text!;
+
+          // Split text into lines for individual centering
+          const lines = textConfig.content
+            .split("\n")
+            .filter((line) => line.trim().length > 0);
+          const lineHeight =
+            (textConfig.size || 1) * (textConfig.lineSpacing || 1.2); // 1.2 is typical line spacing
+
+          // Create a group to hold all line meshes instead of merging geometries
+          const textGroup = new THREE.Group();
+
+          // Create individual meshes for each line
+          lines.forEach((line, index) => {
+            const lineGeometry = new TextGeometry(line.trim(), {
+              font: font,
+              size: textConfig.size || 1,
+              height: textConfig.height || 0.1,
+              curveSegments: 12,
+              bevelEnabled: true,
+              bevelThickness: 0.03,
+              bevelSize: 0.02,
+              bevelOffset: 0,
+              bevelSegments: 5,
+            });
+
+            // Compute bounding box for this line
+            lineGeometry.computeBoundingBox();
+            const lineBoundingBox = lineGeometry.boundingBox!;
+
+            // Center this line horizontally (each line individually centered)
+            if (textConfig.alignment?.horizontal === "center") {
+              lineGeometry.translate(
+                -(lineBoundingBox.max.x + lineBoundingBox.min.x) / 2,
+                0,
+                0
+              );
+            } else if (textConfig.alignment?.horizontal === "left") {
+              lineGeometry.translate(-lineBoundingBox.min.x, 0, 0);
+            } else if (textConfig.alignment?.horizontal === "right") {
+              lineGeometry.translate(-lineBoundingBox.max.x, 0, 0);
+            }
+
+            // Create material for this line
+            const materialProps: any = {
+              color: textConfig.material?.color || "#ffffff",
+            };
+
+            if (textConfig.material?.emissive) {
+              materialProps.emissive = textConfig.material.emissive;
+            }
+
+            if (textConfig.material?.metalness !== undefined) {
+              materialProps.metalness = textConfig.material.metalness;
+            }
+
+            if (textConfig.material?.roughness !== undefined) {
+              materialProps.roughness = textConfig.material.roughness;
+            }
+
+            const lineMaterial = new THREE.MeshStandardMaterial(materialProps);
+            const lineMesh = new THREE.Mesh(lineGeometry, lineMaterial);
+
+            // Apply shadows
+            lineMesh.castShadow = true;
+            lineMesh.receiveShadow = true;
+
+            // Position line vertically (from top to bottom)
+            const yOffset =
+              (lines.length - 1 - index) * lineHeight -
+              ((lines.length - 1) * lineHeight) / 2;
+            lineMesh.position.y = yOffset;
+
+            // Add line mesh to the group
+            textGroup.add(lineMesh);
+          });
+
+          // Apply vertical alignment to the entire text group
+          if (
+            textConfig.alignment?.vertical &&
+            textConfig.alignment.vertical !== "middle"
+          ) {
+            // Compute bounding box of the entire group
+            const groupBox = new THREE.Box3().setFromObject(textGroup);
+            let verticalOffset = 0;
+
+            switch (textConfig.alignment.vertical) {
+              case "top":
+                verticalOffset = -groupBox.max.y;
+                break;
+              case "bottom":
+                verticalOffset = -groupBox.min.y;
+                break;
+            }
+
+            if (verticalOffset !== 0) {
+              textGroup.position.y = verticalOffset;
+            }
+          }
+
+          // Store text content in userData for debugging
+          textGroup.userData.textContent = textConfig.content;
+          textGroup.userData.isTextMesh = true;
+
+          console.log(
+            `✅ Created advanced multi-line text group: "${textConfig.content}" (${lines.length} lines, each centered individually)`
+          );
+          resolve(textGroup as any);
+        } catch (error) {
+          console.error(`❌ Failed to create advanced text geometry:`, error);
+          reject(error);
+        }
+      },
+      undefined,
+      (error) => {
+        console.warn(
+          `⚠️ Failed to load font, falling back to simple text:`,
+          error
+        );
+        // Fallback to simple text creation
+        createTextMesh(config).then(resolve).catch(reject);
+      }
+    );
+  });
+};
+
 // Fallback to create simple geometric shapes if models fail to load
 const createFallbackMesh = (type: string): THREE.Mesh => {
   let geometry: THREE.BufferGeometry;
@@ -995,24 +1244,54 @@ const createAllObjects = async () => {
       config.isInteractive !== false && config.contentType !== "";
 
     const uniqueId = `${config.type}_${index}_${Date.now()}_${Math.random()}`;
+
     try {
       console.log(
-        `🔄 Loading 3D model for ${config.type}${
+        `🔄 Loading object for ${config.type}${
           isInteractive ? " (interactive)" : " (decorative)"
         }...`
       );
 
-      // Try to load the 3D model first with proper deep cloning
-      const model = await loadModel(config.modelPath);
+      let objectToAdd: THREE.Object3D;
+
+      // Handle text objects
+      if (config.type === "text" && config.text) {
+        console.log(`📝 Creating 3D text: "${config.text.content}"`);
+
+        try {
+          // Try advanced text first, fallback to simple if needed
+          const textMesh = await createAdvancedTextMesh(config);
+          objectToAdd = textMesh;
+        } catch (textError) {
+          console.warn(
+            `⚠️ Advanced text failed, using simple text:`,
+            textError
+          );
+          const simpleTextMesh = await createTextMesh(config);
+          objectToAdd = simpleTextMesh;
+        }
+      }
+      // Handle 3D model objects
+      else if (config.modelPath) {
+        console.log(`🎨 Loading 3D model: ${config.modelPath}`);
+        const model = await loadModel(config.modelPath);
+        objectToAdd = model;
+      }
+      // No valid object type
+      else {
+        throw new Error(
+          `Invalid object configuration: no modelPath or text config for ${config.type}`
+        );
+      }
 
       // Apply configuration settings
-      model.position.set(...config.position);
-      model.rotation.set(...config.rotation);
-      model.scale.setScalar(config.scale);
+      objectToAdd.position.set(...config.position);
+      objectToAdd.rotation.set(...config.rotation);
+      objectToAdd.scale.setScalar(config.scale);
 
       // Create unique userData for this instance (no sharing!)
-      model.userData = {
-        ...model.userData,
+      objectToAdd.userData = {
+        ...objectToAdd.userData,
         index,
         type: config.type,
         contentType: config.contentType,
@@ -1025,35 +1304,55 @@ const createAllObjects = async () => {
       };
 
       // Handle child meshes differently for interactive vs decorative objects
-      model.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          child.userData = {
-            parentType: config.type,
-            parentId: uniqueId,
-            parentIndex: index,
-            isInteractive,
-          };
+      if (objectToAdd instanceof THREE.Group) {
+        // For Groups (GLB models), traverse children
+        objectToAdd.traverse((child: THREE.Object3D) => {
+          if (child instanceof THREE.Mesh) {
+            child.userData = {
+              parentType: config.type,
+              parentId: uniqueId,
+              parentIndex: index,
+              isInteractive,
+            };
 
-          // Only add to interactive meshes array if the object is interactive
-          if (isInteractive) {
-            meshes.push(child); // Add to interactive meshes for raycasting
+            // Only add to interactive meshes array if the object is interactive
+            if (isInteractive) {
+              meshes.push(child); // Add to interactive meshes for raycasting
+            }
           }
+        });
+      } else if (objectToAdd instanceof THREE.Mesh) {
+        // For single Meshes (text, fallback objects), handle directly
+        objectToAdd.userData = {
+          ...objectToAdd.userData,
+          parentType: config.type,
+          parentId: uniqueId,
+          parentIndex: index,
+          isInteractive,
+          index, // Direct mesh also needs index for compatibility
+        };
+
+        // Only add to interactive meshes array if the object is interactive
+        if (isInteractive) {
+          meshes.push(objectToAdd); // Add to interactive meshes for raycasting
         }
-      });
+      }
 
-      scene.add(model);
+      scene.add(objectToAdd);
 
-      // Setup GLB animations for this model
-      setupModelAnimations(model, config, uniqueId);
+      // Setup GLB animations for this model (only for Groups with animations)
+      if (objectToAdd instanceof THREE.Group) {
+        setupModelAnimations(objectToAdd, config, uniqueId);
+      }
 
       console.log(
-        `✅ Successfully loaded 3D model for ${
-          config.type
-        } (ID: ${uniqueId}) - ${isInteractive ? "Interactive" : "Decorative"}`
+        `✅ Successfully loaded object for ${config.type} (ID: ${uniqueId}) - ${
+          isInteractive ? "Interactive" : "Decorative"
+        }`
       );
     } catch (error) {
       console.warn(
-        `⚠️ Failed to load 3D model for ${config.type}, using fallback:`,
+        `⚠️ Failed to load object for ${config.type}, using fallback:`,
         error
       );
 
