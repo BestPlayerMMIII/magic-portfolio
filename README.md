@@ -201,6 +201,20 @@ This will start:
 npm run build
 ```
 
+## � Documentation
+
+For comprehensive guides, architecture details, and development workflows, check out our organized documentation:
+
+**[📖 Complete Documentation Hub](./docs/README.md)**
+
+### Quick Links
+
+- **[🎯 Setup Guides](./docs/guides/)** - Step-by-step configuration guides
+- **[🎭 3D Models Guide](./docs/guides/3d-models/)** - 3D model setup and requirements
+- **[✨ Effects Guides](./docs/guides/effects/)** - Advanced effects and lighting configuration
+- **[🏗️ Architecture](./docs/architecture/)** - System design and technical documentation
+- **[🔧 Development](./docs/development/)** - Development workflows and checklists
+
 ## 📊 Content Management
 
 ### Sample Data
