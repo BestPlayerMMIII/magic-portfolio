@@ -14,8 +14,9 @@ import {
   LearningPath,
   FunFact,
 } from "../types/index.js";
+import { DatabaseService } from "./database.js";
 
-class MockService {
+class MockService extends DatabaseService {
   // Simula un delay di rete realistico
   private async simulateNetworkDelay(min = 100, max = 500): Promise<void> {
     const delay = Math.random() * (max - min) + min;

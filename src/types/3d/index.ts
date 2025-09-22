@@ -299,7 +299,7 @@ export function createEffectInstances(
 // Scene and interaction types
 export interface InteractiveObject {
   id: string;
-  type: "crystal" | "cauldron" | "book" | "circle" | "library" | "owl" | "text";
+  type: "text" | string;
   position: [number, number, number];
   rotation: [number, number, number];
   scale: [number, number, number];

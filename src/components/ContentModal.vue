@@ -99,17 +99,17 @@
           <div v-if="type === 'projects'" class="grid gap-4 md:grid-cols-2">
             <div
               v-for="project in content"
-              :key="project.id"
+              :key="project.metadata.id"
               class="bg-slate-800/50 rounded-lg p-4 border border-magic-500/20 hover:border-magic-500/40 transition-colors"
             >
               <h3 class="text-lg font-semibold text-white mb-2">
-                {{ project.title }}
+                {{ project.data.title }}
               </h3>
-              <p class="text-gray-300 mb-3">{{ project.description }}</p>
+              <p class="text-gray-300 mb-3">{{ project.data.description }}</p>
 
               <div class="flex flex-wrap gap-2 mb-3">
                 <span
-                  v-for="tech in project.technologies"
+                  v-for="tech in project.data.technologies"
                   :key="tech"
                   class="px-2 py-1 bg-magic-500/20 text-magic-300 rounded text-sm"
                 >
@@ -119,16 +119,16 @@
 
               <div class="flex gap-2">
                 <a
-                  v-if="project.githubUrl"
-                  :href="project.githubUrl"
+                  v-if="project.data.githubUrl"
+                  :href="project.data.githubUrl"
                   target="_blank"
                   class="px-3 py-1 bg-magic-600 hover:bg-magic-700 text-white rounded transition-colors text-sm"
                 >
                   GitHub
                 </a>
                 <a
-                  v-if="project.liveUrl"
-                  :href="project.liveUrl"
+                  v-if="project.data.liveUrl"
+                  :href="project.data.liveUrl"
                   target="_blank"
                   class="px-3 py-1 bg-mystical-600 hover:bg-mystical-700 text-white rounded transition-colors text-sm"
                 >
@@ -142,17 +142,30 @@
           <div v-else-if="type === 'blog'" class="space-y-4">
             <div
               v-for="post in content"
-              :key="post.id"
-              class="bg-slate-800/50 rounded-lg p-4 border border-magic-500/20"
+              :key="post.metadata.id"
+              class="bg-slate-800/50 rounded-lg p-4 border border-magic-500/20 cursor-pointer hover:border-magic-500/40 transition-colors"
+              @click="openPost(post)"
             >
-              <h3 class="text-lg font-semibold text-white mb-2">
-                {{ post.title }}
-              </h3>
-              <p class="text-gray-300 mb-3">{{ post.excerpt }}</p>
+              <div class="flex items-start space-x-4">
+                <img
+                  :src="post.data.header.image.thumbnailUrl"
+                  alt="Thumbnail"
+                  width="150"
+                  height="150"
+                />
+                <div>
+                  <h3 class="text-lg font-semibold text-white mb-2">
+                    {{ post.data.header.title }}
+                  </h3>
+                  <p class="text-gray-300 mb-3">
+                    {{ post.data.header.excerpt }}
+                  </p>
+                </div>
+              </div>
 
               <div class="flex flex-wrap gap-2 mb-3">
                 <span
-                  v-for="tag in post.tags"
+                  v-for="tag in post.data.header.tags"
                   :key="tag"
                   class="px-2 py-1 bg-mystical-500/20 text-mystical-300 rounded text-sm"
                 >
@@ -161,7 +174,7 @@
               </div>
 
               <p class="text-gray-400 text-sm">
-                Published: {{ formatDate(post.publishedAt) }}
+                Updated: {{ formatDate(post.metadata.updatedAt) }}
               </p>
             </div>
           </div>
@@ -170,39 +183,39 @@
           <div v-else-if="type === 'wip'" class="space-y-4">
             <div
               v-for="item in content"
-              :key="item.id"
+              :key="item.metadata.id"
               class="bg-slate-800/50 rounded-lg p-4 border border-magic-500/20"
             >
               <div class="flex justify-between items-start mb-2">
                 <h3 class="text-lg font-semibold text-white">
-                  {{ item.title }}
+                  {{ item.data.title }}
                 </h3>
                 <span
                   class="px-2 py-1 rounded text-sm"
-                  :class="getPriorityClass(item.priority)"
+                  :class="getPriorityClass(item.data.priority)"
                 >
-                  {{ item.priority }}
+                  {{ item.data.priority }}
                 </span>
               </div>
 
-              <p class="text-gray-300 mb-3">{{ item.description }}</p>
+              <p class="text-gray-300 mb-3">{{ item.data.description }}</p>
 
               <div class="mb-3">
                 <div class="flex justify-between text-sm text-gray-400 mb-1">
                   <span>Progress</span>
-                  <span>{{ item.progress }}%</span>
+                  <span>{{ item.data.progress }}%</span>
                 </div>
                 <div class="w-full bg-gray-700 rounded-full h-2">
                   <div
                     class="bg-magic-500 h-2 rounded-full transition-all duration-300"
-                    :style="{ width: `${item.progress}%` }"
+                    :style="{ width: `${item.data.progress}%` }"
                   ></div>
                 </div>
               </div>
 
               <div class="flex flex-wrap gap-2">
                 <span
-                  v-for="tech in item.technologies"
+                  v-for="tech in item.data.technologies"
                   :key="tech"
                   class="px-2 py-1 bg-magic-500/20 text-magic-300 rounded text-sm"
                 >
@@ -216,28 +229,28 @@
           <div v-else-if="type === 'collaborations'" class="space-y-4">
             <div
               v-for="collab in content"
-              :key="collab.id"
+              :key="collab.metadata.id"
               class="bg-slate-800/50 rounded-lg p-4 border border-magic-500/20"
             >
               <div class="flex justify-between items-start mb-2">
                 <h3 class="text-lg font-semibold text-white">
-                  {{ collab.title }}
+                  {{ collab.data.title }}
                 </h3>
                 <span
                   class="px-2 py-1 rounded text-sm"
-                  :class="getStatusClass(collab.status)"
+                  :class="getStatusClass(collab.data.status)"
                 >
-                  {{ collab.status }}
+                  {{ collab.data.status }}
                 </span>
               </div>
 
-              <p class="text-gray-300 mb-3">{{ collab.description }}</p>
+              <p class="text-gray-300 mb-3">{{ collab.data.description }}</p>
 
               <div class="mb-3">
                 <p class="text-gray-400 text-sm mb-2">Collaborators:</p>
                 <div class="flex flex-wrap gap-2">
                   <span
-                    v-for="collaborator in collab.collaborators"
+                    v-for="collaborator in collab.data.collaborators"
                     :key="collaborator"
                     class="px-2 py-1 bg-mystical-500/20 text-mystical-300 rounded text-sm"
                   >
@@ -248,7 +261,7 @@
 
               <div class="flex flex-wrap gap-2">
                 <span
-                  v-for="tech in collab.technologies"
+                  v-for="tech in collab.data.technologies"
                   :key="tech"
                   class="px-2 py-1 bg-magic-500/20 text-magic-300 rounded text-sm"
                 >
@@ -262,35 +275,35 @@
           <div v-else-if="type === 'learning'" class="space-y-4">
             <div
               v-for="path in content"
-              :key="path.id"
+              :key="path.metadata.id"
               class="bg-slate-800/50 rounded-lg p-4 border border-magic-500/20"
             >
               <div class="flex justify-between items-start mb-2">
                 <h3 class="text-lg font-semibold text-white">
-                  {{ path.title }}
+                  {{ path.data.title }}
                 </h3>
                 <span
                   class="px-2 py-1 rounded text-sm"
-                  :class="getDifficultyClass(path.difficulty)"
+                  :class="getDifficultyClass(path.data.difficulty)"
                 >
-                  {{ path.difficulty }}
+                  {{ path.data.difficulty }}
                 </span>
               </div>
 
-              <p class="text-gray-300 mb-3">{{ path.description }}</p>
+              <p class="text-gray-300 mb-3">{{ path.data.description }}</p>
               <p class="text-gray-400 text-sm mb-3">
-                Category: {{ path.category }}
+                Category: {{ path.data.category }}
               </p>
 
               <div class="mb-3">
                 <div class="flex justify-between text-sm text-gray-400 mb-1">
                   <span>Progress</span>
-                  <span>{{ path.progress }}%</span>
+                  <span>{{ path.data.progress }}%</span>
                 </div>
                 <div class="w-full bg-gray-700 rounded-full h-2">
                   <div
                     class="bg-mystical-500 h-2 rounded-full transition-all duration-300"
-                    :style="{ width: `${path.progress}%` }"
+                    :style="{ width: `${path.data.progress}%` }"
                   ></div>
                 </div>
               </div>
@@ -304,15 +317,15 @@
           >
             <div
               v-for="fact in content"
-              :key="fact.id"
+              :key="fact.metadata.id"
               class="bg-slate-800/50 rounded-lg p-4 border border-magic-500/20"
             >
-              <p class="text-gray-300 mb-3">{{ fact.content }}</p>
+              <p class="text-gray-300 mb-3">{{ fact.data.content }}</p>
               <span
                 class="px-2 py-1 rounded text-sm"
-                :class="getCategoryClass(fact.category)"
+                :class="getCategoryClass(fact.data.category)"
               >
-                {{ fact.category }}
+                {{ fact.data.category }}
               </span>
             </div>
           </div>
@@ -347,9 +360,11 @@
 </template>
 
 <script setup lang="ts">
+import type { ContentItem } from "@/types";
+
 interface Props {
   visible: boolean;
-  content: any[];
+  content: ContentItem<any>[];
   type: string;
   loading?: boolean;
 }
@@ -421,6 +436,11 @@ const getCategoryClass = (category: string) => {
   return (
     classes[category as keyof typeof classes] || "bg-gray-500/20 text-gray-300"
   );
+};
+
+const openPost = <T>(post: ContentItem<T>) => {
+  // TODO open the post in the same tab with all the context of the post (full .data)
+  window.location.href = `/post/${post.schemaId}/${post.metadata.id}`;
 };
 </script>
 

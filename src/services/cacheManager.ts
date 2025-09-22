@@ -6,16 +6,17 @@ import type {
   FunFact,
   LearningPath,
   WorkInProgress,
+  ContentItem,
 } from "../types";
 
 // API function types for dependency injection
 export interface ApiMethods {
-  getProjects: () => Promise<Project[]>;
-  getBlogPosts: () => Promise<BlogPost[]>;
-  getCollaborations: () => Promise<Collaboration[]>;
-  getFunFacts: () => Promise<FunFact[]>;
-  getLearningPaths: () => Promise<LearningPath[]>;
-  getWIPItems: () => Promise<WorkInProgress[]>;
+  getProjects: () => Promise<ContentItem<Project>[]>;
+  getBlogPosts: () => Promise<ContentItem<BlogPost>[]>;
+  getCollaborations: () => Promise<ContentItem<Collaboration>[]>;
+  getFunFacts: () => Promise<ContentItem<FunFact>[]>;
+  getLearningPaths: () => Promise<ContentItem<LearningPath>[]>;
+  getWIPItems: () => Promise<ContentItem<WorkInProgress>[]>;
 }
 
 export interface CacheManagerConfig {
@@ -120,7 +121,7 @@ export class CacheManager {
   /**
    * Get projects with cache-first strategy
    */
-  async getProjects(forceRefresh = false): Promise<Project[]> {
+  async getProjects(forceRefresh = false): Promise<ContentItem<Project>[]> {
     if (!this.apiMethods) throw new Error("API methods not injected");
     return this.getCachedData(
       "projects",
@@ -132,7 +133,7 @@ export class CacheManager {
   /**
    * Get blog posts with cache-first strategy
    */
-  async getBlogPosts(forceRefresh = false): Promise<BlogPost[]> {
+  async getBlogPosts(forceRefresh = false): Promise<ContentItem<BlogPost>[]> {
     if (!this.apiMethods) throw new Error("API methods not injected");
     return this.getCachedData(
       "blogPosts",
@@ -144,7 +145,9 @@ export class CacheManager {
   /**
    * Get collaborations with cache-first strategy
    */
-  async getCollaborations(forceRefresh = false): Promise<Collaboration[]> {
+  async getCollaborations(
+    forceRefresh = false
+  ): Promise<ContentItem<Collaboration>[]> {
     if (!this.apiMethods) throw new Error("API methods not injected");
     return this.getCachedData(
       "collaborations",
@@ -156,7 +159,7 @@ export class CacheManager {
   /**
    * Get fun facts with cache-first strategy
    */
-  async getFunFacts(forceRefresh = false): Promise<FunFact[]> {
+  async getFunFacts(forceRefresh = false): Promise<ContentItem<FunFact>[]> {
     if (!this.apiMethods) throw new Error("API methods not injected");
     return this.getCachedData(
       "funFacts",
@@ -168,7 +171,9 @@ export class CacheManager {
   /**
    * Get learning paths with cache-first strategy
    */
-  async getLearningPaths(forceRefresh = false): Promise<LearningPath[]> {
+  async getLearningPaths(
+    forceRefresh = false
+  ): Promise<ContentItem<LearningPath>[]> {
     if (!this.apiMethods) throw new Error("API methods not injected");
     return this.getCachedData(
       "learningPaths",
@@ -180,7 +185,9 @@ export class CacheManager {
   /**
    * Get WIP projects with cache-first strategy
    */
-  async getWipProjects(forceRefresh = false): Promise<WorkInProgress[]> {
+  async getWipProjects(
+    forceRefresh = false
+  ): Promise<ContentItem<WorkInProgress>[]> {
     if (!this.apiMethods) throw new Error("API methods not injected");
     return this.getCachedData(
       "wipProjects",

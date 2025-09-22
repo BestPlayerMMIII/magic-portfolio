@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
-import { mockService } from "../services/mockService.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
-import { ApiResponse, BlogPost } from "../types/index.js";
+import { ApiResponse, BlogPost, ContentItem } from "../types/index.js";
+import dbService from "../services";
 
 const router = Router();
 
@@ -9,9 +9,9 @@ const router = Router();
 router.get(
   "/",
   asyncHandler(async (req: Request, res: Response) => {
-    const posts = await mockService.getBlogPosts();
+    const posts = await dbService.getBlogPosts();
 
-    const response: ApiResponse<BlogPost[]> = {
+    const response: ApiResponse<ContentItem<BlogPost>[]> = {
       data: posts,
       success: true,
       message: "Blog posts retrieved successfully",
@@ -26,7 +26,7 @@ router.get(
   "/:id",
   asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const post = await mockService.getBlogPostById(id);
+    const post = await dbService.getBlogPostById(id);
 
     if (!post) {
       res.status(404).json({
@@ -37,31 +37,14 @@ router.get(
       return;
     }
 
-    const response: ApiResponse<BlogPost> = {
-      data: post,
+    const response: ApiResponse<ContentItem<BlogPost>[]> = {
+      data: [post],
       success: true,
       message: "Blog post retrieved successfully",
     };
 
     res.json(response);
     return;
-  })
-);
-
-// POST /api/blog - Create new blog post
-router.post(
-  "/",
-  asyncHandler(async (req: Request, res: Response) => {
-    const postData = req.body;
-    const post = await mockService.createBlogPost(postData);
-
-    const response: ApiResponse<BlogPost> = {
-      data: post,
-      success: true,
-      message: "Blog post created successfully",
-    };
-
-    res.status(201).json(response);
   })
 );
 

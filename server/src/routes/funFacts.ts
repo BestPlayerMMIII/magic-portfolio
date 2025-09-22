@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
-import { mockService } from "../services/mockService.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
-import { ApiResponse, FunFact } from "../types/index.js";
+import { ApiResponse, ContentItem, FunFact } from "../types/index.js";
+import dbService from "../services";
 
 const router = Router();
 
@@ -9,9 +9,9 @@ const router = Router();
 router.get(
   "/",
   asyncHandler(async (req: Request, res: Response) => {
-    const funFacts = await mockService.getFunFacts();
+    const funFacts = await dbService.getFunFacts();
 
-    const response: ApiResponse<FunFact[]> = {
+    const response: ApiResponse<ContentItem<FunFact>[]> = {
       data: funFacts,
       success: true,
       message: "Fun facts retrieved successfully",

@@ -6,6 +6,7 @@ import type {
   LearningPath,
   FunFact,
   ApiResponse,
+  ContentItem,
 } from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "/api";
@@ -33,41 +34,41 @@ class ApiService {
   }
 
   // Projects
-  async getProjects(): Promise<Project[]> {
-    return this.fetchApi<Project[]>("/projects");
+  async getProjects(): Promise<ContentItem<Project>[]> {
+    return this.fetchApi<ContentItem<Project>[]>("/projects");
   }
 
-  async getProjectById(id: string): Promise<Project> {
-    return this.fetchApi<Project>(`/projects/${id}`);
+  async getProjectById(id: string): Promise<ContentItem<Project>> {
+    return this.fetchApi<ContentItem<Project>>(`/projects/${id}`);
   }
 
   // Blog Posts
-  async getBlogPosts(): Promise<BlogPost[]> {
-    return this.fetchApi<BlogPost[]>("/blog");
+  async getBlogPosts(): Promise<ContentItem<BlogPost>[]> {
+    return this.fetchApi<ContentItem<BlogPost>[]>("/blog");
   }
 
-  async getBlogPostById(id: string): Promise<BlogPost> {
-    return this.fetchApi<BlogPost>(`/blog/${id}`);
+  async getBlogPostById(id: string): Promise<ContentItem<BlogPost>> {
+    return this.fetchApi<ContentItem<BlogPost>>(`/blog/${id}`);
   }
 
   // Work in Progress
-  async getWIPItems(): Promise<WorkInProgress[]> {
-    return this.fetchApi<WorkInProgress[]>("/wip");
+  async getWIPItems(): Promise<ContentItem<WorkInProgress>[]> {
+    return this.fetchApi<ContentItem<WorkInProgress>[]>("/wip");
   }
 
   // Collaborations
-  async getCollaborations(): Promise<Collaboration[]> {
-    return this.fetchApi<Collaboration[]>("/collaborations");
+  async getCollaborations(): Promise<ContentItem<Collaboration>[]> {
+    return this.fetchApi<ContentItem<Collaboration>[]>("/collaborations");
   }
 
   // Learning Paths
-  async getLearningPaths(): Promise<LearningPath[]> {
-    return this.fetchApi<LearningPath[]>("/learning-path");
+  async getLearningPaths(): Promise<ContentItem<LearningPath>[]> {
+    return this.fetchApi<ContentItem<LearningPath>[]>("/learning-path");
   }
 
   // Fun Facts
-  async getFunFacts(): Promise<FunFact[]> {
-    return this.fetchApi<FunFact[]>("/fun-facts");
+  async getFunFacts(): Promise<ContentItem<FunFact>[]> {
+    return this.fetchApi<ContentItem<FunFact>[]>("/fun-facts");
   }
 
   // Health check

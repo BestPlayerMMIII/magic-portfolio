@@ -12,6 +12,7 @@ import {
   InteractionManager,
   PreloaderService,
 } from ".";
+import type { ContentItem } from "../../types";
 import apiWithCache from "../apiWithCache";
 
 /**
@@ -252,30 +253,9 @@ export class Scene3DManager {
     try {
       console.log("Loading content for:", object.contentType);
 
-      let content: any[];
-
-      switch (object.contentType) {
-        case "projects":
-          content = await apiWithCache.getProjects();
-          break;
-        case "blog":
-          content = await apiWithCache.getBlogPosts();
-          break;
-        case "wip":
-          content = await apiWithCache.getWIPItems();
-          break;
-        case "collaborations":
-          content = await apiWithCache.getCollaborations();
-          break;
-        case "learning":
-          content = await apiWithCache.getLearningPaths();
-          break;
-        case "fun-facts":
-          content = await apiWithCache.getFunFacts();
-          break;
-        default:
-          throw new Error(`Unknown content type: ${object.contentType}`);
-      }
+      let content: ContentItem<any>[] = await apiWithCache.getByType(
+        object.contentType
+      );
 
       console.log("Loaded content:", content);
       return content;

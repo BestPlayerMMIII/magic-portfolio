@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
-import { mockService } from "../services/mockService.js";
 import { asyncHandler } from "../middleware/errorHandler.js";
-import { ApiResponse, WorkInProgress } from "../types/index.js";
+import { ApiResponse, ContentItem, WorkInProgress } from "../types/index.js";
+import dbService from "../services";
 
 const router = Router();
 
@@ -9,9 +9,9 @@ const router = Router();
 router.get(
   "/",
   asyncHandler(async (req: Request, res: Response) => {
-    const wipItems = await mockService.getWIPItems();
+    const wipItems = await dbService.getWIPItems();
 
-    const response: ApiResponse<WorkInProgress[]> = {
+    const response: ApiResponse<ContentItem<WorkInProgress>[]> = {
       data: wipItems,
       success: true,
       message: "Work in progress items retrieved successfully",
