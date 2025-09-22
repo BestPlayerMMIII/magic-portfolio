@@ -90,6 +90,7 @@
           class="prose min-w-[60%] mx-auto"
           :class="{ 'prose-invert': !isDayMode }"
         ></div>
+        <BackButton />
       </div>
       <!-- TODO other post types -->
       <!-- Still loading -->
@@ -112,6 +113,7 @@ import type { ContentItem } from "@/types";
 import { onMounted, ref, watch } from "vue";
 import apiWithCache from "@/services/apiWithCache";
 import AppHeader from "@/components/AppHeader.vue";
+import BackButton from "@/components/BackButton.vue";
 
 interface PostInfo {
   schemaId: string;
