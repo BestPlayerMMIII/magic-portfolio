@@ -6,8 +6,16 @@ export interface Metadata {
   status: "draft" | "published" | "archived";
 }
 
+export type SchemaType =
+  | "project"
+  | "blog-post"
+  | "work-in-progress"
+  | "collaboration"
+  | "learning-path"
+  | "fun-fact";
+
 export interface ContentItem<T> {
-  schemaId: string;
+  schemaId: SchemaType;
   data: T;
   metadata: Metadata;
 }

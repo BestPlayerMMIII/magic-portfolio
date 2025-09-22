@@ -138,7 +138,7 @@
 <script setup lang="ts">
 import { defineProps } from "vue";
 
-const props = defineProps<{
+defineProps<{
   isNavigationMinimized: boolean;
   toggleNavigation: () => void;
   isDayMode: boolean;
