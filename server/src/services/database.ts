@@ -11,7 +11,7 @@ import {
   CollectionQuery,
   GitCMS,
   ContentItem as OriginalContentItem,
-} from "@gitcms/client";
+} from "@git-cms/client";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -112,12 +112,10 @@ export class DatabaseService {
   // private helpers
 
   private getStandardAllQuery(collection: string): CollectionQuery {
-    return (
-      this.gitcms
-        .collection(collection)
-        //.where("status", "published")
-        .orderBy("createdAt", "desc")
-    );
+    return this.gitcms
+      .collection(collection)
+      .where("metadata.status", "published")
+      .orderBy("createdAt", "desc");
   }
 
   private normalizeAs<T>(item: OriginalContentItem): ContentItem<T> {
