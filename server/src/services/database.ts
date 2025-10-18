@@ -120,6 +120,7 @@ export class DatabaseService {
 
   private normalizeAs<T>(item: OriginalContentItem): ContentItem<T> {
     return {
+      id: item.id,
       schemaId: item.schemaId,
       data: item.data as T,
       metadata: item.metadata,

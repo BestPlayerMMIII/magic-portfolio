@@ -1,5 +1,4 @@
 export interface Metadata {
-  id: string;
   createdAt: string;
   updatedAt: string;
   author: string;
@@ -15,6 +14,7 @@ export type SchemaType =
   | "fun-fact";
 
 export interface ContentItem<T> {
+  id: string;
   schemaId: SchemaType;
   data: T;
   metadata: Metadata;

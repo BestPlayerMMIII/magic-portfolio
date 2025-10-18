@@ -99,7 +99,7 @@
           <div v-if="type === 'projects'" class="grid gap-4 md:grid-cols-2">
             <div
               v-for="project in content"
-              :key="project.metadata.id"
+              :key="project.id"
               class="bg-slate-800/50 rounded-lg p-4 border border-magic-500/20 hover:border-magic-500/40 transition-colors"
             >
               <h3 class="text-lg font-semibold text-white mb-2">
@@ -142,7 +142,7 @@
           <div v-else-if="type === 'blog'" class="space-y-4">
             <div
               v-for="post in content"
-              :key="post.metadata.id"
+              :key="post.id"
               class="bg-slate-800/50 rounded-lg p-4 border border-magic-500/20 cursor-pointer hover:border-magic-500/40 transition-colors"
               @click="openPost(post)"
             >
@@ -183,7 +183,7 @@
           <div v-else-if="type === 'wip'" class="space-y-4">
             <div
               v-for="item in content"
-              :key="item.metadata.id"
+              :key="item.id"
               class="bg-slate-800/50 rounded-lg p-4 border border-magic-500/20"
             >
               <div class="flex justify-between items-start mb-2">
@@ -229,7 +229,7 @@
           <div v-else-if="type === 'collaborations'" class="space-y-4">
             <div
               v-for="collab in content"
-              :key="collab.metadata.id"
+              :key="collab.id"
               class="bg-slate-800/50 rounded-lg p-4 border border-magic-500/20"
             >
               <div class="flex justify-between items-start mb-2">
@@ -275,7 +275,7 @@
           <div v-else-if="type === 'learning'" class="space-y-4">
             <div
               v-for="path in content"
-              :key="path.metadata.id"
+              :key="path.id"
               class="bg-slate-800/50 rounded-lg p-4 border border-magic-500/20"
             >
               <div class="flex justify-between items-start mb-2">
@@ -317,7 +317,7 @@
           >
             <div
               v-for="fact in content"
-              :key="fact.metadata.id"
+              :key="fact.id"
               class="bg-slate-800/50 rounded-lg p-4 border border-magic-500/20"
             >
               <p class="text-gray-300 mb-3">{{ fact.data.content }}</p>
@@ -440,7 +440,7 @@ const getCategoryClass = (category: string) => {
 
 const openPost = <T>(post: ContentItem<T>) => {
   // TODO open the post in the same tab with all the context of the post (full .data)
-  window.location.href = `/post/${post.schemaId}/${post.metadata.id}`;
+  window.location.href = `/post/${post.schemaId}/${post.id}`;
 };
 </script>
 

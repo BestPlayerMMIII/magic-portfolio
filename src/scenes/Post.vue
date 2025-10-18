@@ -96,9 +96,38 @@
         <BackButton />
       </div>
       <!-- TODO other post types -->
-      <!-- Still loading -->
-      <div v-else class="flex justify-center items-center h-full">
-        Loading post...
+      <!-- Post not found -->
+      <div
+        v-else
+        class="flex flex-col items-center justify-center h-full gap-4"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-16 w-16 text-gray-400 mb-2"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M13 16h-1v-4h-1m1-4h.01M12 20c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8z"
+          />
+        </svg>
+        <h2
+          class="text-2xl font-semibold"
+          :class="{ 'text-gray-600': isDayMode, 'text-gray-300': !isDayMode }"
+        >
+          Post not found
+        </h2>
+        <p
+          class="mb-2"
+          :class="{ 'text-gray-500': isDayMode, 'text-gray-400': !isDayMode }"
+        >
+          Sorry, the post you are looking for does not exist or was removed.
+        </p>
+        <BackButton />
       </div>
       <!-- Footer component -->
       <div
@@ -207,7 +236,7 @@ onMounted(async () => {
 
     // Fetch post data (already has thumbnails from server)
     post.value = await apiWithCache.getByType(schemaId).then((items) => {
-      return items.find((item) => item.metadata.id === postId) || null;
+      return items.find((item) => item.id === postId) || null;
     });
 
     // Progressive enhancement: load full resolution media
