@@ -42,21 +42,24 @@
           </h1>
 
           <div class="flex justify-center mb-4">
+            <!-- Show loading state while fetching full resolution -->
             <div
-              v-if="imageLoading"
+              v-if="!loadedImageUrl && imageLoading"
               class="w-32 h-32 rounded-xl bg-gradient-to-br from-purple-300 via-pink-200 to-indigo-200 animate-pulse"
             ></div>
+            <!-- Show full resolution image when loaded -->
             <img
               v-else-if="loadedImageUrl"
               :src="loadedImageUrl"
-              alt="Thumbnail"
-              class="w-32 h-32 object-cover rounded-xl shadow-lg border-2 border-purple-300"
+              alt="Post header image"
+              class="w-32 h-32 object-cover rounded-xl shadow-lg border-2 border-purple-300 transition-all duration-300"
             />
+            <!-- Show thumbnail as fallback (comes from server) -->
             <img
-              v-else-if="post.data.header.image.thumbnailUrl"
+              v-else-if="post.data.header.image?.thumbnailUrl"
               :src="post.data.header.image.thumbnailUrl"
-              alt="Thumbnail"
-              class="w-32 h-32 object-cover rounded-xl shadow-lg border-2 border-gray-200"
+              alt="Post header thumbnail"
+              class="w-32 h-32 object-cover rounded-xl shadow-lg border-2 border-gray-200 transition-all duration-300"
             />
           </div>
 
@@ -112,6 +115,7 @@
 import type { ContentItem } from "@/types";
 import { onMounted, ref, watch } from "vue";
 import apiWithCache from "@/services/apiWithCache";
+import mediaService from "@/services/mediaService";
 import AppHeader from "@/components/AppHeader.vue";
 import BackButton from "@/components/BackButton.vue";
 
@@ -126,34 +130,71 @@ const post = ref<ContentItem<any> | null>(null);
 // Day/Night mode state
 const isDayMode = ref(false);
 
-// Async image loading
+// Media loading states
 const loadedImageUrl = ref<string | null>(null);
 const imageLoading = ref(false);
+const contentLoading = ref(false);
 
-const fetchImage = async (url: string) => {
-  imageLoading.value = true;
+// Progressive enhancement for header image
+const fetchFullImage = async (imageField: any) => {
+  if (!imageField) return;
+
+  // Don't show loading if we already have a thumbnail
+  if (!imageField.thumbnailUrl) {
+    imageLoading.value = true;
+  }
+
   try {
-    // Simulate async fetch (could be replaced with actual fetch if needed)
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Image fetch failed");
-    // Create a blob URL for the image
-    const blob = await response.blob();
-    loadedImageUrl.value = URL.createObjectURL(blob);
+    const fullData = await mediaService.fetchFullForField(imageField);
+    if (fullData?.url) {
+      loadedImageUrl.value = fullData.url;
+    }
   } catch (e) {
-    loadedImageUrl.value = null;
+    console.error("Failed to load full image:", e);
   } finally {
     imageLoading.value = false;
   }
 };
 
+// Watch for image changes and load full resolution
 watch(
-  () => post.value?.data.header.image?.url,
-  (url) => {
-    if (url) fetchImage(url);
-    else loadedImageUrl.value = null;
+  () => post.value?.data.header.image,
+  (imageField) => {
+    if (imageField) {
+      // Reset full resolution state
+      loadedImageUrl.value = null;
+      // Fetch full resolution in background
+      fetchFullImage(imageField);
+    } else {
+      loadedImageUrl.value = null;
+    }
   },
   { immediate: true }
 );
+
+// Progressive enhancement for content HTML
+const enhanceContentMedia = async (postId: string) => {
+  if (!post.value?.data.content) return;
+
+  contentLoading.value = true;
+  try {
+    // Fetch the FULL version from the server (which processes original gitcms-media tags)
+    const response = await fetch(`/api/blog/${postId}/full`);
+    if (!response.ok) throw new Error("Failed to fetch full resolution post");
+
+    const result = await response.json();
+    if (result.success && result.data[0]) {
+      // Update only the content with full resolution
+      if (post.value) {
+        post.value.data.content = result.data[0].data.content;
+      }
+    }
+  } catch (e) {
+    console.error("Failed to enhance content media:", e);
+  } finally {
+    contentLoading.value = false;
+  }
+};
 
 onMounted(async () => {
   const pathname = window.location.pathname;
@@ -163,12 +204,17 @@ onMounted(async () => {
     const schemaId = segments[1];
     const postId = segments[2];
     info.value = { schemaId, postId };
+
+    // Fetch post data (already has thumbnails from server)
     post.value = await apiWithCache.getByType(schemaId).then((items) => {
       return items.find((item) => item.metadata.id === postId) || null;
     });
-    // If image url is present, fetch it
-    if (post.value?.data.header.image?.url) {
-      fetchImage(post.value.data.header.image.url);
+
+    // Progressive enhancement: load full resolution media
+    if (post.value) {
+      // Header image will be loaded by the watcher (runs automatically)
+      // Content media will be enhanced in background
+      enhanceContentMedia(postId);
     }
   } else {
     console.error("Invalid URL format. Expected /post/:schemaId/:postId");

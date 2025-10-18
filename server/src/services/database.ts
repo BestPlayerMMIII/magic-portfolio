@@ -126,6 +126,11 @@ export class DatabaseService {
     };
   }
 
+  private async getClean<T>(query: SchemaQuery): Promise<ContentItem<T>[]> {
+    const result = await query.debug(false).get();
+    return result.map((item) => this.normalizeAs<T>(item));
+  }
+
   private async getAll<T>(
     collection: string,
     queryModifier?: (query: SchemaQuery) => SchemaQuery
@@ -134,7 +139,7 @@ export class DatabaseService {
     if (queryModifier) {
       query = queryModifier(query);
     }
-    return (await query.get()).map((item) => this.normalizeAs<T>(item));
+    return await this.getClean<T>(query);
   }
 
   private async getById<T>(
@@ -148,9 +153,8 @@ export class DatabaseService {
     if (queryModifier) {
       query = queryModifier(query);
     }
-    const result = await query.get();
-    if (result.length === 0) return null;
-    return this.normalizeAs<T>(result[0]);
+    const result = await this.getClean<T>(query);
+    return result.length > 0 ? result[0] : null;
   }
 }
 

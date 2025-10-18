@@ -9,6 +9,7 @@ import wipRouter from "./routes/wip.js";
 import collaborationsRouter from "./routes/collaborations.js";
 import learningPathRouter from "./routes/learningPath.js";
 import funFactsRouter from "./routes/funFacts.js";
+import mediaRouter from "./routes/media.js";
 
 // Load environment variables
 dotenv.config();
@@ -25,7 +26,8 @@ app.use(
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         scriptSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "https:"],
+        imgSrc: ["'self'", "data:", "blob:", "https:"],
+        mediaSrc: ["'self'", "data:", "blob:", "https:"],
       },
     },
   })
@@ -62,6 +64,7 @@ app.use("/api/wip", wipRouter);
 app.use("/api/collaborations", collaborationsRouter);
 app.use("/api/learning-path", learningPathRouter);
 app.use("/api/fun-facts", funFactsRouter);
+app.use("/api/media", mediaRouter);
 
 // Error handling middleware
 app.use(errorHandler);

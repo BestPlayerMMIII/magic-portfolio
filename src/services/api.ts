@@ -51,6 +51,10 @@ class ApiService {
     return this.fetchApi<ContentItem<BlogPost>>(`/blog/${id}`);
   }
 
+  async getBlogPostByIdFull(id: string): Promise<ContentItem<BlogPost>> {
+    return this.fetchApi<ContentItem<BlogPost>>(`/blog/${id}/full`);
+  }
+
   // Work in Progress
   async getWIPItems(): Promise<ContentItem<WorkInProgress>[]> {
     return this.fetchApi<ContentItem<WorkInProgress>[]>("/wip");
