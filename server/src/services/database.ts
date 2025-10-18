@@ -8,10 +8,10 @@ import {
   ContentItem,
 } from "../types/index.js";
 import {
-  CollectionQuery,
+  SchemaQuery,
   GitCMS,
   ContentItem as OriginalContentItem,
-} from "@gitcms/client";
+} from "@git-cms/client";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -86,7 +86,7 @@ export class DatabaseService {
     category: "personal" | "technical" | "random"
   ): Promise<ContentItem<FunFact>[]> {
     return this.getAll<FunFact>("fun-fact", (query) =>
-      query.where("category", category)
+      query.where("category", "==", category)
     );
   }
 
@@ -111,13 +111,11 @@ export class DatabaseService {
 
   // private helpers
 
-  private getStandardAllQuery(collection: string): CollectionQuery {
-    return (
-      this.gitcms
-        .collection(collection)
-        //.where("status", "published")
-        .orderBy("createdAt", "desc")
-    );
+  private getStandardAllQuery(collection: string): SchemaQuery {
+    return this.gitcms
+      .from(collection)
+      .where("metadata.status", "==", "published")
+      .orderBy("createdAt", "desc");
   }
 
   private normalizeAs<T>(item: OriginalContentItem): ContentItem<T> {
@@ -130,7 +128,7 @@ export class DatabaseService {
 
   private async getAll<T>(
     collection: string,
-    queryModifier?: (query: CollectionQuery) => CollectionQuery
+    queryModifier?: (query: SchemaQuery) => SchemaQuery
   ): Promise<ContentItem<T>[]> {
     let query = this.getStandardAllQuery(collection);
     if (queryModifier) {
@@ -142,9 +140,11 @@ export class DatabaseService {
   private async getById<T>(
     collection: string,
     id: string,
-    queryModifier?: (query: CollectionQuery) => CollectionQuery
+    queryModifier?: (query: SchemaQuery) => SchemaQuery
   ): Promise<ContentItem<T> | null> {
-    let query = this.getStandardAllQuery(collection).where("id", id).limit(1);
+    let query = this.getStandardAllQuery(collection)
+      .where("id", "==", id)
+      .limit(1);
     if (queryModifier) {
       query = queryModifier(query);
     }
