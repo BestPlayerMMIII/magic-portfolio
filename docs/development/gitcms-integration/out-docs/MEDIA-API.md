@@ -17,23 +17,23 @@ enhancement** for full-resolution media.
 ## Quick Start
 
 ```typescript
-import { GitCMS } from '@git-cms/client';
+import { GitCMS } from "@git-cms/client";
 
 const cms = new GitCMS({
-  repository: 'owner/repo',
-  token: 'your-github-token',
-  branch: 'main',
+  repository: "owner/repo",
+  token: "your-github-token",
+  branch: "main",
 });
 
 // Get a blog post with embedded media
-const post = await cms.from('posts').doc('my-post').get();
+const post = await cms.from("posts").doc("my-post").get();
 
 // Extract media references (fast, synchronous)
 const mediaRefs = cms.media.extractFromHTML(post.content);
 console.log(`Found ${mediaRefs.length} media items`);
 
 // Get thumbnails immediately (fast, synchronous)
-mediaRefs.forEach(ref => {
+mediaRefs.forEach((ref) => {
   const thumbnail = cms.media.getThumbnail(ref);
   console.log(
     `Thumbnail for ${ref.filename}: ${thumbnail.substring(0, 50)}...`
@@ -61,7 +61,7 @@ interface MediaReference {
   alt?: string; // Alt text
   title?: string; // Title attribute
   mimeType?: string; // MIME type (e.g., "image/jpeg")
-  mediaType?: 'image' | 'video' | 'audio' | 'document' | '3d' | 'other';
+  mediaType?: "image" | "video" | "audio" | "document" | "3d" | "other";
 }
 ```
 
@@ -110,14 +110,14 @@ Extract media from schema fields (single or multiple):
 
 ```typescript
 // Single media field
-const profilePic = { path: 'media/avatars/user.jpg' };
+const profilePic = { path: "media/avatars/user.jpg" };
 const ref = cms.media.extractFromField(profilePic);
 // Returns: MediaReference | null
 
 // Multiple media field
 const gallery = [
-  { path: 'media/gallery/img1.jpg' },
-  { path: 'media/gallery/img2.jpg' },
+  { path: "media/gallery/img1.jpg" },
+  { path: "media/gallery/img2.jpg" },
 ];
 const refs = cms.media.extractFromField(gallery);
 // Returns: MediaReference[]
@@ -132,7 +132,7 @@ const thumbnail = cms.media.getThumbnail(mediaRef);
 // Returns: string (base64 data URL or placeholder)
 
 // Use in your UI immediately
-document.getElementById('img').src = thumbnail;
+document.getElementById("img").src = thumbnail;
 ```
 
 #### Fetch Full Resolution (Async)
@@ -173,7 +173,7 @@ const allMedia = await cms.media.fetchMultiple(mediaRefs, {
 });
 
 // allMedia is an array of FullMediaData
-allMedia.forEach(data => {
+allMedia.forEach((data) => {
   console.log(`${data.reference.filename}: ${data.url}`);
 });
 ```
@@ -215,7 +215,7 @@ cms.media.clearCache();
 // Get cache statistics
 const stats = cms.media.getCacheStats();
 console.log(`Cached items: ${stats.size}`);
-console.log(`Cached paths: ${stats.keys.join(', ')}`);
+console.log(`Cached paths: ${stats.keys.join(", ")}`);
 ```
 
 ### ContentMediaHelper
@@ -228,7 +228,7 @@ Higher-level helper for working with content items. Access via
 Extract media from both rich-text and media fields:
 
 ```typescript
-const post = await cms.from('posts').doc('my-post').get();
+const post = await cms.from("posts").doc("my-post").get();
 
 // Extracts from:
 // - post.content (rich-text with <gitcms-media> tags)
@@ -290,18 +290,18 @@ const fullPost = await cms.contentMedia.renderFull(post);
 Best for blog posts, articles, and content-heavy pages.
 
 ```typescript
-import { GitCMS } from '@git-cms/client';
+import { GitCMS } from "@git-cms/client";
 
 const cms = new GitCMS({
   /* config */
 });
 
 // 1. Fetch content
-const post = await cms.from('posts').doc('my-post').get();
+const post = await cms.from("posts").doc("my-post").get();
 
 // 2. Render fast version immediately
 const fastHtml = cms.media.renderFast(post.content);
-document.getElementById('content').innerHTML = fastHtml;
+document.getElementById("content").innerHTML = fastHtml;
 
 // 3. Load full resolution in background
 cms.media
@@ -310,27 +310,27 @@ cms.media
       console.log(`Loading image ${current}/${total}`);
     },
   })
-  .then(fullHtml => {
+  .then((fullHtml) => {
     // Update with full resolution
-    document.getElementById('content').innerHTML = fullHtml;
+    document.getElementById("content").innerHTML = fullHtml;
   });
 ```
 
 ### Pattern 2: React with Progressive Loading
 
 ```typescript
-import React, { useState, useEffect } from 'react';
-import { GitCMS } from '@git-cms/client';
+import React, { useState, useEffect } from "react";
+import { GitCMS } from "@git-cms/client";
 
 function BlogPost({ postId, cms }: { postId: string; cms: GitCMS }) {
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
 
   useEffect(() => {
     async function loadPost() {
       // Fetch post
-      const post = await cms.from('posts').doc(postId).get();
+      const post = await cms.from("posts").doc(postId).get();
 
       // Show thumbnails immediately
       const fastHtml = cms.media.renderFast(post.content);
@@ -341,7 +341,7 @@ function BlogPost({ postId, cms }: { postId: string; cms: GitCMS }) {
       const fullHtml = await cms.media.renderFull(post.content, {
         onProgress: (current, total) => {
           setProgress({ current, total });
-        }
+        },
       });
       setContent(fullHtml);
     }
@@ -353,7 +353,9 @@ function BlogPost({ postId, cms }: { postId: string; cms: GitCMS }) {
     <div>
       {loading && <div>Loading...</div>}
       {progress.total > 0 && progress.current < progress.total && (
-        <div>Loading images: {progress.current}/{progress.total}</div>
+        <div>
+          Loading images: {progress.current}/{progress.total}
+        </div>
       )}
       <div dangerouslySetInnerHTML={{ __html: content }} />
     </div>
@@ -364,8 +366,8 @@ function BlogPost({ postId, cms }: { postId: string; cms: GitCMS }) {
 ### Pattern 3: Next.js with SSR
 
 ```typescript
-import { GitCMS } from '@git-cms/client';
-import type { GetServerSideProps } from 'next';
+import { GitCMS } from "@git-cms/client";
+import type { GetServerSideProps } from "next";
 
 interface Props {
   content: string;
@@ -374,11 +376,12 @@ interface Props {
 
 export const getServerSideProps: GetServerSideProps<Props> = async () => {
   const cms = new GitCMS({
-    repository: process.env.GITHUB_REPO!,
-    token: process.env.GITHUB_TOKEN!,
+    repository: process.env.GITCMS_REPOSITORY!,
+    branch: process.env.GITCMS_BRANCH!,
+    token: process.env.GITCMS_TOKEN!,
   });
 
-  const post = await cms.from('posts').doc('my-post').get();
+  const post = await cms.from("posts").doc("my-post").get();
 
   // Render with thumbnails on server
   const content = cms.media.renderFast(post.content);
@@ -387,7 +390,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async () => {
   const mediaRefs = cms.media.extractFromHTML(post.content);
 
   return {
-    props: { content, mediaRefs }
+    props: { content, mediaRefs },
   };
 };
 
@@ -396,7 +399,9 @@ export default function Post({ content, mediaRefs }: Props) {
 
   useEffect(() => {
     // Load full resolution on client
-    const cms = new GitCMS({ /* client config */ });
+    const cms = new GitCMS({
+      /* client config */
+    });
 
     (async () => {
       const fullHtml = await cms.media.renderFull(content);
@@ -411,22 +416,22 @@ export default function Post({ content, mediaRefs }: Props) {
 ### Pattern 4: Gallery with Lazy Loading
 
 ```typescript
-import { GitCMS } from '@git-cms/client';
+import { GitCMS } from "@git-cms/client";
 
 const cms = new GitCMS({
   /* config */
 });
 
 async function loadGallery() {
-  const gallery = await cms.from('galleries').doc('my-gallery').get();
+  const gallery = await cms.from("galleries").doc("my-gallery").get();
 
   // gallery.data.images is an array of media references
   const mediaRefs = cms.media.extractFromField(gallery.data.images);
 
   // Show thumbnails first
-  const container = document.getElementById('gallery');
-  mediaRefs.forEach(ref => {
-    const img = document.createElement('img');
+  const container = document.getElementById("gallery");
+  mediaRefs.forEach((ref) => {
+    const img = document.createElement("img");
     img.src = cms.media.getThumbnail(ref);
     img.alt = ref.alt || ref.filename;
     img.dataset.path = ref.path;
@@ -434,10 +439,10 @@ async function loadGallery() {
   });
 
   // Load full resolution on demand (when user clicks)
-  container.addEventListener('click', async e => {
+  container.addEventListener("click", async (e) => {
     const target = e.target as HTMLImageElement;
-    if (target.tagName === 'IMG' && target.dataset.path) {
-      const ref = mediaRefs.find(r => r.path === target.dataset.path);
+    if (target.tagName === "IMG" && target.dataset.path) {
+      const ref = mediaRefs.find((r) => r.path === target.dataset.path);
       if (ref) {
         const fullData = await cms.media.fetchFull(ref);
         target.src = fullData.url;
@@ -450,7 +455,7 @@ async function loadGallery() {
 ### Pattern 5: 3D Model Viewer
 
 ```typescript
-import { GitCMS } from '@git-cms/client';
+import { GitCMS } from "@git-cms/client";
 
 const cms = new GitCMS({
   /* config */
@@ -460,7 +465,7 @@ async function load3DModel(path: string) {
   // Create a reference for the 3D model
   const ref = cms.media.extractFromField({ path });
 
-  if (ref && ref.mediaType === '3d') {
+  if (ref && ref.mediaType === "3d") {
     // Fetch the full .glb file
     const fullData = await cms.media.fetchFull(ref, {
       resolveLFS: true, // Important for large 3D files
@@ -472,7 +477,7 @@ async function load3DModel(path: string) {
     });
 
     // Load into your 3D viewer (e.g., Three.js, Babylon.js)
-    const blob = new Blob([fullData.content!], { type: 'model/gltf-binary' });
+    const blob = new Blob([fullData.content!], { type: "model/gltf-binary" });
     const blobUrl = URL.createObjectURL(blob);
 
     // Use with your 3D library
@@ -484,7 +489,7 @@ async function load3DModel(path: string) {
 ### Pattern 6: Video with Thumbnail Poster
 
 ```typescript
-import { GitCMS } from '@git-cms/client';
+import { GitCMS } from "@git-cms/client";
 
 const cms = new GitCMS({
   /* config */
@@ -493,17 +498,17 @@ const cms = new GitCMS({
 async function createVideoPlayer(videoPath: string) {
   const ref = cms.media.extractFromField({ path: videoPath });
 
-  if (ref && ref.mediaType === 'video') {
+  if (ref && ref.mediaType === "video") {
     // Use thumbnail as poster
     const poster = cms.media.getThumbnail(ref);
 
-    const video = document.createElement('video');
+    const video = document.createElement("video");
     video.poster = poster;
     video.controls = true;
 
     // Load full video on play
     video.addEventListener(
-      'play',
+      "play",
       async () => {
         if (!video.src) {
           const fullData = await cms.media.fetchFull(ref);
@@ -560,15 +565,15 @@ try {
     timeout: 10000, // 10 second timeout
   });
 } catch (error) {
-  if (error.message.includes('timeout')) {
+  if (error.message.includes("timeout")) {
     // Handle timeout
-    console.error('Media fetch timed out');
-  } else if (error.message.includes('404')) {
+    console.error("Media fetch timed out");
+  } else if (error.message.includes("404")) {
     // Handle not found
-    console.error('Media not found');
+    console.error("Media not found");
   } else {
     // Generic error
-    console.error('Failed to fetch media:', error);
+    console.error("Failed to fetch media:", error);
   }
 }
 ```
@@ -584,7 +589,7 @@ import type {
   MediaFetchOptions,
   MediaManager,
   ContentMediaHelper,
-} from '@git-cms/client';
+} from "@git-cms/client";
 ```
 
 ## Browser Compatibility

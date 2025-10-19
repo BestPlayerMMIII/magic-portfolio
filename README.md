@@ -5,7 +5,7 @@ An immersive 3D developer portfolio that presents your projects, blog posts, wor
 ## ✨ Features
 
 - **🎭 Interactive 3D Environment**: Navigate through a magical laboratory with floating crystals, alchemy cauldrons, mystical books, and more
-- **📊 Content Management**: Connect to Supabase or Notion to manage all your portfolio content
+- **📊 Content Management**: Powered by GitCMS - a custom Git-based content management solution
 - **🎨 Modern Tech Stack**: Vue 3 + TypeScript frontend, Node.js + TypeScript backend
 - **🎪 Interactive Objects**:
   - 💎 **Floating Crystal** → Projects
@@ -25,7 +25,7 @@ magic-portfolio/
 │   ├── 📁 src/
 │   │   ├── 📄 index.ts        # Main server file
 │   │   ├── 📁 routes/         # API routes for all content types
-│   │   ├── 📁 services/       # Supabase/database services
+│   │   ├── 📁 services/       # GitCMS database services
 │   │   ├── 📁 middleware/     # Error handling, validation
 │   │   └── 📁 types/          # TypeScript type definitions
 │   ├── 📄 package.json
@@ -53,7 +53,7 @@ magic-portfolio/
 ### Prerequisites
 
 - Node.js 18+ and npm
-- Supabase account (or Notion API access)
+- GitCMS repository set up (see [GitCMS documentation](https://github.com/BestPlayerMMIII/gitcms))
 
 ### 1. Clone and Install
 
@@ -71,116 +71,29 @@ Copy the environment template and configure your credentials:
 cp .env.example .env
 ```
 
-Edit `.env` with your Supabase credentials:
+Edit `.env` with your GitCMS credentials:
 
 ```env
-# Supabase Configuration
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+# GitCMS Configuration
+GITCMS_REPOSITORY=username/repo
+GITCMS_BRANCH=main
+GITCMS_TOKEN=your_github_token_here
 
 # Server Configuration
 PORT=3001
 CORS_ORIGIN=http://localhost:5173
 ```
 
-### 3. Database Setup (Supabase)
+### 3. Content Setup with GitCMS
 
-Create the following tables in your Supabase database:
+GitCMS is a Git-based content management system that stores your portfolio content in a GitHub repository. Follow the [GitCMS documentation](https://github.com/BestPlayerMMIII/gitcms) to set up your content repository with the required schemas for:
 
-#### Projects Table
-
-```sql
-CREATE TABLE projects (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  title TEXT NOT NULL,
-  description TEXT,
-  technologies TEXT[],
-  github_url TEXT,
-  live_url TEXT,
-  image_url TEXT,
-  featured BOOLEAN DEFAULT false,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
-#### Blog Posts Table
-
-```sql
-CREATE TABLE blog_posts (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  title TEXT NOT NULL,
-  content TEXT,
-  excerpt TEXT,
-  tags TEXT[],
-  published BOOLEAN DEFAULT false,
-  published_at TIMESTAMP WITH TIME ZONE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
-#### Work in Progress Table
-
-```sql
-CREATE TABLE work_in_progress (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  title TEXT NOT NULL,
-  description TEXT,
-  progress INTEGER DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),
-  technologies TEXT[],
-  expected_completion DATE,
-  priority TEXT CHECK (priority IN ('low', 'medium', 'high')),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
-#### Collaborations Table
-
-```sql
-CREATE TABLE collaborations (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  title TEXT NOT NULL,
-  description TEXT,
-  collaborators TEXT[],
-  status TEXT CHECK (status IN ('planning', 'active', 'completed', 'paused')),
-  technologies TEXT[],
-  github_url TEXT,
-  live_url TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
-#### Learning Paths Table
-
-```sql
-CREATE TABLE learning_paths (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  title TEXT NOT NULL,
-  description TEXT,
-  category TEXT,
-  difficulty TEXT CHECK (difficulty IN ('beginner', 'intermediate', 'advanced')),
-  progress INTEGER DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),
-  resources JSONB,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
-
-#### Fun Facts Table
-
-```sql
-CREATE TABLE fun_facts (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  content TEXT NOT NULL,
-  category TEXT CHECK (category IN ('personal', 'technical', 'random')),
-  is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-```
+- Projects
+- Blog Posts
+- Work in Progress items
+- Collaborations
+- Learning Paths
+- Fun Facts
 
 ### 4. Development
 
@@ -215,29 +128,16 @@ For comprehensive guides, architecture details, and development workflows, check
 - **[🏗️ Architecture](./docs/architecture/)** - System design and technical documentation
 - **[🔧 Development](./docs/development/)** - Development workflows and checklists
 
-## 📊 Content Management
+## 📊 Content Management with GitCMS
 
-### Sample Data
+This portfolio uses **GitCMS**, a custom Git-based content management system that stores all your portfolio content in a GitHub repository. This approach provides:
 
-Insert some sample data to test your portfolio:
+- **Version Control**: All content changes are tracked in Git
+- **No Database Required**: Content is stored as structured files in your repository
+- **Easy Backups**: Your content is automatically backed up through Git
+- **Developer-Friendly**: Edit content using your favorite text editor or through a custom CMS interface
 
-```sql
--- Sample Project
-INSERT INTO projects (title, description, technologies, featured) VALUES
-('Magic Portfolio', 'An interactive 3D developer portfolio', ARRAY['Vue.js', 'Three.js', 'TypeScript', 'Node.js'], true);
-
--- Sample Blog Post
-INSERT INTO blog_posts (title, content, excerpt, tags, published, published_at) VALUES
-('Building an Interactive Portfolio', 'Full content here...', 'Learn how I built this magical portfolio', ARRAY['development', 'vue', 'threejs'], true, NOW());
-
--- Sample WIP
-INSERT INTO work_in_progress (title, description, progress, technologies, priority) VALUES
-('AI-Powered Code Assistant', 'Building a smart coding companion', 75, ARRAY['Python', 'OpenAI', 'FastAPI'], 'high');
-
--- Sample Fun Fact
-INSERT INTO fun_facts (content, category) VALUES
-('I once debugged a critical production issue while on a rollercoaster!', 'personal');
-```
+For setup instructions and schema definitions, see the [GitCMS documentation](https://github.com/BestPlayerMMIII/gitcms).
 
 ## 🎨 Customization
 
@@ -276,9 +176,9 @@ Replace placeholder geometries with custom 3D models by:
 Set these in your Vercel dashboard:
 
 ```
-SUPABASE_URL=your_production_supabase_url
-SUPABASE_ANON_KEY=your_production_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_production_service_key
+GITCMS_REPOSITORY=username/repo
+GITCMS_BRANCH=main
+GITCMS_TOKEN=your_github_token
 CORS_ORIGIN=https://your-domain.vercel.app
 NODE_ENV=production
 ```
@@ -333,7 +233,7 @@ NODE_ENV=production
 - **Node.js**: JavaScript runtime
 - **Express**: Web application framework
 - **TypeScript**: Type-safe JavaScript
-- **Supabase**: Backend-as-a-Service database
+- **GitCMS**: Custom Git-based content management system
 - **CORS**: Cross-origin resource sharing
 - **Helmet**: Security middleware
 
