@@ -9,14 +9,17 @@
 
     <!-- Modal Content -->
     <div
-      class="relative bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 max-w-4xl max-h-[80vh] overflow-y-auto border border-magic-500/30 shadow-2xl"
+      class="relative bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 max-w-5xl w-full max-h-[85vh] overflow-y-auto border border-magic-500/30 shadow-2xl"
       @click.stop
     >
       <!-- Header -->
       <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-white pr-6">
-          {{ getTitle() }}
-        </h2>
+        <div class="flex items-center gap-3">
+          <span class="text-4xl">{{ getSectionEmoji() }}</span>
+          <h2 class="text-2xl font-bold text-white pr-6">
+            {{ getTitle() }}
+          </h2>
+        </div>
         <button
           @click="$emit('close')"
           class="text-gray-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
@@ -29,6 +32,42 @@
             />
           </svg>
         </button>
+      </div>
+
+      <!-- Section Description -->
+      <div
+        v-if="sectionDescription && !props.loading"
+        class="mb-6 p-4 rounded-xl backdrop-blur-sm border"
+        :style="{
+          background: `linear-gradient(135deg, ${sectionDescription.color.from}15, ${sectionDescription.color.to}15)`,
+          borderColor: `${sectionDescription.color.accent}40`,
+        }"
+      >
+        <p class="text-gray-300 text-sm leading-relaxed">
+          {{ sectionDescription.longDescription }}
+        </p>
+        <a
+          :href="`/post/${sectionDescription.id}`"
+          class="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105"
+          :style="{
+            background: `linear-gradient(90deg, ${sectionDescription.color.from}, ${sectionDescription.color.to})`,
+          }"
+        >
+          <span>View Full Section</span>
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M14 5l7 7m0 0l-7 7m7-7H3"
+            />
+          </svg>
+        </a>
       </div>
 
       <!-- Content -->
@@ -96,239 +135,48 @@
         <!-- Actual Content (when not loading) -->
         <div v-else>
           <!-- Projects -->
-          <div v-if="type === 'projects'" class="grid gap-4 md:grid-cols-2">
-            <div
-              v-for="project in content"
-              :key="project.id"
-              class="bg-slate-800/50 rounded-lg p-4 border border-magic-500/20 hover:border-magic-500/40 transition-colors"
-            >
-              <h3 class="text-lg font-semibold text-white mb-2">
-                {{ project.data.title }}
-              </h3>
-              <p class="text-gray-300 mb-3">{{ project.data.description }}</p>
-
-              <div class="flex flex-wrap gap-2 mb-3">
-                <span
-                  v-for="tech in project.data.technologies"
-                  :key="tech"
-                  class="px-2 py-1 bg-magic-500/20 text-magic-300 rounded text-sm"
-                >
-                  {{ tech }}
-                </span>
-              </div>
-
-              <div class="flex gap-2">
-                <a
-                  v-if="project.data.githubUrl"
-                  :href="project.data.githubUrl"
-                  target="_blank"
-                  class="px-3 py-1 bg-magic-600 hover:bg-magic-700 text-white rounded transition-colors text-sm"
-                >
-                  GitHub
-                </a>
-                <a
-                  v-if="project.data.liveUrl"
-                  :href="project.data.liveUrl"
-                  target="_blank"
-                  class="px-3 py-1 bg-mystical-600 hover:bg-mystical-700 text-white rounded transition-colors text-sm"
-                >
-                  Live Demo
-                </a>
-              </div>
-            </div>
-          </div>
+          <ProjectsList
+            v-if="type === 'projects'"
+            :items="content"
+            :isDayMode="false"
+            @item-click="openPost"
+          />
 
           <!-- Blog Posts -->
-          <div v-else-if="type === 'blog'" class="space-y-4">
-            <div
-              v-for="post in content"
-              :key="post.id"
-              class="bg-slate-800/50 rounded-lg p-4 border border-magic-500/20 cursor-pointer hover:border-magic-500/40 transition-colors"
-              @click="openPost(post)"
-            >
-              <div class="flex items-start space-x-4">
-                <img
-                  :src="post.data.header.image.thumbnailUrl"
-                  alt="Thumbnail"
-                  width="150"
-                  height="150"
-                />
-                <div>
-                  <h3 class="text-lg font-semibold text-white mb-2">
-                    {{ post.data.header.title }}
-                  </h3>
-                  <p class="text-gray-300 mb-3">
-                    {{ post.data.header.excerpt }}
-                  </p>
-                </div>
-              </div>
-
-              <div class="flex flex-wrap gap-2 mb-3">
-                <span
-                  v-for="tag in post.data.header.tags"
-                  :key="tag"
-                  class="px-2 py-1 bg-mystical-500/20 text-mystical-300 rounded text-sm"
-                >
-                  {{ tag }}
-                </span>
-              </div>
-
-              <p class="text-gray-400 text-sm">
-                Updated: {{ formatDate(post.metadata.updatedAt) }}
-              </p>
-            </div>
-          </div>
+          <BlogPostsList
+            v-else-if="type === 'blog'"
+            :items="content"
+            :isDayMode="false"
+            @item-click="openPost"
+          />
 
           <!-- Work in Progress -->
-          <div v-else-if="type === 'wip'" class="space-y-4">
-            <div
-              v-for="item in content"
-              :key="item.id"
-              class="bg-slate-800/50 rounded-lg p-4 border border-magic-500/20"
-            >
-              <div class="flex justify-between items-start mb-2">
-                <h3 class="text-lg font-semibold text-white">
-                  {{ item.data.title }}
-                </h3>
-                <span
-                  class="px-2 py-1 rounded text-sm"
-                  :class="getPriorityClass(item.data.priority)"
-                >
-                  {{ item.data.priority }}
-                </span>
-              </div>
-
-              <p class="text-gray-300 mb-3">{{ item.data.description }}</p>
-
-              <div class="mb-3">
-                <div class="flex justify-between text-sm text-gray-400 mb-1">
-                  <span>Progress</span>
-                  <span>{{ item.data.progress }}%</span>
-                </div>
-                <div class="w-full bg-gray-700 rounded-full h-2">
-                  <div
-                    class="bg-magic-500 h-2 rounded-full transition-all duration-300"
-                    :style="{ width: `${item.data.progress}%` }"
-                  ></div>
-                </div>
-              </div>
-
-              <div class="flex flex-wrap gap-2">
-                <span
-                  v-for="tech in item.data.technologies"
-                  :key="tech"
-                  class="px-2 py-1 bg-magic-500/20 text-magic-300 rounded text-sm"
-                >
-                  {{ tech }}
-                </span>
-              </div>
-            </div>
-          </div>
+          <WIPList
+            v-else-if="type === 'wip'"
+            :items="content"
+            :isDayMode="false"
+          />
 
           <!-- Collaborations -->
-          <div v-else-if="type === 'collaborations'" class="space-y-4">
-            <div
-              v-for="collab in content"
-              :key="collab.id"
-              class="bg-slate-800/50 rounded-lg p-4 border border-magic-500/20"
-            >
-              <div class="flex justify-between items-start mb-2">
-                <h3 class="text-lg font-semibold text-white">
-                  {{ collab.data.title }}
-                </h3>
-                <span
-                  class="px-2 py-1 rounded text-sm"
-                  :class="getStatusClass(collab.data.status)"
-                >
-                  {{ collab.data.status }}
-                </span>
-              </div>
-
-              <p class="text-gray-300 mb-3">{{ collab.data.description }}</p>
-
-              <div class="mb-3">
-                <p class="text-gray-400 text-sm mb-2">Collaborators:</p>
-                <div class="flex flex-wrap gap-2">
-                  <span
-                    v-for="collaborator in collab.data.collaborators"
-                    :key="collaborator"
-                    class="px-2 py-1 bg-mystical-500/20 text-mystical-300 rounded text-sm"
-                  >
-                    {{ collaborator }}
-                  </span>
-                </div>
-              </div>
-
-              <div class="flex flex-wrap gap-2">
-                <span
-                  v-for="tech in collab.data.technologies"
-                  :key="tech"
-                  class="px-2 py-1 bg-magic-500/20 text-magic-300 rounded text-sm"
-                >
-                  {{ tech }}
-                </span>
-              </div>
-            </div>
-          </div>
+          <CollaborationsList
+            v-else-if="type === 'collaborations'"
+            :items="content"
+            :isDayMode="false"
+          />
 
           <!-- Learning Paths -->
-          <div v-else-if="type === 'learning'" class="space-y-4">
-            <div
-              v-for="path in content"
-              :key="path.id"
-              class="bg-slate-800/50 rounded-lg p-4 border border-magic-500/20"
-            >
-              <div class="flex justify-between items-start mb-2">
-                <h3 class="text-lg font-semibold text-white">
-                  {{ path.data.title }}
-                </h3>
-                <span
-                  class="px-2 py-1 rounded text-sm"
-                  :class="getDifficultyClass(path.data.difficulty)"
-                >
-                  {{ path.data.difficulty }}
-                </span>
-              </div>
-
-              <p class="text-gray-300 mb-3">{{ path.data.description }}</p>
-              <p class="text-gray-400 text-sm mb-3">
-                Category: {{ path.data.category }}
-              </p>
-
-              <div class="mb-3">
-                <div class="flex justify-between text-sm text-gray-400 mb-1">
-                  <span>Progress</span>
-                  <span>{{ path.data.progress }}%</span>
-                </div>
-                <div class="w-full bg-gray-700 rounded-full h-2">
-                  <div
-                    class="bg-mystical-500 h-2 rounded-full transition-all duration-300"
-                    :style="{ width: `${path.data.progress}%` }"
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <LearningPathsList
+            v-else-if="type === 'learning'"
+            :items="content"
+            :isDayMode="false"
+          />
 
           <!-- Fun Facts -->
-          <div
+          <FunFactsList
             v-else-if="type === 'fun-facts'"
-            class="grid gap-4 md:grid-cols-2"
-          >
-            <div
-              v-for="fact in content"
-              :key="fact.id"
-              class="bg-slate-800/50 rounded-lg p-4 border border-magic-500/20"
-            >
-              <p class="text-gray-300 mb-3">{{ fact.data.content }}</p>
-              <span
-                class="px-2 py-1 rounded text-sm"
-                :class="getCategoryClass(fact.data.category)"
-              >
-                {{ fact.data.category }}
-              </span>
-            </div>
-          </div>
+            :items="content"
+            :isDayMode="false"
+          />
 
           <!-- Empty state -->
           <div
@@ -360,7 +208,19 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import type { ContentItem } from "@/types";
+import {
+  getSectionDescription,
+  contentTypeToSchemaId,
+  type SectionDescription,
+} from "@/config/sectionDescriptions";
+import ProjectsList from "./sections/ProjectsList.vue";
+import BlogPostsList from "./sections/BlogPostsList.vue";
+import WIPList from "./sections/WIPList.vue";
+import CollaborationsList from "./sections/CollaborationsList.vue";
+import LearningPathsList from "./sections/LearningPathsList.vue";
+import FunFactsList from "./sections/FunFactsList.vue";
 
 interface Props {
   visible: boolean;
@@ -375,71 +235,29 @@ defineEmits<{
   close: [];
 }>();
 
+const sectionDescription = computed<SectionDescription | undefined>(() => {
+  const schemaId = contentTypeToSchemaId(props.type);
+  return getSectionDescription(schemaId);
+});
+
 const getTitle = () => {
   const titles = {
-    projects: "🔮 Projects",
-    wip: "⚗️ Work in Progress",
-    blog: "📖 Blog Posts",
-    collaborations: "🔮 Collaborations",
-    learning: "📚 Learning Paths",
-    "fun-facts": "🦉 Fun Facts",
+    projects: "Projects",
+    wip: "Work in Progress",
+    blog: "Blog Posts",
+    collaborations: "Collaborations",
+    learning: "Learning Paths",
+    "fun-facts": "Fun Facts",
   };
   return titles[props.type as keyof typeof titles] || props.type;
 };
 
-const formatDate = (dateString?: string) => {
-  if (!dateString) return "N/A";
-  return new Date(dateString).toLocaleDateString();
-};
-
-const getPriorityClass = (priority: string) => {
-  const classes = {
-    low: "bg-green-500/20 text-green-300",
-    medium: "bg-yellow-500/20 text-yellow-300",
-    high: "bg-red-500/20 text-red-300",
-  };
-  return (
-    classes[priority as keyof typeof classes] || "bg-gray-500/20 text-gray-300"
-  );
-};
-
-const getStatusClass = (status: string) => {
-  const classes = {
-    planning: "bg-blue-500/20 text-blue-300",
-    active: "bg-green-500/20 text-green-300",
-    completed: "bg-purple-500/20 text-purple-300",
-    paused: "bg-yellow-500/20 text-yellow-300",
-  };
-  return (
-    classes[status as keyof typeof classes] || "bg-gray-500/20 text-gray-300"
-  );
-};
-
-const getDifficultyClass = (difficulty: string) => {
-  const classes = {
-    beginner: "bg-green-500/20 text-green-300",
-    intermediate: "bg-yellow-500/20 text-yellow-300",
-    advanced: "bg-red-500/20 text-red-300",
-  };
-  return (
-    classes[difficulty as keyof typeof classes] ||
-    "bg-gray-500/20 text-gray-300"
-  );
-};
-
-const getCategoryClass = (category: string) => {
-  const classes = {
-    personal: "bg-pink-500/20 text-pink-300",
-    technical: "bg-blue-500/20 text-blue-300",
-    random: "bg-purple-500/20 text-purple-300",
-  };
-  return (
-    classes[category as keyof typeof classes] || "bg-gray-500/20 text-gray-300"
-  );
+const getSectionEmoji = () => {
+  return sectionDescription.value?.emoji || "✨";
 };
 
 const openPost = <T>(post: ContentItem<T>) => {
-  // TODO open the post in the same tab with all the context of the post (full .data)
+  // Navigate to the post in the same tab with all the context of the post (full .data)
   window.location.href = `/post/${post.schemaId}/${post.id}`;
 };
 </script>

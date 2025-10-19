@@ -45,8 +45,20 @@
       </div>
     </div>
 
-    <!-- Three.js Canvas Container -->
+    <!-- Navigation Header (shown only in minimalist mode or when not loading) -->
     <div
+      v-if="!preloaderState.isLoading && isMinimalistMode"
+      class="absolute top-0 left-0 right-0 z-40"
+    >
+      <NavigationHeader
+        :isDayMode="isDayMode"
+        :toggleDayNightMode="toggleDayNightMode"
+      />
+    </div>
+
+    <!-- Three.js Canvas Container (hidden in minimalist mode) -->
+    <div
+      v-show="!isMinimalistMode"
       ref="threeContainer"
       class="absolute inset-0 w-full h-full"
       style="z-index: 1"
@@ -71,8 +83,9 @@
       @touchmove.stop.prevent
     ></div>
 
-    <!-- UI Overlay - always on top -->
+    <!-- UI Overlay - always on top (hidden in minimalist mode) -->
     <div
+      v-show="!isMinimalistMode"
       class="ui-overlay absolute inset-0 w-full h-full"
       style="pointer-events: none"
     >
@@ -266,19 +279,102 @@
       @close="closeModal"
       style="z-index: 1000"
     />
+
+    <!-- Minimalist Mode Content -->
+    <div
+      v-if="isMinimalistMode && !preloaderState.isLoading"
+      class="absolute inset-0 z-30 overflow-y-auto"
+      :class="{
+        'bg-[rgb(242,242,242)]': isDayMode,
+        'bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900':
+          !isDayMode,
+      }"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-16">
+        <div class="text-center mb-12">
+          <h1
+            class="text-5xl md:text-6xl font-bold mb-4"
+            :class="{ 'text-gray-900': isDayMode, 'text-white': !isDayMode }"
+          >
+            Welcome to My Portfolio
+          </h1>
+          <p
+            class="text-xl mb-8"
+            :class="{ 'text-gray-700': isDayMode, 'text-gray-300': !isDayMode }"
+          >
+            Explore my work through these sections
+          </p>
+        </div>
+
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <a
+            v-for="section in sections"
+            :key="section.id"
+            :href="`/post/${section.id}`"
+            class="group block p-6 rounded-xl transition-all duration-300 hover:scale-105 border"
+            :class="{
+              'bg-white/90 border-gray-300 hover:border-purple-400 hover:shadow-xl':
+                isDayMode,
+              'bg-slate-800/70 border-purple-500/30 hover:border-purple-500/60 hover:shadow-2xl':
+                !isDayMode,
+            }"
+            :style="{
+              boxShadow: !isDayMode
+                ? `0 0 30px ${section.color.accent}20`
+                : 'none',
+            }"
+          >
+            <div class="text-center">
+              <div
+                class="text-5xl mb-3 group-hover:scale-110 transition-transform duration-300"
+              >
+                {{ section.emoji }}
+              </div>
+              <h3
+                class="text-xl font-bold mb-2"
+                :class="{
+                  'text-gray-900': isDayMode,
+                  'text-white': !isDayMode,
+                }"
+              >
+                {{ section.title }}
+              </h3>
+              <p
+                class="text-sm"
+                :class="{
+                  'text-gray-600': isDayMode,
+                  'text-gray-300': !isDayMode,
+                }"
+              >
+                {{ section.description }}
+              </p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
 import ContentModal from "../components/ContentModal.vue";
+import NavigationHeader from "../components/NavigationHeader.vue";
 import { Scene3DManager } from "../services/core";
 import { default as defaultTheme } from "../themes";
 import type { InteractiveObject, PreloaderState } from "../types/3d";
+import { useViewMode } from "@/stores/viewModeStore";
+import { getAllSectionDescriptions } from "@/config/sectionDescriptions";
 
 // Import UI interaction styles
 import "../styles/ui-interactions.css";
 import AppHeader from "@/components/AppHeader.vue";
+
+// View mode state
+const { isMinimalistMode } = useViewMode();
+
+// Sections for minimalist mode
+const sections = getAllSectionDescriptions();
 
 // Reactive state
 const threeContainer = ref<HTMLDivElement>();

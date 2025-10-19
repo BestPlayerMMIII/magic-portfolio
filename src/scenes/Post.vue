@@ -3,11 +3,9 @@
     class="h-screen w-screen flex flex-col"
     :class="{ 'bg-[rgb(242,242,242)]': isDayMode }"
   >
-    <!-- Header component -->
-    <AppHeader
-      :isNavigationMinimized="false"
+    <!-- Navigation Header -->
+    <NavigationHeader
       :isDayMode="isDayMode"
-      :toggleNavigation="toggleNavigation"
       :toggleDayNightMode="toggleDayNightMode"
     />
 
@@ -145,7 +143,7 @@ import type { ContentItem } from "@/types";
 import { onMounted, ref, watch } from "vue";
 import apiWithCache from "@/services/apiWithCache";
 import mediaService from "@/services/mediaService";
-import AppHeader from "@/components/AppHeader.vue";
+import NavigationHeader from "@/components/NavigationHeader.vue";
 import BackButton from "@/components/BackButton.vue";
 
 interface PostInfo {
@@ -251,7 +249,6 @@ onMounted(async () => {
   }
 });
 
-const toggleNavigation = () => {};
 const toggleDayNightMode = () => {
   isDayMode.value = !isDayMode.value;
   document.documentElement.classList.toggle("dark", !isDayMode.value);
