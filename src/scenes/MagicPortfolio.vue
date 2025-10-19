@@ -125,10 +125,10 @@
 
           <!-- Main content -->
           <div class="relative z-10 flex items-center space-x-3">
-            <div class="text-2xl animate-bounce">✨</div>
+            <div class="text-2xl">✨</div>
             <div class="text-center">
               <p class="text-lg font-bold text-white mb-1 tracking-wide">
-                Click to explore
+                Click {{ hoveredObject?.type }} to explore
               </p>
               <p
                 class="text-sm font-medium text-purple-200 uppercase tracking-wider"
@@ -136,7 +136,7 @@
                 {{ getObjectTitle(hoveredObject?.contentType || "") }}
               </p>
             </div>
-            <div class="text-2xl animate-bounce delay-300">🔮</div>
+            <div class="text-2xl">🔮</div>
           </div>
 
           <!-- Bottom glow effect -->
@@ -370,8 +370,8 @@ import { getAllSectionDescriptions } from "@/config/sectionDescriptions";
 import "../styles/ui-interactions.css";
 import AppHeader from "@/components/AppHeader.vue";
 
-// View mode state
-const { isMinimalistMode } = useViewMode();
+// View mode state from store
+const { isMinimalistMode, isDayMode, toggleDayMode } = useViewMode();
 
 // Sections for minimalist mode
 const sections = getAllSectionDescriptions();
@@ -396,9 +396,6 @@ const preloaderState = ref<PreloaderState>({
   totalAssets: 0,
   loadedAssets: 0,
 });
-
-// Day/Night mode state
-const isDayMode = ref(false);
 
 // Scene manager instance
 let scene3DManager: Scene3DManager | null = null;
@@ -430,8 +427,14 @@ const initThreeJS = async () => {
     // Initialize with wizard lab theme
     await scene3DManager.initialize(threeContainer.value, defaultTheme);
 
-    // Update day/night mode state
-    isDayMode.value = scene3DManager.getCurrentLightingMode() === "day";
+    // Sync 3D scene with store's day mode
+    const currentMode = scene3DManager.getCurrentLightingMode();
+    const sceneIsDayMode = currentMode === "day";
+
+    // If store's mode differs from scene's initial mode, toggle scene
+    if (isDayMode.value !== sceneIsDayMode) {
+      scene3DManager.toggleDayNightMode();
+    }
 
     console.log("✅ Magic Portfolio initialized successfully");
   } catch (error) {
@@ -516,8 +519,9 @@ const toggleNavigation = () => {
 const toggleDayNightMode = () => {
   if (scene3DManager) {
     scene3DManager.toggleDayNightMode();
-    isDayMode.value = scene3DManager.getCurrentLightingMode() === "day";
   }
+  // Update store (which persists to localStorage)
+  toggleDayMode();
 };
 
 onMounted(() => {

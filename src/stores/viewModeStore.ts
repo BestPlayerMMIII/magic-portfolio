@@ -1,9 +1,35 @@
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 
 export type ViewMode = "3d" | "minimalist";
 
-const viewMode = ref<ViewMode>("3d");
-const isDayMode = ref(false);
+const STORAGE_KEY_VIEW_MODE = "magic-portfolio-view-mode";
+const STORAGE_KEY_DAY_MODE = "magic-portfolio-day-mode";
+
+// Initialize from localStorage or defaults
+const viewMode = ref<ViewMode>(
+  (localStorage.getItem(STORAGE_KEY_VIEW_MODE) as ViewMode) || "3d"
+);
+
+// Initialize day mode from localStorage, or auto-detect from system
+const getInitialDayMode = (): boolean => {
+  const stored = localStorage.getItem(STORAGE_KEY_DAY_MODE);
+  if (stored !== null) {
+    return stored === "true";
+  }
+  // Auto-detect from system preference
+  return !window.matchMedia("(prefers-color-scheme: dark)").matches;
+};
+
+const isDayMode = ref(getInitialDayMode());
+
+// Watch and persist changes to localStorage
+watch(viewMode, (newMode) => {
+  localStorage.setItem(STORAGE_KEY_VIEW_MODE, newMode);
+});
+
+watch(isDayMode, (newMode) => {
+  localStorage.setItem(STORAGE_KEY_DAY_MODE, String(newMode));
+});
 
 /**
  * Composable for managing application view mode

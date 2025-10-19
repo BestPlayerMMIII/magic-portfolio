@@ -145,6 +145,10 @@ import apiWithCache from "@/services/apiWithCache";
 import mediaService from "@/services/mediaService";
 import NavigationHeader from "@/components/NavigationHeader.vue";
 import BackButton from "@/components/BackButton.vue";
+import { useViewMode } from "@/stores/viewModeStore";
+
+// Use day mode from store
+const { isDayMode, toggleDayMode } = useViewMode();
 
 interface PostInfo {
   schemaId: string;
@@ -153,9 +157,6 @@ interface PostInfo {
 
 const info = ref<PostInfo | null>(null);
 const post = ref<ContentItem<any> | null>(null);
-
-// Day/Night mode state
-const isDayMode = ref(false);
 
 // Media loading states
 const loadedImageUrl = ref<string | null>(null);
@@ -250,7 +251,7 @@ onMounted(async () => {
 });
 
 const toggleDayNightMode = () => {
-  isDayMode.value = !isDayMode.value;
+  toggleDayMode();
   document.documentElement.classList.toggle("dark", !isDayMode.value);
 };
 </script>

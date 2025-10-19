@@ -181,12 +181,15 @@ import {
   schemaIdToContentType,
 } from "@/config/sectionDescriptions";
 import type { ContentItem } from "@/types";
+import { useViewMode } from "@/stores/viewModeStore";
+
+// Use day mode from store
+const { isDayMode, toggleDayMode } = useViewMode();
 
 const schemaId = ref<string>("");
 const content = ref<ContentItem<any>[]>([]);
 const loading = ref(true);
 const error = ref<string | null>(null);
-const isDayMode = ref(false);
 
 const sectionDescription = computed(() => {
   return schemaId.value ? getSectionDescription(schemaId.value) : undefined;
@@ -232,7 +235,7 @@ onMounted(async () => {
 });
 
 const toggleDayNightMode = () => {
-  isDayMode.value = !isDayMode.value;
+  toggleDayMode();
   document.documentElement.classList.toggle("dark", !isDayMode.value);
 };
 

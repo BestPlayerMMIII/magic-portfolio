@@ -2,7 +2,7 @@
   <div class="section-header mb-8">
     <div class="flex items-center justify-center mb-4">
       <div
-        class="text-6xl mb-2 animate-bounce"
+        class="text-6xl mb-2 animate-bounce-once"
         :style="{
           filter: `drop-shadow(0 0 20px ${description.color.accent})`,
         }"
@@ -49,3 +49,20 @@ defineProps<{
   isDayMode: boolean;
 }>();
 </script>
+
+<style scoped>
+/* Bounce animation that plays only once */
+@keyframes bounce-once {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-25%);
+  }
+}
+
+.animate-bounce-once {
+  animation: bounce-once 1s ease-in-out;
+}
+</style>
