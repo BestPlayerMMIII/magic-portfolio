@@ -1,15 +1,13 @@
-import type { SchemaType } from "@/types";
-
 /**
  * Centralized Category Configuration
- * Synced with server configuration
+ * Single source of truth for all post categories
  */
 
 export type VisibilityRule = "always" | "hide-if-empty" | "never";
 
-export interface SectionDescription {
+export interface CategoryConfig {
   // Identity
-  id: SchemaType; // GitCMS schemaId
+  id: string; // schemaId in GitCMS - the single source of truth
 
   // Display
   title: string;
@@ -25,12 +23,20 @@ export interface SectionDescription {
   };
 
   // Behavior
-  enabled: boolean;
-  visibility: VisibilityRule;
-  order: number;
+  enabled: boolean; // Master switch
+  visibility: VisibilityRule; // How to handle display
+  order: number; // Display order
+
+  // Media processing
+  hasMedia: boolean; // Whether to process media fields
+  mediaFields?: string[]; // Specific fields to process
 }
 
-export const sectionDescriptions: Record<string, SectionDescription> = {
+/**
+ * Master category registry
+ * Add/remove/modify categories here
+ */
+export const categories: Record<string, CategoryConfig> = {
   project: {
     id: "project",
     title: "Projects",
@@ -46,7 +52,9 @@ export const sectionDescriptions: Record<string, SectionDescription> = {
     enabled: true,
     visibility: "always",
     order: 1,
+    hasMedia: false,
   },
+
   "blog-post": {
     id: "blog-post",
     title: "Blog Posts",
@@ -62,7 +70,10 @@ export const sectionDescriptions: Record<string, SectionDescription> = {
     enabled: true,
     visibility: "always",
     order: 2,
+    hasMedia: true,
+    mediaFields: ["header.image", "content"],
   },
+
   "work-in-progress": {
     id: "work-in-progress",
     title: "Work in Progress",
@@ -76,9 +87,11 @@ export const sectionDescriptions: Record<string, SectionDescription> = {
       accent: "#fbbf24", // amber-400
     },
     enabled: true,
-    visibility: "always",
+    visibility: "hide-if-empty",
     order: 3,
+    hasMedia: false,
   },
+
   collaboration: {
     id: "collaboration",
     title: "Collaborations",
@@ -94,7 +107,9 @@ export const sectionDescriptions: Record<string, SectionDescription> = {
     enabled: true,
     visibility: "hide-if-empty",
     order: 4,
+    hasMedia: false,
   },
+
   "learning-path": {
     id: "learning-path",
     title: "Learning Paths",
@@ -110,7 +125,9 @@ export const sectionDescriptions: Record<string, SectionDescription> = {
     enabled: true,
     visibility: "hide-if-empty",
     order: 5,
+    hasMedia: false,
   },
+
   "fun-fact": {
     id: "fun-fact",
     title: "Fun Facts",
@@ -126,35 +143,36 @@ export const sectionDescriptions: Record<string, SectionDescription> = {
     enabled: true,
     visibility: "hide-if-empty",
     order: 6,
+    hasMedia: false,
   },
 };
 
 /**
- * Get section description by ID (schemaId)
+ * Get all enabled categories sorted by order
  */
-export function getSectionById(id: SchemaType): SectionDescription | undefined {
-  return sectionDescriptions[id];
-}
-
-/**
- * Get all enabled section descriptions sorted by order
- */
-export function getAllSectionDescriptions(): SectionDescription[] {
-  return Object.values(sectionDescriptions)
-    .filter((section) => section.enabled)
+export function getEnabledCategories(): CategoryConfig[] {
+  return Object.values(categories)
+    .filter((cat) => cat.enabled)
     .sort((a, b) => a.order - b.order);
 }
 
 /**
- * Check if a section should be visible based on content count
+ * Get category by ID (schemaId)
  */
-export function shouldShowSection(
-  section: SectionDescription,
+export function getCategoryById(id: string): CategoryConfig | undefined {
+  return categories[id];
+}
+
+/**
+ * Check if a category should be visible based on content count
+ */
+export function shouldShowCategory(
+  category: CategoryConfig,
   itemCount: number
 ): boolean {
-  if (!section.enabled) return false;
+  if (!category.enabled) return false;
 
-  switch (section.visibility) {
+  switch (category.visibility) {
     case "always":
       return true;
     case "never":

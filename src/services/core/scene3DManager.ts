@@ -12,7 +12,7 @@ import {
   InteractionManager,
   PreloaderService,
 } from ".";
-import type { ContentItem } from "../../types";
+import type { ContentItem, NullableSchemaType, ObjectConfig } from "@/types";
 import apiWithCache from "../apiWithCache";
 
 /**
@@ -122,6 +122,42 @@ export class Scene3DManager {
   }
 
   /**
+   * Apply visibility rules to objects - makes them non-interactable instead of hiding them
+   */
+  private async applyVisibilityRules(
+    objects: ObjectConfig[]
+  ): Promise<ObjectConfig[]> {
+    try {
+      // Get all categories with visibility information
+      const categories = await apiWithCache.getAllCategories();
+      const visibleCategoryIds = new Set(
+        categories.filter((cat) => cat.visible).map((cat) => cat.id)
+      );
+
+      // Mark objects as non-interactable if their category is not visible
+      const processedObjects = objects.map((obj) => {
+        if (!obj.contentType) return obj; // Non-content objects remain as-is
+
+        // If category is not visible, make it non-interactable
+        if (!visibleCategoryIds.has(obj.contentType)) {
+          return {
+            ...obj, // keep all visual properties (position, model, color, etc.)
+            isInteractive: false, // makes it non-interactable
+          };
+        }
+
+        return obj;
+      });
+
+      return processedObjects;
+    } catch (error) {
+      console.error("Failed to apply visibility rules:", error);
+      // Fallback: return all objects unchanged if visibility check fails
+      return objects;
+    }
+  }
+
+  /**
    * Initialize the 3D scene with a theme
    */
   async initialize(container: HTMLElement, theme: ThemeConfig): Promise<void> {
@@ -164,11 +200,14 @@ export class Scene3DManager {
       this._objectManager
     );
 
+    // Apply visibility rules to objects (makes non-visible categories non-interactable)
+    const processedObjects = await this.applyVisibilityRules(theme.objects);
+
     // Preload assets
-    await this._preloaderService.preloadAssets(theme.objects);
+    await this._preloaderService.preloadAssets(processedObjects);
 
     // Create objects after preloading
-    await this._objectManager.createObjectsFromConfig(theme.objects);
+    await this._objectManager.createObjectsFromConfig(processedObjects);
 
     // Start animation loop
     this._sceneManager.startAnimation();
@@ -208,11 +247,14 @@ export class Scene3DManager {
     // Update theme
     this._currentTheme = theme;
 
+    // Apply visibility rules to objects (makes non-visible categories non-interactable)
+    const processedObjects = await this.applyVisibilityRules(theme.objects);
+
     // Preload new assets
-    await this._preloaderService.preloadAssets(theme.objects);
+    await this._preloaderService.preloadAssets(processedObjects);
 
     // Create new objects
-    await this._objectManager.createObjectsFromConfig(theme.objects);
+    await this._objectManager.createObjectsFromConfig(processedObjects);
 
     console.log("✅ Theme switched successfully");
   }
@@ -253,7 +295,7 @@ export class Scene3DManager {
     try {
       console.log("Loading content for:", object.contentType);
 
-      let content: ContentItem<any>[] = await apiWithCache.getByType(
+      let content: ContentItem<any>[] = await apiWithCache.getByCategory(
         object.contentType
       );
 
@@ -268,19 +310,19 @@ export class Scene3DManager {
   /**
    * Get the title for a content type
    */
-  getObjectTitle(contentType: string): string {
+  getObjectTitle(contentType: NullableSchemaType): string {
     switch (contentType) {
-      case "projects":
+      case "project":
         return "My Projects";
-      case "blog":
+      case "blog-post":
         return "Blog Posts";
-      case "wip":
+      case "work-in-progress":
         return "Work in Progress";
-      case "collaborations":
+      case "collaboration":
         return "Collaborations";
-      case "learning":
+      case "learning-path":
         return "Learning Paths";
-      case "fun-facts":
+      case "fun-fact":
         return "Fun Facts";
       default:
         return "Unknown";

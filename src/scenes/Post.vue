@@ -139,7 +139,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ContentItem } from "@/types";
+import type { ContentItem, SchemaType } from "@/types";
 import { onMounted, ref, watch } from "vue";
 import apiWithCache from "@/services/apiWithCache";
 import mediaService from "@/services/mediaService";
@@ -201,13 +201,13 @@ watch(
 );
 
 // Progressive enhancement for content HTML
-const enhanceContentMedia = async (postId: string) => {
+const enhanceContentMedia = async (schemaId: string, postId: string) => {
   if (!post.value?.data.content) return;
 
   contentLoading.value = true;
   try {
     // Fetch the FULL version from the server (which processes original gitcms-media tags)
-    const response = await fetch(`/api/blog/${postId}/full`);
+    const response = await fetch(`/api/posts/${schemaId}/${postId}/full`);
     if (!response.ok) throw new Error("Failed to fetch full resolution post");
 
     const result = await response.json();
@@ -234,15 +234,19 @@ onMounted(async () => {
     info.value = { schemaId, postId };
 
     // Fetch post data (already has thumbnails from server)
-    post.value = await apiWithCache.getByType(schemaId).then((items) => {
-      return items.find((item) => item.id === postId) || null;
-    });
+    post.value = await apiWithCache
+      .getByCategory(schemaId as SchemaType)
+      .then((items: ContentItem<any>[]) => {
+        return (
+          items.find((item: ContentItem<any>) => item.id === postId) || null
+        );
+      });
 
     // Progressive enhancement: load full resolution media
     if (post.value) {
       // Header image will be loaded by the watcher (runs automatically)
       // Content media will be enhanced in background
-      enhanceContentMedia(postId);
+      enhanceContentMedia(schemaId, postId);
     }
   } else {
     console.error("Invalid URL format. Expected /post/:schemaId/:postId");

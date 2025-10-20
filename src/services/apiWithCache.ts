@@ -1,12 +1,4 @@
-import type {
-  Project,
-  BlogPost,
-  Collaboration,
-  FunFact,
-  LearningPath,
-  WorkInProgress,
-  ContentItem,
-} from "../types";
+import type { ContentItem, SchemaType } from "@/types";
 import { cacheManager } from "./cacheManager";
 import { apiService } from "./api";
 
@@ -24,7 +16,7 @@ class ApiWithCacheService {
    * Initialize the cache system
    * Must be called once at app startup
    */
-  async initialize(): Promise<void> {
+  async initialize(categoriesToPreload: SchemaType[] = []): Promise<void> {
     if (this.isInitialized) {
       console.warn("🔄 ApiWithCache already initialized");
       return;
@@ -33,19 +25,13 @@ class ApiWithCacheService {
     try {
       // Inject API methods into cache manager to avoid circular dependencies
       cacheManager.setApiMethods({
-        getProjects: () => apiService.getProjects(),
-        getBlogPosts: () => apiService.getBlogPosts(),
-        getCollaborations: () => apiService.getCollaborations(),
-        getFunFacts: () => apiService.getFunFacts(),
-        getLearningPaths: () => apiService.getLearningPaths(),
-        getWIPItems: () => apiService.getWIPItems(),
+        getPostsByCategory: (category: string) =>
+          apiService.getPostsByCategory(category),
+        getAllCategories: () => apiService.getAllCategories(),
       });
 
-      // Start background refresh
-      cacheManager.startBackgroundRefresh();
-
-      // Preload all data
-      await cacheManager.preloadAllData();
+      // Initialize with preload categories
+      await cacheManager.initialize(categoriesToPreload);
 
       this.isInitialized = true;
       console.log("✅ Cache system initialized successfully");
@@ -56,121 +42,74 @@ class ApiWithCacheService {
   }
 
   /**
-   * Get projects - cached or fresh
+   * Get posts by category - cached or fresh
+   * @param categoryId - SchemaType ID (e.g., "project", "blog-post")
    */
-  async getProjects(useCache = true): Promise<ContentItem<Project>[]> {
-    if (useCache && this.isInitialized) {
-      return cacheManager.getProjects();
-    }
-    return apiService.getProjects();
-  }
-
-  /**
-   * Get blog posts - cached or fresh
-   */
-  async getBlogPosts(useCache = true): Promise<ContentItem<BlogPost>[]> {
-    if (useCache && this.isInitialized) {
-      return cacheManager.getBlogPosts();
-    }
-    return apiService.getBlogPosts();
-  }
-
-  /**
-   * Get collaborations - cached or fresh
-   */
-  async getCollaborations(
+  async getByCategory<T = any>(
+    categoryId: SchemaType,
     useCache = true
-  ): Promise<ContentItem<Collaboration>[]> {
+  ): Promise<ContentItem<T>[]> {
     if (useCache && this.isInitialized) {
-      return cacheManager.getCollaborations();
+      return cacheManager.getByCategory<T>(categoryId);
     }
-    return apiService.getCollaborations();
+    return apiService.getPostsByCategory<T>(categoryId);
   }
 
   /**
-   * Get fun facts - cached or fresh
+   * Get all categories with metadata - cached or fresh
    */
-  async getFunFacts(useCache = true): Promise<ContentItem<FunFact>[]> {
+  async getAllCategories(useCache = true): Promise<
+    Array<{
+      id: string;
+      title: string;
+      count: number;
+      visible: boolean;
+    }>
+  > {
     if (useCache && this.isInitialized) {
-      return cacheManager.getFunFacts();
+      return cacheManager.getAllCategories();
     }
-    return apiService.getFunFacts();
+    return apiService.getAllCategories();
   }
 
   /**
-   * Get learning paths - cached or fresh
+   * Get single post by category and id (NEW)
    */
-  async getLearningPaths(
-    useCache = true
-  ): Promise<ContentItem<LearningPath>[]> {
-    if (useCache && this.isInitialized) {
-      return cacheManager.getLearningPaths();
+  async getPostById<T = any>(
+    category: string,
+    id: string
+  ): Promise<ContentItem<T> | null> {
+    try {
+      return await apiService.getPostById<T>(category, id);
+    } catch (error) {
+      console.error(`Failed to get post ${id} from ${category}:`, error);
+      return null;
     }
-    return apiService.getLearningPaths();
   }
 
   /**
-   * Get WIP projects - cached or fresh
+   * Get single post with full media (NEW)
    */
-  async getWIPItems(useCache = true): Promise<ContentItem<WorkInProgress>[]> {
-    if (useCache && this.isInitialized) {
-      return cacheManager.getWipProjects();
+  async getPostByIdFull<T = any>(
+    category: string,
+    id: string
+  ): Promise<ContentItem<T> | null> {
+    try {
+      return await apiService.getPostByIdFull<T>(category, id);
+    } catch (error) {
+      console.error(`Failed to get full post ${id} from ${category}:`, error);
+      return null;
     }
-    return apiService.getWIPItems();
   }
 
   /**
-   * Get post by type
+   * Force refresh specific category
    */
-  async getByType(type: string, useCache = true): Promise<ContentItem<any>[]> {
-    let content: ContentItem<any>[] = [];
-    switch (type) {
-      case "projects":
-      case "project":
-        content = await apiWithCache.getProjects(useCache);
-        break;
-      case "blog":
-      case "blog-post":
-        content = await apiWithCache.getBlogPosts(useCache);
-        break;
-      case "wip":
-      case "work-in-progress":
-        content = await apiWithCache.getWIPItems(useCache);
-        break;
-      case "collaborations":
-      case "collaboration":
-        content = await apiWithCache.getCollaborations(useCache);
-        break;
-      case "learning":
-      case "learning-path":
-        content = await apiWithCache.getLearningPaths(useCache);
-        break;
-      case "fun-facts":
-      case "fun-fact":
-        content = await apiWithCache.getFunFacts(useCache);
-        break;
-      default:
-        throw new Error(`Unknown content type: ${type}`);
-    }
-    return content;
-  }
-
-  /**
-   * Force refresh specific data type
-   */
-  async refreshData(
-    type:
-      | "projects"
-      | "blogPosts"
-      | "collaborations"
-      | "funFacts"
-      | "learningPaths"
-      | "wipProjects"
-  ): Promise<void> {
+  async refreshCategory(categoryId: SchemaType): Promise<void> {
     if (!this.isInitialized) {
       throw new Error("Cache system not initialized");
     }
-    return cacheManager.refreshData(type);
+    return cacheManager.refreshCategory(categoryId);
   }
 
   /**

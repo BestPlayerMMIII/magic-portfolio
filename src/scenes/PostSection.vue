@@ -176,11 +176,8 @@ import WIPList from "@/components/sections/WIPList.vue";
 import CollaborationsList from "@/components/sections/CollaborationsList.vue";
 import LearningPathsList from "@/components/sections/LearningPathsList.vue";
 import FunFactsList from "@/components/sections/FunFactsList.vue";
-import {
-  getSectionDescription,
-  schemaIdToContentType,
-} from "@/config/sectionDescriptions";
-import type { ContentItem } from "@/types";
+import { getSectionById } from "@/config/sectionDescriptions";
+import type { ContentItem, SchemaType } from "@/types";
 import { useViewMode } from "@/stores/viewModeStore";
 
 // Use day mode from store
@@ -192,7 +189,7 @@ const loading = ref(true);
 const error = ref<string | null>(null);
 
 const sectionDescription = computed(() => {
-  return schemaId.value ? getSectionDescription(schemaId.value) : undefined;
+  return schemaId.value ? getSectionById(schemaId.value as any) : undefined;
 });
 
 const sectionTitle = computed(() => {
@@ -221,11 +218,10 @@ onMounted(async () => {
   schemaId.value = pathSchemaId;
 
   try {
-    // Convert schema ID to content type for API
-    const contentType = schemaIdToContentType(pathSchemaId);
-
-    // Fetch content
-    content.value = await apiWithCache.getByType(contentType);
+    // Fetch content using schemaId directly
+    content.value = await apiWithCache.getByCategory(
+      pathSchemaId as SchemaType
+    );
     loading.value = false;
   } catch (err) {
     console.error("Failed to load section content:", err);

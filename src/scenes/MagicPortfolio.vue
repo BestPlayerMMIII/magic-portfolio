@@ -306,7 +306,22 @@
           </p>
         </div>
 
-        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <!-- Loading state -->
+        <div
+          v-if="isLoadingSections"
+          class="flex items-center justify-center py-20"
+        >
+          <div
+            class="animate-spin rounded-full h-12 w-12 border-b-2"
+            :class="{
+              'border-gray-900': isDayMode,
+              'border-purple-400': !isDayMode,
+            }"
+          ></div>
+        </div>
+
+        <!-- Section cards -->
+        <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <a
             v-for="section in sections"
             :key="section.id"
@@ -357,14 +372,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import ContentModal from "../components/ContentModal.vue";
 import NavigationHeader from "../components/NavigationHeader.vue";
 import { Scene3DManager } from "../services/core";
 import { default as defaultTheme } from "../themes";
+import type { NullableSchemaType } from "@/types";
 import type { InteractiveObject, PreloaderState } from "../types/3d";
 import { useViewMode } from "@/stores/viewModeStore";
 import { getAllSectionDescriptions } from "@/config/sectionDescriptions";
+import { apiWithCache } from "@/services/apiWithCache";
 
 // Import UI interaction styles
 import "../styles/ui-interactions.css";
@@ -373,8 +390,17 @@ import AppHeader from "@/components/AppHeader.vue";
 // View mode state from store
 const { isMinimalistMode, isDayMode, toggleDayMode } = useViewMode();
 
-// Sections for minimalist mode
-const sections = getAllSectionDescriptions();
+// Sections data
+const allSections = getAllSectionDescriptions();
+const visibleSectionIds = ref<string[]>([]);
+const isLoadingSections = ref(true);
+
+// Filter sections based on visibility rules
+const sections = computed(() => {
+  return allSections.filter((section) =>
+    visibleSectionIds.value.includes(section.id)
+  );
+});
 
 // Reactive state
 const threeContainer = ref<HTMLDivElement>();
@@ -499,7 +525,7 @@ const closeModal = () => {
 };
 
 // Get object title for display
-const getObjectTitle = (contentType: string): string => {
+const getObjectTitle = (contentType: NullableSchemaType): string => {
   if (scene3DManager) {
     return scene3DManager.getObjectTitle(contentType);
   }
@@ -524,7 +550,22 @@ const toggleDayNightMode = () => {
   toggleDayMode();
 };
 
-onMounted(() => {
+onMounted(async () => {
+  // Load visible sections based on visibility rules
+  try {
+    const categories = await apiWithCache.getAllCategories();
+    visibleSectionIds.value = categories
+      .filter((cat) => cat.visible)
+      .map((cat) => cat.id);
+    console.log("Visible sections in 3D scene:", visibleSectionIds.value);
+  } catch (error) {
+    console.error("Failed to load visible sections:", error);
+    // Fallback: show all sections if fetching fails
+    visibleSectionIds.value = allSections.map((s) => s.id);
+  } finally {
+    isLoadingSections.value = false;
+  }
+
   initThreeJS();
 });
 

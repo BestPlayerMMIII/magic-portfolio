@@ -1,13 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import type {
-  BlogPost,
-  Collaboration,
-  FunFact,
-  LearningPath,
-  Project,
-  WorkInProgress,
-} from "../types";
+import type { SchemaType } from "@/types";
 
 // Cache entry with TTL
 interface CacheEntry<T> {
@@ -16,46 +9,26 @@ interface CacheEntry<T> {
   ttl: number; // Time to live in milliseconds
 }
 
-// Cache state for all portfolio data
-interface CacheState {
-  projects: CacheEntry<Project[]> | null;
-  blogPosts: CacheEntry<BlogPost[]> | null;
-  collaborations: CacheEntry<Collaboration[]> | null;
-  funFacts: CacheEntry<FunFact[]> | null;
-  learningPaths: CacheEntry<LearningPath[]> | null;
-  wipProjects: CacheEntry<WorkInProgress[]> | null;
-}
-
 export const useCacheStore = defineStore("cache", () => {
-  // Cache state
-  const cache = ref<CacheState>({
-    projects: null,
-    blogPosts: null,
-    collaborations: null,
-    funFacts: null,
-    learningPaths: null,
-    wipProjects: null,
-  });
+  // Generic cache state - supports any key
+  const cache = ref<Record<string, CacheEntry<any>>>({});
 
-  // Loading states
-  const isLoading = ref({
-    projects: false,
-    blogPosts: false,
-    collaborations: false,
-    funFacts: false,
-    learningPaths: false,
-    wipProjects: false,
-  });
+  // Generic loading states
+  const isLoading = ref<Record<string, boolean>>({});
 
-  // Cache configuration
-  const cacheTTL = {
-    projects: 30 * 60 * 1000, // 30 minutes
-    blogPosts: 15 * 60 * 1000, // 15 minutes
-    collaborations: 60 * 60 * 1000, // 1 hour
-    funFacts: 60 * 60 * 1000, // 1 hour
-    learningPaths: 60 * 60 * 1000, // 1 hour
-    wipProjects: 10 * 60 * 1000, // 10 minutes (more dynamic)
+  // Default cache TTL configuration by category
+  const defaultTTL: Record<SchemaType | "_categories", number> = {
+    project: 30 * 60 * 1000, // 30 minutes
+    "blog-post": 15 * 60 * 1000, // 15 minutes
+    collaboration: 60 * 60 * 1000, // 1 hour
+    "fun-fact": 60 * 60 * 1000, // 1 hour
+    "learning-path": 60 * 60 * 1000, // 1 hour
+    "work-in-progress": 10 * 60 * 1000, // 10 minutes (more dynamic)
+    _categories: 15 * 60 * 1000, // 15 minutes for categories list
   };
+
+  // Fallback TTL for unknown keys
+  const fallbackTTL = 30 * 60 * 1000; // 30 minutes
 
   // Check if cache entry is valid
   function isCacheValid<T>(entry: CacheEntry<T> | null): boolean {
@@ -66,21 +39,21 @@ export const useCacheStore = defineStore("cache", () => {
 
   // Set cache entry
   function setCacheEntry<T>(
-    key: keyof CacheState,
+    key: SchemaType | "_categories",
     data: T,
     customTtl?: number
   ): void {
-    const ttl = customTtl || cacheTTL[key];
+    const ttl = customTtl || defaultTTL[key] || fallbackTTL;
     cache.value[key] = {
       data,
       timestamp: Date.now(),
       ttl,
-    } as any;
+    };
   }
 
   // Get cache entry if valid
-  function getCacheEntry<T>(key: keyof CacheState): T | null {
-    const entry = cache.value[key] as CacheEntry<T> | null;
+  function getCacheEntry<T>(key: string): T | null {
+    const entry = cache.value[key] as CacheEntry<T> | undefined;
     if (!entry || !isCacheValid(entry)) {
       return null;
     }
@@ -88,15 +61,14 @@ export const useCacheStore = defineStore("cache", () => {
   }
 
   // Clear specific cache entry
-  function clearCacheEntry(key: keyof CacheState): void {
-    cache.value[key] = null;
+  function clearCacheEntry(key: string): void {
+    delete cache.value[key];
   }
 
   // Clear all cache
   function clearAllCache(): void {
-    Object.keys(cache.value).forEach((key) => {
-      cache.value[key as keyof CacheState] = null;
-    });
+    cache.value = {};
+    isLoading.value = {};
   }
 
   // Get cache statistics
@@ -111,7 +83,7 @@ export const useCacheStore = defineStore("cache", () => {
         const age = Date.now() - entry.timestamp;
         const expires = entry.ttl - age;
         stats[key] = {
-          cached: isCacheValid(entry as CacheEntry<any>),
+          cached: isCacheValid(entry),
           age: Math.round(age / 1000), // seconds
           expires: Math.round(Math.max(0, expires) / 1000), // seconds
         };
@@ -125,16 +97,11 @@ export const useCacheStore = defineStore("cache", () => {
 
   // Check if all critical data is cached
   const isFullyCached = computed(() => {
-    const criticalKeys: (keyof CacheState)[] = [
-      "projects",
-      "blogPosts",
-      "collaborations",
-      "funFacts",
-    ];
+    const criticalKeys = ["project", "blog-post", "collaboration", "fun-fact"];
 
     return criticalKeys.every((key) => {
       const entry = cache.value[key];
-      return entry && isCacheValid(entry as CacheEntry<any>);
+      return entry && isCacheValid(entry);
     });
   });
 

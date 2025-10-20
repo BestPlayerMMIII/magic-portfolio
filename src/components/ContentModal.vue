@@ -136,7 +136,7 @@
         <div v-else>
           <!-- Projects -->
           <ProjectsList
-            v-if="type === 'projects'"
+            v-if="type === 'project'"
             :items="content"
             :isDayMode="false"
             @item-click="openPost"
@@ -144,7 +144,7 @@
 
           <!-- Blog Posts -->
           <BlogPostsList
-            v-else-if="type === 'blog'"
+            v-else-if="type === 'blog-post'"
             :items="content"
             :isDayMode="false"
             @item-click="openPost"
@@ -152,28 +152,28 @@
 
           <!-- Work in Progress -->
           <WIPList
-            v-else-if="type === 'wip'"
+            v-else-if="type === 'work-in-progress'"
             :items="content"
             :isDayMode="false"
           />
 
           <!-- Collaborations -->
           <CollaborationsList
-            v-else-if="type === 'collaborations'"
+            v-else-if="type === 'collaboration'"
             :items="content"
             :isDayMode="false"
           />
 
           <!-- Learning Paths -->
           <LearningPathsList
-            v-else-if="type === 'learning'"
+            v-else-if="type === 'learning-path'"
             :items="content"
             :isDayMode="false"
           />
 
           <!-- Fun Facts -->
           <FunFactsList
-            v-else-if="type === 'fun-facts'"
+            v-else-if="type === 'fun-fact'"
             :items="content"
             :isDayMode="false"
           />
@@ -209,10 +209,9 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import type { ContentItem } from "@/types";
+import type { ContentItem, NullableSchemaType, SchemaType } from "@/types";
 import {
-  getSectionDescription,
-  contentTypeToSchemaId,
+  getSectionById,
   type SectionDescription,
 } from "@/config/sectionDescriptions";
 import ProjectsList from "./sections/ProjectsList.vue";
@@ -225,7 +224,7 @@ import FunFactsList from "./sections/FunFactsList.vue";
 interface Props {
   visible: boolean;
   content: ContentItem<any>[];
-  type: string;
+  type: NullableSchemaType;
   loading?: boolean;
 }
 
@@ -236,18 +235,17 @@ defineEmits<{
 }>();
 
 const sectionDescription = computed<SectionDescription | undefined>(() => {
-  const schemaId = contentTypeToSchemaId(props.type);
-  return getSectionDescription(schemaId);
+  return getSectionById(props.type as any);
 });
 
 const getTitle = () => {
-  const titles = {
-    projects: "Projects",
-    wip: "Work in Progress",
-    blog: "Blog Posts",
-    collaborations: "Collaborations",
-    learning: "Learning Paths",
-    "fun-facts": "Fun Facts",
+  const titles: Record<SchemaType, string> = {
+    project: "Projects",
+    "work-in-progress": "Work in Progress",
+    "blog-post": "Blog Posts",
+    collaboration: "Collaborations",
+    "learning-path": "Learning Paths",
+    "fun-fact": "Fun Facts",
   };
   return titles[props.type as keyof typeof titles] || props.type;
 };

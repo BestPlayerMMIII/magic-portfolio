@@ -51,7 +51,7 @@
 
         <!-- Center Section: Navigation Links (minimalist mode) -->
         <div
-          v-if="isMinimalistMode || !isHomePage"
+          v-if="(isMinimalistMode || !isHomePage) && !isLoadingSections"
           ref="navLinksRef"
           class="hidden md:flex items-center space-x-1"
         >
@@ -174,7 +174,11 @@
 
       <!-- Mobile Menu (for minimalist mode) -->
       <div
-        v-if="showMobileMenu && (isMinimalistMode || !isHomePage)"
+        v-if="
+          showMobileMenu &&
+          (isMinimalistMode || !isHomePage) &&
+          !isLoadingSections
+        "
         class="md:hidden border-t py-2"
         :class="{
           'border-gray-200': isDayMode,
@@ -244,6 +248,7 @@ import { ref, computed, onMounted } from "vue";
 import { useViewMode } from "@/stores/viewModeStore";
 import { getAllSectionDescriptions } from "@/config/sectionDescriptions";
 import { getSectionIcon } from "@/config/sectionIcons";
+import { apiWithCache } from "@/services/apiWithCache";
 
 defineProps<{
   isDayMode: boolean;
@@ -254,8 +259,17 @@ const { is3DMode, isMinimalistMode, toggle3DMode } = useViewMode();
 
 const showMobileMenu = ref(false);
 const currentPath = ref("");
+const visibleSections = ref<string[]>([]);
+const isLoadingSections = ref(true);
 
-const sections = getAllSectionDescriptions();
+const allSections = getAllSectionDescriptions();
+
+// Filter sections based on visibility rules
+const sections = computed(() => {
+  return allSections.filter((section) =>
+    visibleSections.value.includes(section.id)
+  );
+});
 
 const isHomePage = computed(() => {
   return currentPath.value === "/" || currentPath.value === "";
@@ -269,8 +283,30 @@ const toggleMobileMenu = () => {
   showMobileMenu.value = !showMobileMenu.value;
 };
 
-onMounted(() => {
+// Load visible sections based on visibility rules and item counts
+const loadVisibleSections = async () => {
+  try {
+    isLoadingSections.value = true;
+    const categories = await apiWithCache.getAllCategories();
+
+    // Filter to only visible categories
+    visibleSections.value = categories
+      .filter((cat) => cat.visible)
+      .map((cat) => cat.id);
+
+    console.log("Visible sections:", visibleSections.value);
+  } catch (error) {
+    console.error("Failed to load visible sections:", error);
+    // Fallback: show all sections if fetching fails
+    visibleSections.value = allSections.map((s) => s.id);
+  } finally {
+    isLoadingSections.value = false;
+  }
+};
+
+onMounted(async () => {
   currentPath.value = window.location.pathname;
+  await loadVisibleSections();
 });
 </script>
 

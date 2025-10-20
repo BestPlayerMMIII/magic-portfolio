@@ -12,6 +12,7 @@ export type SchemaType =
   | "collaboration"
   | "learning-path"
   | "fun-fact";
+export type NullableSchemaType = SchemaType | "";
 
 export interface ContentItem<T> {
   id: string;
