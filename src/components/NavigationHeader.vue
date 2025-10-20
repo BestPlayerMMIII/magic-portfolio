@@ -52,13 +52,33 @@
         <!-- Center Section: Navigation Links (minimalist mode) -->
         <div
           v-if="isMinimalistMode || !isHomePage"
+          ref="navLinksRef"
           class="hidden md:flex items-center space-x-1"
         >
+          <!-- About Link -->
+          <a
+            href="/about"
+            class="nav-link group px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium flex items-center overflow-hidden"
+            :class="{
+              'text-gray-700 hover:bg-gray-100 hover:text-purple-600':
+                isDayMode && !isSectionActive('about'),
+              'bg-purple-100 text-purple-700':
+                isDayMode && isSectionActive('about'),
+              'text-gray-300 hover:bg-white/10 hover:text-purple-300':
+                !isDayMode && !isSectionActive('about'),
+              'bg-purple-500/20 text-purple-300 border border-purple-500/50':
+                !isDayMode && isSectionActive('about'),
+            }"
+          >
+            <component :is="getSectionIcon('about', 'w-5 h-5 flex-shrink-0')" />
+            <span class="nav-text whitespace-nowrap">About</span>
+          </a>
+
           <a
             v-for="section in sections"
             :key="section.id"
             :href="`/post/${section.id}`"
-            class="px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium"
+            class="nav-link group px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium flex items-center overflow-hidden"
             :class="{
               'text-gray-700 hover:bg-gray-100 hover:text-purple-600':
                 isDayMode && !isSectionActive(section.id),
@@ -70,8 +90,10 @@
                 !isDayMode && isSectionActive(section.id),
             }"
           >
-            <span class="mr-1">{{ section.emoji }}</span>
-            {{ section.title }}
+            <component
+              :is="getSectionIcon(section.id, 'w-5 h-5 flex-shrink-0')"
+            />
+            <span class="nav-text whitespace-nowrap">{{ section.title }}</span>
           </a>
         </div>
 
@@ -159,11 +181,30 @@
           'border-purple-500/30': !isDayMode,
         }"
       >
+        <!-- About Link (Mobile) -->
+        <a
+          href="/about"
+          class="block px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium mb-1 flex items-center gap-2"
+          :class="{
+            'text-gray-700 hover:bg-gray-100':
+              isDayMode && !isSectionActive('about'),
+            'bg-purple-100 text-purple-700':
+              isDayMode && isSectionActive('about'),
+            'text-gray-300 hover:bg-white/10':
+              !isDayMode && !isSectionActive('about'),
+            'bg-purple-500/20 text-purple-300':
+              !isDayMode && isSectionActive('about'),
+          }"
+        >
+          <component :is="getSectionIcon('about', 'w-5 h-5')" />
+          <span>About</span>
+        </a>
+        <!-- Other Section Links -->
         <a
           v-for="section in sections"
           :key="section.id"
           :href="`/post/${section.id}`"
-          class="block px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium mb-1"
+          class="block px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium mb-1 flex items-center gap-2"
           :class="{
             'text-gray-700 hover:bg-gray-100':
               isDayMode && !isSectionActive(section.id),
@@ -175,8 +216,8 @@
               !isDayMode && isSectionActive(section.id),
           }"
         >
-          <span class="mr-2">{{ section.emoji }}</span>
-          {{ section.title }}
+          <component :is="getSectionIcon(section.id, 'w-5 h-5')" />
+          <span>{{ section.title }}</span>
         </a>
 
         <!-- View Mode Toggle for Mobile -->
@@ -202,6 +243,7 @@
 import { ref, computed, onMounted } from "vue";
 import { useViewMode } from "@/stores/viewModeStore";
 import { getAllSectionDescriptions } from "@/config/sectionDescriptions";
+import { getSectionIcon } from "@/config/sectionIcons";
 
 defineProps<{
   isDayMode: boolean;
@@ -246,5 +288,35 @@ onMounted(() => {
   50% {
     background-position: 100% 50%;
   }
+}
+
+/* Cool hover text reveal effect */
+.nav-link {
+  position: relative;
+}
+
+.nav-text {
+  max-width: 0;
+  opacity: 0;
+  margin-left: 0;
+  transform: translateX(-10px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-link:hover .nav-text {
+  max-width: 200px;
+  opacity: 1;
+  margin-left: 0.5rem;
+  transform: translateX(0);
+}
+
+/* Add smooth scale effect to icon on hover */
+.nav-link:hover :deep(svg) {
+  transform: scale(1.1) rotate(5deg);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.nav-link :deep(svg) {
+  transition: transform 0.3s ease;
 }
 </style>

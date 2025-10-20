@@ -115,7 +115,8 @@ export class DatabaseService {
     return this.gitcms
       .from(collection)
       .where("metadata.status", "==", "published")
-      .orderBy("createdAt", "desc");
+      .orderBy("metadata.priority", "desc")
+      .orderBy("metadata.publishedAt", "desc");
   }
 
   private normalizeAs<T>(item: OriginalContentItem): ContentItem<T> {

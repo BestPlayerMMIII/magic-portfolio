@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { MagicPortfolio, Post, PostSection } from "@/scenes";
+import { MagicPortfolio, Post, PostSection, About } from "@/scenes";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -8,6 +8,11 @@ const router = createRouter({
       path: "/",
       name: "home",
       component: MagicPortfolio,
+    },
+    {
+      path: "/about",
+      name: "about",
+      component: About,
     },
     {
       path: "/post/:schemaId",
