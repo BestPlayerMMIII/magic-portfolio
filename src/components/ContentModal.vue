@@ -46,8 +46,8 @@
         <p class="text-gray-300 text-sm leading-relaxed">
           {{ sectionDescription.longDescription }}
         </p>
-        <a
-          :href="`/post/${sectionDescription.id}`"
+        <router-link
+          :to="`/post/${sectionDescription.id}`"
           class="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105"
           :style="{
             background: `linear-gradient(90deg, ${sectionDescription.color.from}, ${sectionDescription.color.to})`,
@@ -67,7 +67,7 @@
               d="M14 5l7 7m0 0l-7 7m7-7H3"
             />
           </svg>
-        </a>
+        </router-link>
       </div>
 
       <!-- Content -->
@@ -209,6 +209,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import router from "@/router";
 import type { ContentItem, NullableSchemaType, SchemaType } from "@/types";
 import {
   getSectionById,
@@ -255,8 +256,8 @@ const getSectionEmoji = () => {
 };
 
 const openPost = <T>(post: ContentItem<T>) => {
-  // Navigate to the post in the same tab with all the context of the post (full .data)
-  window.location.href = `/post/${post.schemaId}/${post.id}`;
+  // Navigate to the post using Vue Router (SPA navigation)
+  router.push(`/post/${post.schemaId}/${post.id}`);
 };
 </script>
 

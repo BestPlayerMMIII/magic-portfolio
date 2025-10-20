@@ -165,7 +165,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
+import router from "@/router";
 import apiWithCache from "@/services/apiWithCache";
 import NavigationHeader from "@/components/NavigationHeader.vue";
 import BackButton from "@/components/BackButton.vue";
@@ -196,18 +197,8 @@ const sectionTitle = computed(() => {
   return sectionDescription.value?.title || "Content";
 });
 
-onMounted(async () => {
-  // Parse schemaId from URL pathname
-  const pathname = window.location.pathname;
-  const segments = pathname.split("/").filter(Boolean);
-
-  if (segments.length !== 2 || segments[0] !== "post") {
-    error.value = "Invalid section path";
-    loading.value = false;
-    return;
-  }
-
-  const pathSchemaId = segments[1];
+const loadSection = async () => {
+  const pathSchemaId = router.currentRoute.value.params.schemaId as string;
 
   if (!pathSchemaId) {
     error.value = "Invalid section path";
@@ -215,6 +206,8 @@ onMounted(async () => {
     return;
   }
 
+  loading.value = true;
+  error.value = null;
   schemaId.value = pathSchemaId;
 
   try {
@@ -228,6 +221,19 @@ onMounted(async () => {
     error.value = "Failed to load content. Please try again later.";
     loading.value = false;
   }
+};
+
+// Watch for route changes
+watch(
+  () => router.currentRoute.value.params.schemaId,
+  () => {
+    loadSection();
+  },
+  { immediate: false }
+);
+
+onMounted(async () => {
+  await loadSection();
 });
 
 const toggleDayNightMode = () => {
@@ -236,6 +242,6 @@ const toggleDayNightMode = () => {
 };
 
 const navigateToItem = (item: ContentItem<any>) => {
-  window.location.href = `/post/${item.schemaId}/${item.id}`;
+  router.push(`/post/${item.schemaId}/${item.id}`);
 };
 </script>

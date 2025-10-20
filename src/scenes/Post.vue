@@ -94,6 +94,25 @@
         <BackButton />
       </div>
       <!-- TODO other post types -->
+      <!-- Loading state -->
+      <div
+        v-else-if="isLoadingPost"
+        class="flex flex-col items-center justify-center h-full gap-4"
+      >
+        <div
+          class="animate-spin rounded-full h-16 w-16 border-b-2"
+          :class="{
+            'border-gray-900': isDayMode,
+            'border-purple-400': !isDayMode,
+          }"
+        ></div>
+        <p
+          class="text-lg"
+          :class="{ 'text-gray-600': isDayMode, 'text-gray-300': !isDayMode }"
+        >
+          Loading post...
+        </p>
+      </div>
       <!-- Post not found -->
       <div
         v-else
@@ -157,6 +176,7 @@ interface PostInfo {
 
 const info = ref<PostInfo | null>(null);
 const post = ref<ContentItem<any> | null>(null);
+const isLoadingPost = ref(true); // Add loading state
 
 // Media loading states
 const loadedImageUrl = ref<string | null>(null);
@@ -233,23 +253,31 @@ onMounted(async () => {
     const postId = segments[2];
     info.value = { schemaId, postId };
 
-    // Fetch post data (already has thumbnails from server)
-    post.value = await apiWithCache
-      .getByCategory(schemaId as SchemaType)
-      .then((items: ContentItem<any>[]) => {
-        return (
-          items.find((item: ContentItem<any>) => item.id === postId) || null
-        );
-      });
+    try {
+      // Fetch post data (already has thumbnails from server)
+      post.value = await apiWithCache
+        .getByCategory(schemaId as SchemaType)
+        .then((items: ContentItem<any>[]) => {
+          return (
+            items.find((item: ContentItem<any>) => item.id === postId) || null
+          );
+        });
 
-    // Progressive enhancement: load full resolution media
-    if (post.value) {
-      // Header image will be loaded by the watcher (runs automatically)
-      // Content media will be enhanced in background
-      enhanceContentMedia(schemaId, postId);
+      // Progressive enhancement: load full resolution media
+      if (post.value) {
+        // Header image will be loaded by the watcher (runs automatically)
+        // Content media will be enhanced in background
+        enhanceContentMedia(schemaId, postId);
+      }
+    } catch (error) {
+      console.error("Failed to load post:", error);
+      post.value = null;
+    } finally {
+      isLoadingPost.value = false;
     }
   } else {
     console.error("Invalid URL format. Expected /post/:schemaId/:postId");
+    isLoadingPost.value = false;
     window.location.href = "/";
   }
 });

@@ -322,10 +322,10 @@
 
         <!-- Section cards -->
         <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <a
+          <router-link
             v-for="section in sections"
             :key="section.id"
-            :href="`/post/${section.id}`"
+            :to="`/post/${section.id}`"
             class="group block p-6 rounded-xl transition-all duration-300 hover:scale-105 border"
             :class="{
               'bg-white/90 border-gray-300 hover:border-purple-400 hover:shadow-xl':
@@ -364,7 +364,7 @@
                 {{ section.description }}
               </p>
             </div>
-          </a>
+          </router-link>
         </div>
       </div>
     </div>

@@ -13,8 +13,8 @@
         <!-- Left Section: Logo + Title + View Mode -->
         <div class="flex items-center space-x-4">
           <!-- Logo/Home Button -->
-          <a
-            href="/"
+          <router-link
+            to="/"
             class="flex items-center space-x-2 group transition-all duration-300 hover:scale-105"
           >
             <div
@@ -31,7 +31,7 @@
                 </span>
               </h1>
             </div>
-          </a>
+          </router-link>
 
           <!-- View Mode Toggle (only on home page) -->
           <button
@@ -56,8 +56,8 @@
           class="hidden md:flex items-center space-x-1"
         >
           <!-- About Link -->
-          <a
-            href="/about"
+          <router-link
+            to="/about"
             class="nav-link group px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium flex items-center overflow-hidden"
             :class="{
               'text-gray-700 hover:bg-gray-100 hover:text-purple-600':
@@ -72,12 +72,12 @@
           >
             <component :is="getSectionIcon('about', 'w-5 h-5 flex-shrink-0')" />
             <span class="nav-text whitespace-nowrap">About</span>
-          </a>
+          </router-link>
 
-          <a
+          <router-link
             v-for="section in sections"
             :key="section.id"
-            :href="`/post/${section.id}`"
+            :to="`/post/${section.id}`"
             class="nav-link group px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium flex items-center overflow-hidden"
             :class="{
               'text-gray-700 hover:bg-gray-100 hover:text-purple-600':
@@ -94,7 +94,7 @@
               :is="getSectionIcon(section.id, 'w-5 h-5 flex-shrink-0')"
             />
             <span class="nav-text whitespace-nowrap">{{ section.title }}</span>
-          </a>
+          </router-link>
         </div>
 
         <!-- Right Section: Controls -->
@@ -186,8 +186,8 @@
         }"
       >
         <!-- About Link (Mobile) -->
-        <a
-          href="/about"
+        <router-link
+          to="/about"
           class="block px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium mb-1 flex items-center gap-2"
           :class="{
             'text-gray-700 hover:bg-gray-100':
@@ -202,12 +202,12 @@
         >
           <component :is="getSectionIcon('about', 'w-5 h-5')" />
           <span>About</span>
-        </a>
+        </router-link>
         <!-- Other Section Links -->
-        <a
+        <router-link
           v-for="section in sections"
           :key="section.id"
-          :href="`/post/${section.id}`"
+          :to="`/post/${section.id}`"
           class="block px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium mb-1 flex items-center gap-2"
           :class="{
             'text-gray-700 hover:bg-gray-100':
@@ -222,7 +222,7 @@
         >
           <component :is="getSectionIcon(section.id, 'w-5 h-5')" />
           <span>{{ section.title }}</span>
-        </a>
+        </router-link>
 
         <!-- View Mode Toggle for Mobile -->
         <button
