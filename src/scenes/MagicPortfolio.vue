@@ -96,13 +96,13 @@
         :toggleDayNightMode="toggleDayNightMode"
       />
 
-      <!-- Interactive Hints - Enhanced -->
+      <!-- Interactive Hints - Enhanced & Mobile Optimized -->
       <div
         v-if="hoveredObject"
-        class="ui-hints ui-hint absolute bottom-32 left-1/2 transform -translate-x-1/2 transition-all duration-300"
+        class="ui-hints ui-hint absolute left-1/2 transform -translate-x-1/2 transition-all duration-300 px-4 w-full max-w-md bottom-24 sm:bottom-32"
       >
         <div
-          class="hints-container relative group bg-gradient-to-r from-indigo-900/95 via-purple-900/95 to-pink-900/95 backdrop-blur-xl text-white px-10 py-5 rounded-3xl shadow-2xl border border-purple-400/60 overflow-hidden hover:scale-105 transition-all duration-500"
+          class="hints-container relative group bg-gradient-to-r from-indigo-900/95 via-purple-900/95 to-pink-900/95 backdrop-blur-xl text-white rounded-2xl sm:rounded-3xl shadow-2xl border border-purple-400/60 overflow-hidden hover:scale-105 transition-all duration-500 px-4 py-3 sm:px-10 sm:py-5"
         >
           <!-- Enhanced animated background with multiple layers -->
           <div
@@ -124,19 +124,21 @@
           ></div>
 
           <!-- Main content -->
-          <div class="relative z-10 flex items-center space-x-3">
-            <div class="text-2xl">✨</div>
-            <div class="text-center">
-              <p class="text-lg font-bold text-white mb-1 tracking-wide">
-                Click {{ hoveredObject?.type }} to explore
+          <div class="relative z-10 flex items-center space-x-2 sm:space-x-3">
+            <div class="text-xl sm:text-2xl flex-shrink-0">✨</div>
+            <div class="text-center flex-1 min-w-0">
+              <p
+                class="text-sm sm:text-lg font-bold text-white mb-0.5 sm:mb-1 tracking-wide truncate"
+              >
+                {{ isMobile ? "Tap" : "Click" }} {{ hoveredObject?.type }}
               </p>
               <p
-                class="text-sm font-medium text-purple-200 uppercase tracking-wider"
+                class="text-xs sm:text-sm font-medium text-purple-200 uppercase tracking-wider truncate"
               >
                 {{ getObjectTitle(hoveredObject?.contentType || "") }}
               </p>
             </div>
-            <div class="text-2xl">🔮</div>
+            <div class="text-xl sm:text-2xl flex-shrink-0">🔮</div>
           </div>
 
           <!-- Bottom glow effect -->
@@ -528,6 +530,11 @@ const showInteractiveObjectsPopup = ref(false);
 
 // Device detection
 const isMobile = ref(false); // include mobile, tablet, no desktop
+const handleResize = () => {
+  // Detect device type
+  const deviceType = getDeviceType();
+  isMobile.value = deviceType === "mobile" || deviceType === "tablet";
+};
 
 // Preloader state
 const preloaderState = ref<PreloaderState>({
@@ -670,9 +677,8 @@ const toggleDayNightMode = () => {
 };
 
 onMounted(async () => {
-  // Detect device type
-  const deviceType = getDeviceType();
-  isMobile.value = deviceType === "mobile" || deviceType === "tablet";
+  window.addEventListener("resize", handleResize);
+  handleResize();
 
   // Load visible sections based on visibility rules
   try {
@@ -693,6 +699,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  window.removeEventListener("resize", handleResize);
   if (scene3DManager) {
     scene3DManager.dispose();
     scene3DManager = null;

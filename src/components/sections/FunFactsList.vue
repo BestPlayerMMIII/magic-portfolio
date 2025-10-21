@@ -1,19 +1,21 @@
 <template>
-  <div class="fun-facts-list grid gap-4 md:grid-cols-2">
+  <div class="fun-facts-list grid gap-4 sm:grid-cols-1 md:grid-cols-2">
     <div
       v-for="fact in items"
       :key="fact.id"
-      class="fun-fact-card rounded-lg p-6 border transition-all duration-300 hover:scale-105"
+      class="fun-fact-card rounded-lg p-4 sm:p-6 border transition-all duration-300 hover:scale-105"
       :class="{
         'bg-white/90 border-gray-300 hover:shadow-lg': isDayMode,
         'bg-slate-800/70 border-rose-500/30 hover:shadow-2xl hover:shadow-rose-500/20':
           !isDayMode,
       }"
     >
-      <div class="flex items-start gap-3 mb-3">
-        <span class="text-3xl">{{ getCategoryEmoji(fact.data.category) }}</span>
+      <div class="flex items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
+        <span class="text-2xl sm:text-3xl flex-shrink-0">{{
+          getCategoryEmoji(fact.data.category)
+        }}</span>
         <span
-          class="px-3 py-1 rounded-full text-xs font-medium"
+          class="px-2 sm:px-3 py-1 rounded-full text-xs font-medium"
           :class="getCategoryClass(fact.data.category)"
         >
           {{ fact.data.category }}

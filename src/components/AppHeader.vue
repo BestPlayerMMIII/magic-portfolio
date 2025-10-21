@@ -81,9 +81,9 @@
                   d="M4 6h16M4 12h16M4 18h16"
                 />
               </svg>
-              <span class="text-cyan-300 font-medium text-sm"
-                >Classic View</span
-              >
+              <span v-if="!isMobile" class="text-cyan-300 font-medium text-sm">
+                Classic View
+              </span>
             </div>
 
             <!-- Enhanced ripple effect -->
@@ -174,7 +174,22 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from "vue";
+import { defineProps, ref, onMounted, onUnmounted } from "vue";
+import { isMobileDevice } from "@/utils/deviceDetection"; // adjust path if needed
+
+const isMobile = ref(false);
+function handleResize() {
+  isMobile.value = isMobileDevice();
+}
+
+onMounted(() => {
+  window.addEventListener("resize", handleResize);
+  handleResize();
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", handleResize);
+});
 
 defineProps<{
   isNavigationMinimized: boolean;

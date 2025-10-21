@@ -3,22 +3,24 @@
     <div
       v-for="item in items"
       :key="item.id"
-      class="wip-card rounded-lg p-6 border transition-all duration-300"
+      class="wip-card rounded-lg p-4 sm:p-6 border transition-all duration-300"
       :class="{
         'bg-white/90 border-gray-300 hover:shadow-lg': isDayMode,
         'bg-slate-800/70 border-amber-500/30 hover:shadow-2xl hover:shadow-amber-500/20':
           !isDayMode,
       }"
     >
-      <div class="flex justify-between items-start mb-3">
+      <div
+        class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3"
+      >
         <h3
-          class="text-xl font-semibold"
+          class="text-lg sm:text-xl font-semibold"
           :class="{ 'text-gray-900': isDayMode, 'text-white': !isDayMode }"
         >
           {{ item.data.title }}
         </h3>
         <span
-          class="px-3 py-1 rounded-full text-xs font-medium"
+          class="px-3 py-1 rounded-full text-xs font-medium self-start"
           :class="getPriorityClass(item.data.priority)"
         >
           {{ item.data.priority }}
@@ -26,7 +28,7 @@
       </div>
 
       <p
-        class="mb-4 text-sm"
+        class="mb-3 sm:mb-4 text-sm line-clamp-10"
         :class="{ 'text-gray-700': isDayMode, 'text-gray-300': !isDayMode }"
       >
         {{ item.data.description }}
@@ -54,11 +56,11 @@
         </div>
       </div>
 
-      <div class="flex flex-wrap gap-2">
+      <div class="flex flex-wrap gap-1.5 sm:gap-2">
         <span
           v-for="tech in item.data.technologies"
           :key="tech"
-          class="px-3 py-1 rounded-full text-xs font-medium transition-colors"
+          class="px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition-colors"
           :class="{
             'bg-amber-100 text-amber-700 hover:bg-amber-200': isDayMode,
             'bg-amber-500/20 text-amber-300 hover:bg-amber-500/30': !isDayMode,

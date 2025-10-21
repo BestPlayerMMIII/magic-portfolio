@@ -3,22 +3,24 @@
     <div
       v-for="path in items"
       :key="path.id"
-      class="learning-path-card rounded-lg p-6 border transition-all duration-300"
+      class="learning-path-card rounded-lg p-4 sm:p-6 border transition-all duration-300"
       :class="{
         'bg-white/90 border-gray-300 hover:shadow-lg': isDayMode,
         'bg-slate-800/70 border-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/20':
           !isDayMode,
       }"
     >
-      <div class="flex justify-between items-start mb-3">
+      <div
+        class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3"
+      >
         <h3
-          class="text-xl font-semibold"
+          class="text-lg sm:text-xl font-semibold"
           :class="{ 'text-gray-900': isDayMode, 'text-white': !isDayMode }"
         >
           {{ path.data.title }}
         </h3>
         <span
-          class="px-3 py-1 rounded-full text-xs font-medium"
+          class="px-3 py-1 rounded-full text-xs font-medium self-start"
           :class="getDifficultyClass(path.data.difficulty)"
         >
           {{ path.data.difficulty }}
@@ -26,7 +28,7 @@
       </div>
 
       <p
-        class="mb-2 text-sm"
+        class="mb-2 text-sm line-clamp-10"
         :class="{ 'text-gray-700': isDayMode, 'text-gray-300': !isDayMode }"
       >
         {{ path.data.description }}
