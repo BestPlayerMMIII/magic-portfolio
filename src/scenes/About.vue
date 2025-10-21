@@ -75,33 +75,19 @@
         class="relative mt-6 p-6 flex flex-col justify-center"
       >
         <!-- Special About Page Header -->
-        <div class="max-w-4xl mx-auto w-full mb-8 text-center">
-          <div
-            class="inline-block p-4 rounded-full mb-4 bg-gradient-to-br from-purple-500/20 via-pink-500/20 to-indigo-500/20"
-          >
-            <svg
-              class="w-12 h-12"
-              :class="{
-                'text-purple-600': isDayMode,
-                'text-purple-400': !isDayMode,
-              }"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+        <div
+          class="max-w-4xl mx-auto w-full mb-8 text-center animate-fade-in-up"
+        >
+          <h1 class="text-6xl md:text-7xl font-bold mb-6 tracking-tight">
+            <span
+              class="bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent animate-gradient-shift"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          </div>
-          <h1
-            class="text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent"
-          >
-            About Me
+              About Me
+            </span>
           </h1>
+          <div
+            class="w-24 h-1 mx-auto rounded-full bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 animate-fade-in-up"
+          ></div>
         </div>
 
         <!-- Render HTML content -->
@@ -174,6 +160,47 @@ const toggleDayNightMode = () => {
 </script>
 
 <style scoped>
+/* Animation keyframes */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Animation classes */
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out forwards;
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+/* Animation delays */
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+
 /* Additional prose styling for about page */
 :deep(.prose) {
   @apply text-base leading-relaxed;

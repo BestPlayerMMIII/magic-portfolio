@@ -183,18 +183,45 @@
               Controls
             </h3>
             <div class="space-y-3 text-sm">
-              <div class="flex items-center p-2 rounded-lg bg-white/5">
-                <span class="text-2xl mr-3">🖱️</span>
-                <span>Left click + drag to rotate</span>
-              </div>
-              <div class="flex items-center p-2 rounded-lg bg-white/5">
-                <span class="text-2xl mr-3">🔍</span>
-                <span>Click objects to explore</span>
-              </div>
-              <div class="flex items-center p-2 rounded-lg bg-white/5">
-                <span class="text-2xl mr-3">🔄</span>
-                <span>Mouse wheel to zoom</span>
-              </div>
+              <!-- Mobile/Tablet Controls -->
+              <template v-if="isMobile">
+                <div class="flex items-center p-2 rounded-lg bg-white/5">
+                  <span class="text-2xl mr-3">👆</span>
+                  <span>Tap and drag to rotate</span>
+                </div>
+                <div
+                  class="flex items-center p-2 rounded-lg bg-white/5 cursor-pointer hover:bg-white/10 transition-colors"
+                  @click="toggleInteractiveObjectsPopup"
+                  style="pointer-events: auto"
+                >
+                  <span class="text-2xl mr-3">🔍</span>
+                  <span>Tap objects to explore</span>
+                </div>
+                <div class="flex items-center p-2 rounded-lg bg-white/5">
+                  <span class="text-2xl mr-3">🤏</span>
+                  <span>Pinch to zoom</span>
+                </div>
+              </template>
+
+              <!-- Desktop Controls -->
+              <template v-else>
+                <div class="flex items-center p-2 rounded-lg bg-white/5">
+                  <span class="text-2xl mr-3">🖱️</span>
+                  <span>Left click + drag to rotate</span>
+                </div>
+                <div
+                  class="flex items-center p-2 rounded-lg bg-white/5 cursor-pointer hover:bg-white/10 transition-colors"
+                  @click="toggleInteractiveObjectsPopup"
+                  style="pointer-events: auto"
+                >
+                  <span class="text-2xl mr-3">🔍</span>
+                  <span>Click objects to explore</span>
+                </div>
+                <div class="flex items-center p-2 rounded-lg bg-white/5">
+                  <span class="text-2xl mr-3">🔄</span>
+                  <span>Mouse wheel to zoom</span>
+                </div>
+              </template>
             </div>
 
             <!-- Reset View Button -->
@@ -249,6 +276,84 @@
             ></path>
           </svg>
         </button>
+      </div>
+
+      <!-- Interactive Objects Info Popup -->
+      <div
+        v-if="showInteractiveObjectsPopup"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style="pointer-events: auto"
+        @click.self="toggleInteractiveObjectsPopup"
+      >
+        <!-- Backdrop -->
+        <div
+          class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          @click="toggleInteractiveObjectsPopup"
+        ></div>
+
+        <!-- Popup content -->
+        <div
+          class="relative bg-gradient-to-br from-indigo-900/95 to-purple-900/95 backdrop-blur-lg text-white p-6 rounded-2xl border border-indigo-400/50 shadow-2xl max-w-md w-full"
+          @click.stop
+        >
+          <!-- Close button -->
+          <button
+            @click="toggleInteractiveObjectsPopup"
+            class="absolute top-3 right-3 p-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors duration-200"
+          >
+            <svg
+              class="w-4 h-4 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+
+          <!-- Header -->
+          <h3
+            class="text-xl font-semibold mb-4 text-indigo-300 flex items-center"
+          >
+            Types of Interactive Objects
+          </h3>
+
+          <!-- Interactive objects list -->
+          <div class="space-y-3">
+            <div>
+              <ul class="space-y-3">
+                <li
+                  v-for="info in sections"
+                  :key="info.id"
+                  class="flex flex-col gap-2 p-3 rounded-lg bg-white/10 hover:bg-white/15 transition-colors"
+                >
+                  <div class="flex items-start">
+                    <span class="text-3xl mr-3 flex-shrink-0">
+                      {{ info.emoji }}
+                    </span>
+                    <div class="flex-1">
+                      <h5 class="font-semibold text-white mb-1">
+                        {{ info.title }}
+                      </h5>
+                      <p class="text-xs text-purple-200">
+                        Search for a
+                        <span class="font-semibold mx-1">{{
+                          mapSectionObject[info.id] || "special object"
+                        }}</span>
+                        in the scene!
+                      </p>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Magical ambient overlay -->
@@ -382,6 +487,8 @@ import type { InteractiveObject, PreloaderState } from "../types/3d";
 import { useViewMode } from "@/stores/viewModeStore";
 import { getAllSectionDescriptions } from "@/config/sectionDescriptions";
 import { apiWithCache } from "@/services/apiWithCache";
+import { getDeviceType } from "@/utils/deviceDetection";
+import { wizardLabObjects } from "@/themes/wizard-lab";
 
 // Import UI interaction styles
 import "../styles/ui-interactions.css";
@@ -393,6 +500,10 @@ const { isMinimalistMode, isDayMode, toggleDayMode } = useViewMode();
 // Sections data
 const allSections = getAllSectionDescriptions();
 const visibleSectionIds = ref<string[]>([]);
+const mapSectionObject = wizardLabObjects.reduce((map, obj) => {
+  map[obj.contentType] = obj.type;
+  return map;
+}, {} as Record<string, string>);
 const isLoadingSections = ref(true);
 
 // Filter sections based on visibility rules
@@ -413,6 +524,10 @@ const isLoadingContent = ref(false);
 // UI state management
 const showControlsPanel = ref(false);
 const isNavigationMinimized = ref(true);
+const showInteractiveObjectsPopup = ref(false);
+
+// Device detection
+const isMobile = ref(false); // include mobile, tablet, no desktop
 
 // Preloader state
 const preloaderState = ref<PreloaderState>({
@@ -537,6 +652,10 @@ const toggleControlsPanel = () => {
   showControlsPanel.value = !showControlsPanel.value;
 };
 
+const toggleInteractiveObjectsPopup = () => {
+  showInteractiveObjectsPopup.value = !showInteractiveObjectsPopup.value;
+};
+
 const toggleNavigation = () => {
   isNavigationMinimized.value = !isNavigationMinimized.value;
 };
@@ -551,6 +670,10 @@ const toggleDayNightMode = () => {
 };
 
 onMounted(async () => {
+  // Detect device type
+  const deviceType = getDeviceType();
+  isMobile.value = deviceType === "mobile" || deviceType === "tablet";
+
   // Load visible sections based on visibility rules
   try {
     const categories = await apiWithCache.getAllCategories();
