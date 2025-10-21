@@ -56,8 +56,8 @@
         >
           The about page could not be loaded.
         </p>
-        <a
-          href="/"
+        <router-link
+          to="/"
           class="px-6 py-2 rounded-lg font-medium transition-all duration-200"
           :class="{
             'bg-purple-600 text-white hover:bg-purple-700': isDayMode,
@@ -66,7 +66,7 @@
           }"
         >
           Go Home
-        </a>
+        </router-link>
       </div>
 
       <!-- Content -->

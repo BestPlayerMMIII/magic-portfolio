@@ -244,11 +244,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useViewMode } from "@/stores/viewModeStore";
 import { getAllSectionDescriptions } from "@/config/sectionDescriptions";
 import { getSectionIcon } from "@/config/sectionIcons";
 import { apiWithCache } from "@/services/apiWithCache";
+import router from "@/router";
 
 defineProps<{
   isDayMode: boolean;
@@ -305,9 +306,17 @@ const loadVisibleSections = async () => {
 };
 
 onMounted(async () => {
-  currentPath.value = window.location.pathname;
+  currentPath.value = router.currentRoute.value.fullPath;
   await loadVisibleSections();
 });
+
+// Watch for route changes to update the current path
+watch(
+  () => router.currentRoute.value.fullPath,
+  (newPath) => {
+    currentPath.value = newPath;
+  }
+);
 </script>
 
 <style scoped>

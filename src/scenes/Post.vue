@@ -165,6 +165,7 @@ import mediaService from "@/services/mediaService";
 import NavigationHeader from "@/components/NavigationHeader.vue";
 import BackButton from "@/components/BackButton.vue";
 import { useViewMode } from "@/stores/viewModeStore";
+import router from "@/router";
 
 // Use day mode from store
 const { isDayMode, toggleDayMode } = useViewMode();
@@ -245,7 +246,7 @@ const enhanceContentMedia = async (schemaId: string, postId: string) => {
 };
 
 onMounted(async () => {
-  const pathname = window.location.pathname;
+  const pathname = router.currentRoute.value.path;
   const segments = pathname.split("/").filter(Boolean);
 
   if (segments.length === 3 && segments[0] === "post") {
@@ -278,7 +279,7 @@ onMounted(async () => {
   } else {
     console.error("Invalid URL format. Expected /post/:schemaId/:postId");
     isLoadingPost.value = false;
-    window.location.href = "/";
+    router.push("/");
   }
 });
 

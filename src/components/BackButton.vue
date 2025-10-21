@@ -1,8 +1,8 @@
 <template>
   <!-- Back button -->
   <div class="flex justify-center mt-8">
-    <button
-      @click="goHome"
+    <router-link
+      to="/"
       class="px-6 py-2 rounded-full bg-gradient-to-r from-purple-500 via-pink-400 to-indigo-400 text-white font-bold shadow-lg hover:scale-105 hover:from-purple-600 hover:to-indigo-500 transition-all duration-200 flex items-center gap-2"
     >
       <svg
@@ -20,12 +20,10 @@
         />
       </svg>
       Back
-    </button>
+    </router-link>
   </div>
 </template>
 
 <script setup lang="ts">
-const goHome = () => {
-  window.location.href = "/";
-};
+// No script needed - using router-link for navigation
 </script>

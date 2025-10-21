@@ -55,8 +55,8 @@
         <!-- Right Section: Controls -->
         <div class="flex items-center space-x-4">
           <!-- Classic Navigation Button -->
-          <a
-            href="/post/project"
+          <router-link
+            to="/post/project"
             class="ui-button relative px-4 py-3 rounded-xl transition-all duration-300 overflow-hidden group shadow-lg hover:shadow-xl bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-400/50"
             style="pointer-events: auto; cursor: pointer"
             title="Switch to Classic Navigation"
@@ -90,7 +90,7 @@
             <div
               class="absolute inset-0 opacity-0 group-active:opacity-30 transition-opacity duration-150 rounded-xl bg-cyan-400"
             ></div>
-          </a>
+          </router-link>
 
           <!-- Day/Night Mode Toggle -->
           <button
