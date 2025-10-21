@@ -152,10 +152,7 @@ onMounted(async () => {
     error.value = null;
 
     // Fetch all blog posts and find the one with id "about"
-    const blogPosts = await apiWithCache.getByCategory<BlogPost>("blog-post");
-    const aboutPost = blogPosts.find(
-      (post: ContentItem<BlogPost>) => post.id === "about"
-    );
+    const aboutPost = await apiWithCache.getPostById<BlogPost>("html", "about");
 
     if (!aboutPost) {
       throw new Error("About page not found");
@@ -166,7 +163,7 @@ onMounted(async () => {
       aboutContent.value = aboutPost.data.content;
     } else {
       // Fetch full version if content is not available
-      const response = await fetch(`/api/posts/blog-post/about/full`);
+      const response = await fetch(`/api/posts/html/about/full`);
       if (!response.ok) throw new Error("Failed to fetch about page");
 
       const result = await response.json();

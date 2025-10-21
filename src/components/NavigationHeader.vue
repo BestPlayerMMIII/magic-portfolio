@@ -8,10 +8,13 @@
         !isDayMode,
     }"
   >
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <div class="flex items-center h-16 relative">
         <!-- Left Section: Logo + Title + View Mode -->
-        <div class="flex items-center space-x-4">
+        <div
+          class="flex items-center space-x-4 min-w-0"
+          style="min-width: 180px"
+        >
           <!-- Logo/Home Button -->
           <router-link
             to="/"
@@ -53,7 +56,8 @@
         <div
           v-if="(isMinimalistMode || !isHomePage) && !isLoadingSections"
           ref="navLinksRef"
-          class="hidden md:flex items-center space-x-1"
+          class="hidden md:flex items-center space-x-1 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2"
+          style="z-index: 1"
         >
           <!-- About Link -->
           <router-link
@@ -98,7 +102,10 @@
         </div>
 
         <!-- Right Section: Controls -->
-        <div class="flex items-center space-x-2">
+        <div
+          class="flex items-center space-x-2 min-w-0 justify-end ml-auto"
+          style="min-width: 180px"
+        >
           <!-- Mobile Menu Toggle (for minimalist mode on mobile) -->
           <button
             v-if="isMinimalistMode || !isHomePage"

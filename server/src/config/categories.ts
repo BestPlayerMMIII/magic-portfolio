@@ -7,7 +7,7 @@ export type VisibilityRule = "always" | "hide-if-empty" | "never";
 
 export interface CategoryConfig {
   // Identity
-  id: string; // schemaId in GitCMS - the single source of truth
+  id: string; // schemaId in GitCMS
 
   // Display
   title: string;
@@ -31,6 +31,26 @@ export interface CategoryConfig {
   hasMedia: boolean; // Whether to process media fields
   mediaFields?: string[]; // Specific fields to process
 }
+const getEmptyCategoryConfig = (
+  id: string,
+  override?: Partial<CategoryConfig>
+): CategoryConfig => ({
+  title: "",
+  emoji: "",
+  description: "",
+  longDescription: "",
+  color: {
+    from: "#000000",
+    to: "#000000",
+    accent: "#000000",
+  },
+  enabled: true,
+  visibility: "never",
+  order: 0,
+  hasMedia: false,
+  ...override,
+  id,
+});
 
 /**
  * Master category registry
@@ -145,6 +165,8 @@ export const categories: Record<string, CategoryConfig> = {
     order: 6,
     hasMedia: false,
   },
+
+  html: getEmptyCategoryConfig("html", { hasMedia: true }),
 };
 
 /**
