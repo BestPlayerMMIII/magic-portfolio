@@ -133,11 +133,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import apiWithCache from "@/services/apiWithCache";
 import NavigationHeader from "@/components/NavigationHeader.vue";
 import BackButton from "@/components/BackButton.vue";
 import { useViewMode } from "@/stores/viewModeStore";
-import type { ContentItem, BlogPost } from "@/types";
 
 // Use day mode from store
 const { isDayMode, toggleDayMode } = useViewMode();
@@ -151,27 +149,15 @@ onMounted(async () => {
     loading.value = true;
     error.value = null;
 
-    // Fetch all blog posts and find the one with id "about"
-    const aboutPost = await apiWithCache.getPostById<BlogPost>("html", "about");
+    // Fetch full version of about page
+    const response = await fetch(`/api/posts/html/about/full`);
+    if (!response.ok) throw new Error("Failed to fetch about page");
 
-    if (!aboutPost) {
-      throw new Error("About page not found");
-    }
-
-    // If we need full resolution, fetch it
-    if (aboutPost.data.content) {
-      aboutContent.value = aboutPost.data.content;
+    const result = await response.json();
+    if (result.success && result.data[0]) {
+      aboutContent.value = result.data[0].data.content;
     } else {
-      // Fetch full version if content is not available
-      const response = await fetch(`/api/posts/html/about/full`);
-      if (!response.ok) throw new Error("Failed to fetch about page");
-
-      const result = await response.json();
-      if (result.success && result.data[0]) {
-        aboutContent.value = result.data[0].data.content;
-      } else {
-        throw new Error("About page content is empty");
-      }
+      throw new Error("About page content is empty");
     }
   } catch (e) {
     console.error("Error loading about page:", e);

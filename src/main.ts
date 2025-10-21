@@ -5,39 +5,26 @@ import router from "./router";
 import apiWithCache from "./services/apiWithCache";
 import "./style.css";
 
-// Prevent multiple app initializations (for HMR)
-const APP_INITIALIZED_KEY = "__MAGIC_PORTFOLIO_APP_INITIALIZED__";
+console.log("🎨 Initializing Magic Portfolio app...");
 
-declare global {
-  var __MAGIC_PORTFOLIO_APP_INITIALIZED__: boolean | undefined;
-}
+// Create Vue app
+const app = createApp(App);
 
-if (!globalThis[APP_INITIALIZED_KEY]) {
-  console.log("🎨 Initializing Magic Portfolio app...");
+// Create Pinia store
+const pinia = createPinia();
 
-  // Create Vue app
-  const app = createApp(App);
+// Setup app plugins
+app.use(pinia);
+app.use(router);
 
-  // Create Pinia store
-  const pinia = createPinia();
+// Mount app
+app.mount("#app");
 
-  // Setup app plugins
-  app.use(pinia);
-  app.use(router);
-
-  // Initialize cache system after mounting
-  app.mount("#app");
-
-  // Initialize cache system with preloading
-  apiWithCache.initialize().catch((error) => {
-    console.error("❌ Failed to initialize cache system:", error);
-    // Continue without cache - app will work with direct API calls
-  });
-
-  globalThis[APP_INITIALIZED_KEY] = true;
-} else {
-  console.log("♻️ App already initialized, skipping (HMR)");
-}
+// Initialize cache system with preloading
+apiWithCache.initialize().catch((error) => {
+  console.error("❌ Failed to initialize cache system:", error);
+  // Continue without cache - app will work with direct API calls
+});
 
 // Optional: Add cache stats to window for debugging
 if (import.meta.env.DEV) {

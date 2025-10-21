@@ -21,11 +21,8 @@ export class CacheManager {
   private cacheStore: ReturnType<typeof useCacheStore> | null = null;
   private apiMethods: ApiMethods | null = null;
   private isInitialized = false;
-  public readonly instanceId: string;
 
   constructor(config: Partial<CacheManagerConfig> = {}) {
-    this.instanceId = Math.random().toString(36).substring(7);
-    console.log(`🆕 CacheManager instance created: ${this.instanceId}`);
     this.config = {
       enableBackgroundRefresh: true,
       refreshInterval: 30,
@@ -48,20 +45,15 @@ export class CacheManager {
 
   async initialize(categoriesToPreload: SchemaType[] = []): Promise<void> {
     // Prevent multiple initializations
-    console.log(
-      `🔍 Initialize called on instance ${this.instanceId} - isInitialized: ${this.isInitialized}`
-    );
     if (this.isInitialized) {
-      console.log(
-        `⚠️ Cache manager (${this.instanceId}) already initialized, skipping...`
-      );
+      console.log("⚠️ Cache manager already initialized, skipping...");
       return;
     }
 
     if (!this.apiMethods) {
       throw new Error("API methods not injected. Call setApiMethods() first.");
     }
-    console.log(`🚀 Initializing cache manager (${this.instanceId})...`);
+    console.log("🚀 Initializing cache manager...");
     try {
       if (categoriesToPreload.length > 0) {
         await this.preloadCategories(categoriesToPreload);
@@ -228,62 +220,6 @@ export class CacheManager {
   }
 }
 
-// Store singleton in globalThis to survive HMR (Hot Module Replacement)
-const CACHE_MANAGER_KEY = "__MAGIC_PORTFOLIO_CACHE_MANAGER__";
-
-declare global {
-  var __MAGIC_PORTFOLIO_CACHE_MANAGER__: CacheManager | undefined;
-}
-
-export const cacheManager = {
-  getInstance(): CacheManager {
-    if (!globalThis[CACHE_MANAGER_KEY]) {
-      console.log("🔥 Creating NEW CacheManager singleton instance");
-      globalThis[CACHE_MANAGER_KEY] = new CacheManager();
-    } else {
-      console.log(
-        `♻️ Reusing existing CacheManager instance: ${globalThis[CACHE_MANAGER_KEY].instanceId}`
-      );
-    }
-    return globalThis[CACHE_MANAGER_KEY];
-  },
-  setApiMethods(apiMethods: ApiMethods) {
-    return this.getInstance().setApiMethods(apiMethods);
-  },
-  async initialize(categoriesToPreload: SchemaType[] = []) {
-    return this.getInstance().initialize(categoriesToPreload);
-  },
-  async preloadCategories(categoryIds: SchemaType[]) {
-    return this.getInstance().preloadCategories(categoryIds);
-  },
-  async getByCategory<T = any>(categoryId: SchemaType, forceRefresh = false) {
-    return this.getInstance().getByCategory<T>(categoryId, forceRefresh);
-  },
-  async getAllCategories(forceRefresh = false) {
-    return this.getInstance().getAllCategories(forceRefresh);
-  },
-  startBackgroundRefresh(categoryIds: SchemaType[] = []) {
-    return this.getInstance().startBackgroundRefresh(categoryIds);
-  },
-  stopBackgroundRefresh() {
-    return this.getInstance().stopBackgroundRefresh();
-  },
-  clearCache() {
-    return this.getInstance().clearCache();
-  },
-  async refreshCategory(categoryId: SchemaType) {
-    return this.getInstance().refreshCategory(categoryId);
-  },
-  destroy() {
-    return this.getInstance().destroy();
-  },
-  getCacheHealth() {
-    return this.getInstance().getCacheHealth();
-  },
-  getCacheStats() {
-    return this.getInstance().getCacheStats();
-  },
-  get isFullyCached() {
-    return this.getInstance().isFullyCached;
-  },
-};
+// Standard ES6 module singleton
+// No need for globalThis since router-link ensures SPA navigation
+export const cacheManager = new CacheManager();

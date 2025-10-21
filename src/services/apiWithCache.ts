@@ -140,22 +140,9 @@ class ApiWithCacheService {
   }
 }
 
-// Store singleton in globalThis to survive HMR (Hot Module Replacement)
-const API_WITH_CACHE_KEY = "__MAGIC_PORTFOLIO_API_WITH_CACHE__";
-
-declare global {
-  var __MAGIC_PORTFOLIO_API_WITH_CACHE__: ApiWithCacheService | undefined;
-}
-
-function getApiWithCacheInstance(): ApiWithCacheService {
-  if (!globalThis[API_WITH_CACHE_KEY]) {
-    globalThis[API_WITH_CACHE_KEY] = new ApiWithCacheService();
-  }
-  return globalThis[API_WITH_CACHE_KEY];
-}
-
-// Export singleton instance
-export const apiWithCache = getApiWithCacheInstance();
+// Standard ES6 module singleton
+// No need for globalThis since router-link ensures SPA navigation
+export const apiWithCache = new ApiWithCacheService();
 
 // Export for Vue components to use
 export default apiWithCache;

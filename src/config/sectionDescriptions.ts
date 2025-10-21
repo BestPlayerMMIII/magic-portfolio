@@ -146,6 +146,14 @@ export function getAllSectionDescriptions(): SectionDescription[] {
 }
 
 /**
+ * Check if a section is enabled
+ */
+export function isSectionEnabled(id: SchemaType): boolean {
+  const section = getSectionById(id);
+  return section ? section.enabled : false;
+}
+
+/**
  * Check if a section should be visible based on content count
  */
 export function shouldShowSection(

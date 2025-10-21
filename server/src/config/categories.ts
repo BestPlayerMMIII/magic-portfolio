@@ -53,10 +53,20 @@ const getEmptyCategoryConfig = (
 });
 
 /**
+ * GitCMS schemas that are not standard categories,
+ * but from which we may still want to fetch contents
+ */
+const otherSchemas: Record<string, CategoryConfig> = {
+  html: getEmptyCategoryConfig("html", { hasMedia: true }),
+};
+
+/**
  * Master category registry
  * Add/remove/modify categories here
  */
 export const categories: Record<string, CategoryConfig> = {
+  ...otherSchemas,
+
   project: {
     id: "project",
     title: "Projects",
@@ -165,8 +175,6 @@ export const categories: Record<string, CategoryConfig> = {
     order: 6,
     hasMedia: false,
   },
-
-  html: getEmptyCategoryConfig("html", { hasMedia: true }),
 };
 
 /**
