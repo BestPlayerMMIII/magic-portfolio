@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "/api";
+import { API_BASE_URL } from "./api.js";
 
 /**
  * Client-side media service that communicates with the server-side media API

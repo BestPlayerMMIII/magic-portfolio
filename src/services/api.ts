@@ -1,6 +1,6 @@
 import type { ApiResponse, ContentItem } from "../types";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "/api";
+export const API_BASE_URL = (import.meta.env.VITE_API_URL || "") + "/api";
 
 class ApiService {
   private async fetchApi<T>(endpoint: string): Promise<T> {

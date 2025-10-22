@@ -65,24 +65,13 @@ npm install
 
 ### 2. Environment Setup
 
-Copy the environment template and configure your credentials:
+For both src/ and server/src, copy the environment template and configure your credentials:
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` with your GitCMS credentials:
-
-```env
-# GitCMS Configuration
-GITCMS_REPOSITORY=username/repo
-GITCMS_BRANCH=main
-GITCMS_TOKEN=your_github_token_here
-
-# Server Configuration
-PORT=3001
-CORS_ORIGIN=http://localhost:5173
-```
+Edit `.env` with correct GitCMS credentials
 
 ### 3. Content Setup with GitCMS
 
