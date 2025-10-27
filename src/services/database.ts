@@ -1,32 +1,20 @@
-import {
-  Project,
-  BlogPost,
-  WorkInProgress,
-  Collaboration,
-  LearningPath,
-  FunFact,
-  ContentItem,
-} from "../types/index.js";
-import {
+import type {
   SchemaQuery,
-  GitCMS,
-  ContentItem as OriginalContentItem,
+  ContentItem as GitCMSContentItem,
 } from "@git-cms/client";
+import { gitcms } from "./gitcms";
+import type { ContentItem } from "@/types";
 
-import dotenv from "dotenv";
-dotenv.config();
-
+/**
+ * Database Service for Frontend
+ *
+ * Provides access to GitCMS content directly from the frontend
+ * using public transport mode (no backend needed).
+ *
+ * This service mirrors the backend DatabaseService but runs entirely
+ * in the browser, accessing public GitHub repositories directly.
+ */
 export class DatabaseService {
-  gitcms = new GitCMS({
-    repository: process.env.GITCMS_REPOSITORY || "username/repo",
-    branch: process.env.GITCMS_BRANCH || "main",
-    token: process.env.GITCMS_TOKEN || "",
-  });
-
-  // ============================================
-  // GENERIC METHODS (NEW - USE THESE)
-  // ============================================
-
   /**
    * Get all items by schemaId (generic method)
    */
@@ -72,22 +60,22 @@ export class DatabaseService {
     return counts;
   }
 
-  // private helpers
+  // Private helpers
 
   private getStandardAllQuery(collection: string): SchemaQuery {
-    return this.gitcms
+    return gitcms
       .from(collection)
       .where("metadata.status", "==", "published")
       .orderBy("metadata.priority", "desc")
       .orderBy("metadata.publishedAt", "desc");
   }
 
-  private normalizeAs<T>(item: OriginalContentItem): ContentItem<T> {
+  private normalizeAs<T>(item: GitCMSContentItem): ContentItem<T> {
     return {
       id: item.id,
-      schemaId: item.schemaId,
+      schemaId: item.schemaId as any,
       data: item.data as T,
-      metadata: item.metadata,
+      metadata: item.metadata as any,
     };
   }
 
@@ -123,4 +111,12 @@ export class DatabaseService {
   }
 }
 
+/**
+ * Singleton instance of the database service
+ */
 export const databaseService = new DatabaseService();
+
+/**
+ * Default export for convenience
+ */
+export default databaseService;

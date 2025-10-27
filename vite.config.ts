@@ -8,7 +8,6 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd());
 
   // access env variables with defaults
-  const API_URL = `${env.VITE_API_URL ?? "http://localhost:3001"}`;
   const PORT = Number(env.VITE_PORT) || 5173;
 
   return {
@@ -21,13 +20,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port: PORT,
       host: true,
-      proxy: {
-        "/api": {
-          target: API_URL,
-          changeOrigin: true,
-          secure: false,
-        },
-      },
+      // No proxy needed - direct GitCMS access!
     },
     build: {
       outDir: "dist",

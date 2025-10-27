@@ -72,6 +72,7 @@ import { ref, watch } from "vue";
 import type { ContentItem } from "@/types";
 import mediaService from "@/services/mediaService";
 import BackButton from "@/components/BackButton.vue";
+import { apiService } from "@/services/api";
 
 interface Props {
   post: ContentItem<any>;
@@ -111,14 +112,12 @@ const fetchFullImage = async (imageField: any) => {
 const enhanceContentMedia = async (schemaId: string, postId: string) => {
   contentLoading.value = true;
   try {
-    // Fetch the FULL version from the server (which processes original gitcms-media tags)
-    const response = await fetch(`/api/posts/${schemaId}/${postId}/full`);
-    if (!response.ok) throw new Error("Failed to fetch full resolution post");
+    // Fetch the FULL version using the API service
+    const fullPost = await apiService.getPostByIdFull(schemaId, postId);
 
-    const result = await response.json();
-    if (result.success && result.data[0]) {
+    if (fullPost?.data?.content) {
       // Update only the content with full resolution
-      enhancedContent.value = result.data[0].data.content;
+      enhancedContent.value = fullPost.data.content;
     }
   } catch (e) {
     console.error("Failed to enhance content media:", e);
