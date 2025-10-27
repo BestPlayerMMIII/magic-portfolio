@@ -1,29 +1,24 @@
-import type { ApiResponse, ContentItem } from "../types";
+import type { ContentItem } from "../types";
+import { databaseService } from "./database";
+import { mediaService } from "./mediaService";
+import {
+  getCategoryById,
+  getEnabledCategories,
+  shouldShowCategory,
+} from "@/config/categories";
 
-export const API_BASE_URL = (import.meta.env.VITE_API_URL || "") + "/api";
-
+/**
+ * API Service for Frontend
+ *
+ * Now directly uses GitCMS client in public transport mode
+ * instead of making HTTP requests to a backend API.
+ *
+ * This provides:
+ * - Direct access to public GitHub repositories
+ * - No backend server required
+ * - Same interface as before for backward compatibility
+ */
 class ApiService {
-  private async fetchApi<T>(endpoint: string): Promise<T> {
-    try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data: ApiResponse<T> = await response.json();
-
-      if (!data.success) {
-        throw new Error(data.message || "API request failed");
-      }
-
-      return data.data;
-    } catch (error) {
-      console.error(`API Error for ${endpoint}:`, error);
-      throw error;
-    }
-  }
-
   // ============================================
   // GENERIC METHODS (NEW - PREFERRED)
   // ============================================
@@ -35,7 +30,28 @@ class ApiService {
   async getPostsByCategory<T = any>(
     category: string
   ): Promise<ContentItem<T>[]> {
-    return this.fetchApi<ContentItem<T>[]>(`/posts/${category}`);
+    const categoryConfig = getCategoryById(category);
+
+    if (!categoryConfig) {
+      throw new Error(`Category '${category}' not found`);
+    }
+
+    if (!categoryConfig.enabled) {
+      throw new Error(`Category '${category}' is disabled`);
+    }
+
+    // Fetch posts
+    const posts = await databaseService.getBySchemaId<T>(category);
+
+    // Process media if needed
+    let processedPosts = posts;
+    if (categoryConfig.hasMedia) {
+      processedPosts = posts.map((post) =>
+        mediaService.processContentFast(post)
+      );
+    }
+
+    return processedPosts;
   }
 
   /**
@@ -47,10 +63,32 @@ class ApiService {
     category: string,
     id: string
   ): Promise<ContentItem<T>> {
-    const result = await this.fetchApi<ContentItem<T>[]>(
-      `/posts/${category}/${id}`
-    );
-    return result[0];
+    const categoryConfig = getCategoryById(category);
+
+    if (!categoryConfig) {
+      throw new Error(`Category '${category}' not found`);
+    }
+
+    if (!categoryConfig.enabled) {
+      throw new Error(`Category '${category}' is disabled`);
+    }
+
+    // Fetch post
+    const post = await databaseService.getByIdAndSchemaId<T>(category, id);
+
+    if (!post) {
+      throw new Error(
+        `Post with id '${id}' not found in category '${category}'`
+      );
+    }
+
+    // Process media if needed (fast version)
+    let processedPost = post;
+    if (categoryConfig.hasMedia) {
+      processedPost = mediaService.processContentFast(post);
+    }
+
+    return processedPost;
   }
 
   /**
@@ -62,10 +100,32 @@ class ApiService {
     category: string,
     id: string
   ): Promise<ContentItem<T>> {
-    const result = await this.fetchApi<ContentItem<T>[]>(
-      `/posts/${category}/${id}/full`
-    );
-    return result[0];
+    const categoryConfig = getCategoryById(category);
+
+    if (!categoryConfig) {
+      throw new Error(`Category '${category}' not found`);
+    }
+
+    if (!categoryConfig.enabled) {
+      throw new Error(`Category '${category}' is disabled`);
+    }
+
+    // Fetch post
+    const post = await databaseService.getByIdAndSchemaId<T>(category, id);
+
+    if (!post) {
+      throw new Error(
+        `Post with id '${id}' not found in category '${category}'`
+      );
+    }
+
+    // Process media if needed (full resolution)
+    let processedPost = post;
+    if (categoryConfig.hasMedia) {
+      processedPost = await mediaService.processContentFull(post);
+    }
+
+    return processedPost;
   }
 
   /**
@@ -79,12 +139,33 @@ class ApiService {
       visible: boolean;
     }>
   > {
-    return this.fetchApi<any>("/posts");
+    const enabledCategories = getEnabledCategories();
+
+    const categoriesWithCounts = await Promise.all(
+      enabledCategories.map(async (category) => {
+        const items = await databaseService.getBySchemaId(category.id);
+        const shouldShow = shouldShowCategory(category, items.length);
+
+        return {
+          ...category,
+          count: items.length,
+          visible: shouldShow,
+        };
+      })
+    );
+
+    return categoriesWithCounts;
   }
 
-  // Health check
+  /**
+   * Health check (for backward compatibility)
+   * @deprecated No longer needed without backend
+   */
   async healthCheck(): Promise<{ status: string; timestamp: string }> {
-    return this.fetchApi<{ status: string; timestamp: string }>("/health");
+    return {
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+    };
   }
 }
 
