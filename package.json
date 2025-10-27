@@ -22,7 +22,7 @@
     "typescript",
     "node"
   ],
-  "author": "Your Name",
+  "author": "Manuel Maiuolo - https://bestplayer.dev",
   "license": "MIT",
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.18",
@@ -37,7 +37,6 @@
     "vite": "^7.1.5"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.38.0",
     "@types/three": "^0.157.0",
     "dotenv": "^17.2.2",
     "pinia": "^3.0.3",

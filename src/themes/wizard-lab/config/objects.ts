@@ -7,7 +7,7 @@ import type { ObjectConfig } from "../../../types/3d";
 export const wizardLabObjects: ObjectConfig[] = [
   {
     type: "crystal",
-    contentType: "projects",
+    contentType: "project",
     modelPath: "/assets/models/crystal.glb",
     position: [0, 3, -1], // [x, y, z] - left/right, up/down, forward/back
     rotation: [0, 0, 0], // [x, y, z] rotation in radians (0 to 2*PI)
@@ -34,7 +34,7 @@ export const wizardLabObjects: ObjectConfig[] = [
   },
   {
     type: "cauldron",
-    contentType: "wip",
+    contentType: "work-in-progress",
     modelPath: "/assets/models/cauldron.glb",
     position: [7, -0.25, 7],
     rotation: [0, Math.PI / 4, 0], // 45 degree Y rotation
@@ -61,7 +61,7 @@ export const wizardLabObjects: ObjectConfig[] = [
   },
   {
     type: "book",
-    contentType: "blog",
+    contentType: "blog-post",
     modelPath: "/assets/models/book.glb",
     position: [-6, 5, 8],
     rotation: [0, Math.PI / 3, -Math.PI / 10],
@@ -88,7 +88,7 @@ export const wizardLabObjects: ObjectConfig[] = [
   },
   {
     type: "circle",
-    contentType: "collaborations",
+    contentType: "collaboration",
     modelPath: "/assets/models/magic-circle.glb",
     position: [6, -0.2, -6],
     rotation: [0, 0, 0], // 90 degree X rotation (horizontal)
@@ -115,7 +115,7 @@ export const wizardLabObjects: ObjectConfig[] = [
   },
   {
     type: "library",
-    contentType: "learning",
+    contentType: "learning-path",
     modelPath: "/assets/models/library.glb",
     position: [-8, -0.3, -6],
     rotation: [0, 0, 0], // 22.5 degree Y rotation
@@ -142,7 +142,7 @@ export const wizardLabObjects: ObjectConfig[] = [
   },
   {
     type: "owl",
-    contentType: "fun-facts",
+    contentType: "fun-fact",
     modelPath: "/assets/models/owl.glb",
     position: [5, 7, -9],
     rotation: [0, Math.PI / 2, 0],

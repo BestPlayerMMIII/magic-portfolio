@@ -2,11 +2,12 @@
 
 import * as THREE from "three";
 import type { DeepPartial, Vector3 } from "../global";
+import type { NullableSchemaType, SchemaType } from "@/types";
 
 // Object and animation configuration types
 export interface ObjectConfig {
   type: string;
-  contentType: string; // empty string "" means non-interactive decorative object
+  contentType: NullableSchemaType; // empty string "" means non-interactive decorative object
   modelPath?: string; // optional for text objects
   position: [number, number, number];
   rotation: [number, number, number]; // in radians
@@ -303,14 +304,7 @@ export interface InteractiveObject {
   position: [number, number, number];
   rotation: [number, number, number];
   scale: [number, number, number];
-  contentType:
-    | "projects"
-    | "wip"
-    | "blog"
-    | "collaborations"
-    | "learning"
-    | "fun-facts"
-    | "";
+  contentType: SchemaType;
   isHovered: boolean;
   isClicked: boolean;
 }

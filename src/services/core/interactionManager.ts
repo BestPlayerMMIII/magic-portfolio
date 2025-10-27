@@ -142,26 +142,33 @@ export class InteractionManager {
       const intersected = intersects[0].object as THREE.Mesh;
       const interactiveObjects = this._objectManager.getInteractiveObjects();
 
-      // Get the parent index from userData
-      const index =
-        intersected.userData.parentIndex !== undefined
-          ? intersected.userData.parentIndex
-          : intersected.userData.index;
+      // Get the object ID from userData (more reliable than index)
+      const objectId =
+        intersected.userData.parentId || intersected.userData.objectId;
 
-      if (index !== undefined && interactiveObjects[index]) {
-        const hoveredObject = interactiveObjects[index];
-        currentHoveredObjectId = hoveredObject.id;
+      // Check if this object is interactive
+      const isInteractive = intersected.userData.isInteractive !== false;
 
-        // Update hover state
-        this._objectManager.updateHoverStates(currentHoveredObjectId);
-        this._currentHoveredObject = hoveredObject;
+      if (objectId && isInteractive) {
+        // Find the interactive object by ID
+        const hoveredObject = interactiveObjects.find(
+          (obj) => obj.id === objectId
+        );
 
-        // Change cursor
-        document.body.style.cursor = "pointer";
+        if (hoveredObject) {
+          currentHoveredObjectId = hoveredObject.id;
 
-        // Trigger hover callback
-        if (this._onObjectHover) {
-          this._onObjectHover(hoveredObject);
+          // Update hover state
+          this._objectManager.updateHoverStates(currentHoveredObjectId);
+          this._currentHoveredObject = hoveredObject;
+
+          // Change cursor
+          document.body.style.cursor = "pointer";
+
+          // Trigger hover callback
+          if (this._onObjectHover) {
+            this._onObjectHover(hoveredObject);
+          }
         }
       }
     } else {
@@ -222,36 +229,48 @@ export class InteractionManager {
       if (mouseUpObject === this._mouseDownObject) {
         const interactiveObjects = this._objectManager.getInteractiveObjects();
 
-        // Get the parent index from userData
-        const index =
-          mouseUpObject.userData.parentIndex !== undefined
-            ? mouseUpObject.userData.parentIndex
-            : mouseUpObject.userData.index;
+        // Get the object ID from userData (more reliable than index)
+        const objectId =
+          mouseUpObject.userData.parentId || mouseUpObject.userData.objectId;
 
-        if (index !== undefined && interactiveObjects[index]) {
-          const clickedObject = interactiveObjects[index];
+        // Check if this object is interactive
+        const isInteractive = mouseUpObject.userData.isInteractive !== false;
 
-          console.log("Click detected! Object:", clickedObject.type);
+        if (objectId && isInteractive) {
+          // Find the interactive object by ID
+          const clickedObject = interactiveObjects.find(
+            (obj) => obj.id === objectId
+          );
 
-          // Create interaction event
-          const interactionEvent: InteractionEvent = {
-            type: "click",
-            object: clickedObject,
-            raycastResult: {
-              object: mouseUpObject,
-              point: intersects[0].point,
-              distance: intersects[0].distance,
-              face: intersects[0].face || undefined,
-              faceIndex: intersects[0].faceIndex,
-              uv: intersects[0].uv,
-            },
-            originalEvent: event,
-          };
+          if (clickedObject) {
+            console.log("Click detected! Object:", clickedObject.type);
 
-          // Trigger click callback
-          if (this._onObjectClick) {
-            this._onObjectClick(clickedObject, interactionEvent);
+            // Create interaction event
+            const interactionEvent: InteractionEvent = {
+              type: "click",
+              object: clickedObject,
+              raycastResult: {
+                object: mouseUpObject,
+                point: intersects[0].point,
+                distance: intersects[0].distance,
+                face: intersects[0].face || undefined,
+                faceIndex: intersects[0].faceIndex,
+                uv: intersects[0].uv,
+              },
+              originalEvent: event,
+            };
+
+            // Trigger click callback
+            if (this._onObjectClick) {
+              this._onObjectClick(clickedObject, interactionEvent);
+            }
+          } else {
+            console.log(
+              "Click canceled - object not found in interactive list"
+            );
           }
+        } else {
+          console.log("Click canceled - object is not interactive");
         }
       } else {
         console.log("Click canceled - different objects on down/up");

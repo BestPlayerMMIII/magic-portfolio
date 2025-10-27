@@ -54,6 +54,44 @@
 
         <!-- Right Section: Controls -->
         <div class="flex items-center space-x-4">
+          <!-- Classic Navigation Button -->
+          <router-link
+            to="/about"
+            class="ui-button relative px-4 py-3 rounded-xl transition-all duration-300 overflow-hidden group shadow-lg hover:shadow-xl bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-400/50"
+            style="pointer-events: auto; cursor: pointer"
+            title="Switch to Classic Navigation"
+          >
+            <!-- Enhanced background animation -->
+            <div
+              class="absolute inset-0 transition-all duration-500 bg-gradient-to-r from-cyan-600/10 to-blue-600/10"
+            ></div>
+
+            <!-- Content -->
+            <div class="relative z-10 flex items-center gap-2">
+              <svg
+                class="w-5 h-5 text-cyan-400 transition-all duration-300 transform group-hover:scale-110"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+              <span v-if="!isMobile" class="text-cyan-300 font-medium text-sm">
+                Classic View
+              </span>
+            </div>
+
+            <!-- Enhanced ripple effect -->
+            <div
+              class="absolute inset-0 opacity-0 group-active:opacity-30 transition-opacity duration-150 rounded-xl bg-cyan-400"
+            ></div>
+          </router-link>
+
           <!-- Day/Night Mode Toggle -->
           <button
             @click="toggleDayNightMode"
@@ -136,7 +174,22 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from "vue";
+import { defineProps, ref, onMounted, onUnmounted } from "vue";
+import { isMobileDevice } from "@/utils/deviceDetection"; // adjust path if needed
+
+const isMobile = ref(false);
+function handleResize() {
+  isMobile.value = isMobileDevice();
+}
+
+onMounted(() => {
+  window.addEventListener("resize", handleResize);
+  handleResize();
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", handleResize);
+});
 
 defineProps<{
   isNavigationMinimized: boolean;

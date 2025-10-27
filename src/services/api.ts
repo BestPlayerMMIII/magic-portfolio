@@ -1,15 +1,6 @@
-import type {
-  Project,
-  BlogPost,
-  WorkInProgress,
-  Collaboration,
-  LearningPath,
-  FunFact,
-  ApiResponse,
-  ContentItem,
-} from "../types";
+import type { ApiResponse, ContentItem } from "../types";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "/api";
+export const API_BASE_URL = (import.meta.env.VITE_API_URL || "") + "/api";
 
 class ApiService {
   private async fetchApi<T>(endpoint: string): Promise<T> {
@@ -33,42 +24,62 @@ class ApiService {
     }
   }
 
-  // Projects
-  async getProjects(): Promise<ContentItem<Project>[]> {
-    return this.fetchApi<ContentItem<Project>[]>("/projects");
+  // ============================================
+  // GENERIC METHODS (NEW - PREFERRED)
+  // ============================================
+
+  /**
+   * Get all posts of a specific category
+   * @param category - schemaId or apiPath (e.g., "project" or "projects")
+   */
+  async getPostsByCategory<T = any>(
+    category: string
+  ): Promise<ContentItem<T>[]> {
+    return this.fetchApi<ContentItem<T>[]>(`/posts/${category}`);
   }
 
-  async getProjectById(id: string): Promise<ContentItem<Project>> {
-    return this.fetchApi<ContentItem<Project>>(`/projects/${id}`);
+  /**
+   * Get a single post by category and id
+   * @param category - schemaId or apiPath
+   * @param id - post id
+   */
+  async getPostById<T = any>(
+    category: string,
+    id: string
+  ): Promise<ContentItem<T>> {
+    const result = await this.fetchApi<ContentItem<T>[]>(
+      `/posts/${category}/${id}`
+    );
+    return result[0];
   }
 
-  // Blog Posts
-  async getBlogPosts(): Promise<ContentItem<BlogPost>[]> {
-    return this.fetchApi<ContentItem<BlogPost>[]>("/blog");
+  /**
+   * Get a single post with full resolution media
+   * @param category - schemaId or apiPath
+   * @param id - post id
+   */
+  async getPostByIdFull<T = any>(
+    category: string,
+    id: string
+  ): Promise<ContentItem<T>> {
+    const result = await this.fetchApi<ContentItem<T>[]>(
+      `/posts/${category}/${id}/full`
+    );
+    return result[0];
   }
 
-  async getBlogPostById(id: string): Promise<ContentItem<BlogPost>> {
-    return this.fetchApi<ContentItem<BlogPost>>(`/blog/${id}`);
-  }
-
-  // Work in Progress
-  async getWIPItems(): Promise<ContentItem<WorkInProgress>[]> {
-    return this.fetchApi<ContentItem<WorkInProgress>[]>("/wip");
-  }
-
-  // Collaborations
-  async getCollaborations(): Promise<ContentItem<Collaboration>[]> {
-    return this.fetchApi<ContentItem<Collaboration>[]>("/collaborations");
-  }
-
-  // Learning Paths
-  async getLearningPaths(): Promise<ContentItem<LearningPath>[]> {
-    return this.fetchApi<ContentItem<LearningPath>[]>("/learning-path");
-  }
-
-  // Fun Facts
-  async getFunFacts(): Promise<ContentItem<FunFact>[]> {
-    return this.fetchApi<ContentItem<FunFact>[]>("/fun-facts");
+  /**
+   * Get all categories with metadata
+   */
+  async getAllCategories(): Promise<
+    Array<{
+      id: string;
+      title: string;
+      count: number;
+      visible: boolean;
+    }>
+  > {
+    return this.fetchApi<any>("/posts");
   }
 
   // Health check

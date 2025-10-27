@@ -7,6 +7,7 @@ export interface Metadata {
 }
 
 export interface ContentItem<T> {
+  id: string;
   schemaId: string;
   data: T;
   metadata: Metadata;

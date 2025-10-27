@@ -5,6 +5,8 @@ import router from "./router";
 import apiWithCache from "./services/apiWithCache";
 import "./style.css";
 
+console.log("🎨 Initializing Magic Portfolio app...");
+
 // Create Vue app
 const app = createApp(App);
 
@@ -15,7 +17,7 @@ const pinia = createPinia();
 app.use(pinia);
 app.use(router);
 
-// Initialize cache system after mounting
+// Mount app
 app.mount("#app");
 
 // Initialize cache system with preloading

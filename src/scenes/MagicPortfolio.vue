@@ -45,8 +45,20 @@
       </div>
     </div>
 
-    <!-- Three.js Canvas Container -->
+    <!-- Navigation Header (shown only in minimalist mode or when not loading) -->
     <div
+      v-if="!preloaderState.isLoading && isMinimalistMode"
+      class="absolute top-0 left-0 right-0 z-40"
+    >
+      <NavigationHeader
+        :isDayMode="isDayMode"
+        :toggleDayNightMode="toggleDayNightMode"
+      />
+    </div>
+
+    <!-- Three.js Canvas Container (hidden in minimalist mode) -->
+    <div
+      v-show="!isMinimalistMode"
       ref="threeContainer"
       class="absolute inset-0 w-full h-full"
       style="z-index: 1"
@@ -71,8 +83,9 @@
       @touchmove.stop.prevent
     ></div>
 
-    <!-- UI Overlay - always on top -->
+    <!-- UI Overlay - always on top (hidden in minimalist mode) -->
     <div
+      v-show="!isMinimalistMode"
       class="ui-overlay absolute inset-0 w-full h-full"
       style="pointer-events: none"
     >
@@ -83,13 +96,13 @@
         :toggleDayNightMode="toggleDayNightMode"
       />
 
-      <!-- Interactive Hints - Enhanced -->
+      <!-- Interactive Hints - Enhanced & Mobile Optimized -->
       <div
         v-if="hoveredObject"
-        class="ui-hints ui-hint absolute bottom-32 left-1/2 transform -translate-x-1/2 transition-all duration-300"
+        class="ui-hints ui-hint absolute left-1/2 transform -translate-x-1/2 transition-all duration-300 px-4 w-full max-w-md bottom-24 sm:bottom-32"
       >
         <div
-          class="hints-container relative group bg-gradient-to-r from-indigo-900/95 via-purple-900/95 to-pink-900/95 backdrop-blur-xl text-white px-10 py-5 rounded-3xl shadow-2xl border border-purple-400/60 overflow-hidden hover:scale-105 transition-all duration-500"
+          class="hints-container relative group bg-gradient-to-r from-indigo-900/95 via-purple-900/95 to-pink-900/95 backdrop-blur-xl text-white rounded-2xl sm:rounded-3xl shadow-2xl border border-purple-400/60 overflow-hidden hover:scale-105 transition-all duration-500 px-4 py-3 sm:px-10 sm:py-5"
         >
           <!-- Enhanced animated background with multiple layers -->
           <div
@@ -111,19 +124,21 @@
           ></div>
 
           <!-- Main content -->
-          <div class="relative z-10 flex items-center space-x-3">
-            <div class="text-2xl animate-bounce">✨</div>
-            <div class="text-center">
-              <p class="text-lg font-bold text-white mb-1 tracking-wide">
-                Click to explore
+          <div class="relative z-10 flex items-center space-x-2 sm:space-x-3">
+            <div class="text-xl sm:text-2xl flex-shrink-0">✨</div>
+            <div class="text-center flex-1 min-w-0">
+              <p
+                class="text-sm sm:text-lg font-bold text-white mb-0.5 sm:mb-1 tracking-wide truncate"
+              >
+                {{ isMobile ? "Tap" : "Click" }} {{ hoveredObject?.type }}
               </p>
               <p
-                class="text-sm font-medium text-purple-200 uppercase tracking-wider"
+                class="text-xs sm:text-sm font-medium text-purple-200 uppercase tracking-wider truncate"
               >
                 {{ getObjectTitle(hoveredObject?.contentType || "") }}
               </p>
             </div>
-            <div class="text-2xl animate-bounce delay-300">🔮</div>
+            <div class="text-xl sm:text-2xl flex-shrink-0">🔮</div>
           </div>
 
           <!-- Bottom glow effect -->
@@ -170,18 +185,45 @@
               Controls
             </h3>
             <div class="space-y-3 text-sm">
-              <div class="flex items-center p-2 rounded-lg bg-white/5">
-                <span class="text-2xl mr-3">🖱️</span>
-                <span>Left click + drag to rotate</span>
-              </div>
-              <div class="flex items-center p-2 rounded-lg bg-white/5">
-                <span class="text-2xl mr-3">🔍</span>
-                <span>Click objects to explore</span>
-              </div>
-              <div class="flex items-center p-2 rounded-lg bg-white/5">
-                <span class="text-2xl mr-3">🔄</span>
-                <span>Mouse wheel to zoom</span>
-              </div>
+              <!-- Mobile/Tablet Controls -->
+              <template v-if="isMobile">
+                <div class="flex items-center p-2 rounded-lg bg-white/5">
+                  <span class="text-2xl mr-3">👆</span>
+                  <span>Tap and drag to rotate</span>
+                </div>
+                <div
+                  class="flex items-center p-2 rounded-lg bg-white/5 cursor-pointer hover:bg-white/10 transition-colors"
+                  @click="toggleInteractiveObjectsPopup"
+                  style="pointer-events: auto"
+                >
+                  <span class="text-2xl mr-3">🔍</span>
+                  <span>Tap objects to explore</span>
+                </div>
+                <div class="flex items-center p-2 rounded-lg bg-white/5">
+                  <span class="text-2xl mr-3">🤏</span>
+                  <span>Pinch to zoom</span>
+                </div>
+              </template>
+
+              <!-- Desktop Controls -->
+              <template v-else>
+                <div class="flex items-center p-2 rounded-lg bg-white/5">
+                  <span class="text-2xl mr-3">🖱️</span>
+                  <span>Left click + drag to rotate</span>
+                </div>
+                <div
+                  class="flex items-center p-2 rounded-lg bg-white/5 cursor-pointer hover:bg-white/10 transition-colors"
+                  @click="toggleInteractiveObjectsPopup"
+                  style="pointer-events: auto"
+                >
+                  <span class="text-2xl mr-3">🔍</span>
+                  <span>Click objects to explore</span>
+                </div>
+                <div class="flex items-center p-2 rounded-lg bg-white/5">
+                  <span class="text-2xl mr-3">🔄</span>
+                  <span>Mouse wheel to zoom</span>
+                </div>
+              </template>
             </div>
 
             <!-- Reset View Button -->
@@ -238,6 +280,84 @@
         </button>
       </div>
 
+      <!-- Interactive Objects Info Popup -->
+      <div
+        v-if="showInteractiveObjectsPopup"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style="pointer-events: auto"
+        @click.self="toggleInteractiveObjectsPopup"
+      >
+        <!-- Backdrop -->
+        <div
+          class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          @click="toggleInteractiveObjectsPopup"
+        ></div>
+
+        <!-- Popup content -->
+        <div
+          class="relative bg-gradient-to-br from-indigo-900/95 to-purple-900/95 backdrop-blur-lg text-white p-6 rounded-2xl border border-indigo-400/50 shadow-2xl max-w-md w-full"
+          @click.stop
+        >
+          <!-- Close button -->
+          <button
+            @click="toggleInteractiveObjectsPopup"
+            class="absolute top-3 right-3 p-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors duration-200"
+          >
+            <svg
+              class="w-4 h-4 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+
+          <!-- Header -->
+          <h3
+            class="text-xl font-semibold mb-4 text-indigo-300 flex items-center"
+          >
+            Types of Interactive Objects
+          </h3>
+
+          <!-- Interactive objects list -->
+          <div class="space-y-3">
+            <div>
+              <ul class="space-y-3">
+                <li
+                  v-for="info in sections"
+                  :key="info.id"
+                  class="flex flex-col gap-2 p-3 rounded-lg bg-white/10 hover:bg-white/15 transition-colors"
+                >
+                  <div class="flex items-start">
+                    <span class="text-3xl mr-3 flex-shrink-0">
+                      {{ info.emoji }}
+                    </span>
+                    <div class="flex-1">
+                      <h5 class="font-semibold text-white mb-1">
+                        {{ info.title }}
+                      </h5>
+                      <p class="text-xs text-purple-200">
+                        Search for a
+                        <span class="font-semibold mx-1">{{
+                          mapSectionObject[info.id] || "special object"
+                        }}</span>
+                        in the scene!
+                      </p>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Magical ambient overlay -->
       <div
         class="magical-overlay absolute inset-0 pointer-events-none transition-opacity duration-1000"
@@ -266,19 +386,134 @@
       @close="closeModal"
       style="z-index: 1000"
     />
+
+    <!-- Minimalist Mode Content -->
+    <div
+      v-if="isMinimalistMode && !preloaderState.isLoading"
+      class="absolute inset-0 z-30 overflow-y-auto"
+      :class="{
+        'bg-[rgb(242,242,242)]': isDayMode,
+        'bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900':
+          !isDayMode,
+      }"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-16">
+        <div class="text-center mb-12">
+          <h1
+            class="text-5xl md:text-6xl font-bold mb-4"
+            :class="{ 'text-gray-900': isDayMode, 'text-white': !isDayMode }"
+          >
+            Welcome to My Portfolio
+          </h1>
+          <p
+            class="text-xl mb-8"
+            :class="{ 'text-gray-700': isDayMode, 'text-gray-300': !isDayMode }"
+          >
+            Explore my work through these sections
+          </p>
+        </div>
+
+        <!-- Loading state -->
+        <div
+          v-if="isLoadingSections"
+          class="flex items-center justify-center py-20"
+        >
+          <div
+            class="animate-spin rounded-full h-12 w-12 border-b-2"
+            :class="{
+              'border-gray-900': isDayMode,
+              'border-purple-400': !isDayMode,
+            }"
+          ></div>
+        </div>
+
+        <!-- Section cards -->
+        <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <router-link
+            v-for="section in sections"
+            :key="section.id"
+            :to="`/post/${section.id}`"
+            class="group block p-6 rounded-xl transition-all duration-300 hover:scale-105 border"
+            :class="{
+              'bg-white/90 border-gray-300 hover:border-purple-400 hover:shadow-xl':
+                isDayMode,
+              'bg-slate-800/70 border-purple-500/30 hover:border-purple-500/60 hover:shadow-2xl':
+                !isDayMode,
+            }"
+            :style="{
+              boxShadow: !isDayMode
+                ? `0 0 30px ${section.color.accent}20`
+                : 'none',
+            }"
+          >
+            <div class="text-center">
+              <div
+                class="text-5xl mb-3 group-hover:scale-110 transition-transform duration-300"
+              >
+                {{ section.emoji }}
+              </div>
+              <h3
+                class="text-xl font-bold mb-2"
+                :class="{
+                  'text-gray-900': isDayMode,
+                  'text-white': !isDayMode,
+                }"
+              >
+                {{ section.title }}
+              </h3>
+              <p
+                class="text-sm"
+                :class="{
+                  'text-gray-600': isDayMode,
+                  'text-gray-300': !isDayMode,
+                }"
+              >
+                {{ section.description }}
+              </p>
+            </div>
+          </router-link>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import ContentModal from "../components/ContentModal.vue";
+import NavigationHeader from "../components/NavigationHeader.vue";
 import { Scene3DManager } from "../services/core";
 import { default as defaultTheme } from "../themes";
+import type { NullableSchemaType } from "@/types";
 import type { InteractiveObject, PreloaderState } from "../types/3d";
+import { useViewMode } from "@/stores/viewModeStore";
+import { getAllSectionDescriptions } from "@/config/sectionDescriptions";
+import { apiWithCache } from "@/services/apiWithCache";
+import { getDeviceType } from "@/utils/deviceDetection";
+import { wizardLabObjects } from "@/themes/wizard-lab";
 
 // Import UI interaction styles
 import "../styles/ui-interactions.css";
 import AppHeader from "@/components/AppHeader.vue";
+
+// View mode state from store
+const { isMinimalistMode, isDayMode, toggleDayMode } = useViewMode();
+
+// Sections data
+const allSections = getAllSectionDescriptions();
+const visibleSectionIds = ref<string[]>([]);
+const mapSectionObject = wizardLabObjects.reduce((map, obj) => {
+  map[obj.contentType] = obj.type;
+  return map;
+}, {} as Record<string, string>);
+const isLoadingSections = ref(true);
+
+// Filter sections based on visibility rules
+const sections = computed(() => {
+  return allSections.filter((section) =>
+    visibleSectionIds.value.includes(section.id)
+  );
+});
 
 // Reactive state
 const threeContainer = ref<HTMLDivElement>();
@@ -291,6 +526,15 @@ const isLoadingContent = ref(false);
 // UI state management
 const showControlsPanel = ref(false);
 const isNavigationMinimized = ref(true);
+const showInteractiveObjectsPopup = ref(false);
+
+// Device detection
+const isMobile = ref(false); // include mobile, tablet, no desktop
+const handleResize = () => {
+  // Detect device type
+  const deviceType = getDeviceType();
+  isMobile.value = deviceType === "mobile" || deviceType === "tablet";
+};
 
 // Preloader state
 const preloaderState = ref<PreloaderState>({
@@ -300,9 +544,6 @@ const preloaderState = ref<PreloaderState>({
   totalAssets: 0,
   loadedAssets: 0,
 });
-
-// Day/Night mode state
-const isDayMode = ref(false);
 
 // Scene manager instance
 let scene3DManager: Scene3DManager | null = null;
@@ -334,8 +575,14 @@ const initThreeJS = async () => {
     // Initialize with wizard lab theme
     await scene3DManager.initialize(threeContainer.value, defaultTheme);
 
-    // Update day/night mode state
-    isDayMode.value = scene3DManager.getCurrentLightingMode() === "day";
+    // Sync 3D scene with store's day mode
+    const currentMode = scene3DManager.getCurrentLightingMode();
+    const sceneIsDayMode = currentMode === "day";
+
+    // If store's mode differs from scene's initial mode, toggle scene
+    if (isDayMode.value !== sceneIsDayMode) {
+      scene3DManager.toggleDayNightMode();
+    }
 
     console.log("✅ Magic Portfolio initialized successfully");
   } catch (error) {
@@ -400,7 +647,7 @@ const closeModal = () => {
 };
 
 // Get object title for display
-const getObjectTitle = (contentType: string): string => {
+const getObjectTitle = (contentType: NullableSchemaType): string => {
   if (scene3DManager) {
     return scene3DManager.getObjectTitle(contentType);
   }
@@ -412,6 +659,10 @@ const toggleControlsPanel = () => {
   showControlsPanel.value = !showControlsPanel.value;
 };
 
+const toggleInteractiveObjectsPopup = () => {
+  showInteractiveObjectsPopup.value = !showInteractiveObjectsPopup.value;
+};
+
 const toggleNavigation = () => {
   isNavigationMinimized.value = !isNavigationMinimized.value;
 };
@@ -420,15 +671,35 @@ const toggleNavigation = () => {
 const toggleDayNightMode = () => {
   if (scene3DManager) {
     scene3DManager.toggleDayNightMode();
-    isDayMode.value = scene3DManager.getCurrentLightingMode() === "day";
   }
+  // Update store (which persists to localStorage)
+  toggleDayMode();
 };
 
-onMounted(() => {
+onMounted(async () => {
+  window.addEventListener("resize", handleResize);
+  handleResize();
+
+  // Load visible sections based on visibility rules
+  try {
+    const categories = await apiWithCache.getAllCategories();
+    visibleSectionIds.value = categories
+      .filter((cat) => cat.visible)
+      .map((cat) => cat.id);
+    console.log("Visible sections in 3D scene:", visibleSectionIds.value);
+  } catch (error) {
+    console.error("Failed to load visible sections:", error);
+    // Fallback: show all sections if fetching fails
+    visibleSectionIds.value = allSections.map((s) => s.id);
+  } finally {
+    isLoadingSections.value = false;
+  }
+
   initThreeJS();
 });
 
 onUnmounted(() => {
+  window.removeEventListener("resize", handleResize);
   if (scene3DManager) {
     scene3DManager.dispose();
     scene3DManager = null;

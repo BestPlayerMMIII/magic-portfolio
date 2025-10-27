@@ -48,15 +48,15 @@ export class EffectsManager {
     this._lightingManager.onModeChange(this.onLightingModeChange);
     this._lightingManager.initialize(lightingConfig);
 
-    // Set initial day mode state
-    this._isDayMode = this._lightingManager.getCurrentMode() === "day";
-
     // Configure global shadow settings
     this.configureShadows(renderer, lightingConfig.globalShadowSettings);
 
     // Initialize particle system manager
     this._particleManager = new ParticleSystemManager(scene);
     await this.setupParticleEffects(particlesConfig);
+
+    // Set initial day mode state triggering effects
+    this.onLightingModeChange(this._lightingManager.getCurrentMode());
 
     this._isInitialized = true;
     console.log("✅ EffectsManager initialized");
@@ -128,10 +128,11 @@ export class EffectsManager {
     this.updateParticles(deltaTime, cameraPosition);
 
     // Update lighting if needed
+    /* Lighting manager doesn't need per-frame updates currently
     if (this._lightingManager) {
-      // Lighting manager doesn't need per-frame updates currently
-      // but this is where we'd call it if needed
+      // but here is where we'd call it if needed
     }
+    */
   }
 
   /**

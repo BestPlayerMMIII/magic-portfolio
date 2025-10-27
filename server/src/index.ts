@@ -3,18 +3,14 @@ import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
 import { errorHandler } from "./middleware/errorHandler.js";
-import projectsRouter from "./routes/projects.js";
-import blogRouter from "./routes/blog.js";
-import wipRouter from "./routes/wip.js";
-import collaborationsRouter from "./routes/collaborations.js";
-import learningPathRouter from "./routes/learningPath.js";
-import funFactsRouter from "./routes/funFacts.js";
+import mediaRouter from "./routes/media.js";
+import postsRouter from "./routes/posts.js"; // Generic posts router
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = Number(process.env.API_PORT) || 3001;
 
 // Security middleware
 app.use(
@@ -25,7 +21,8 @@ app.use(
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         scriptSrc: ["'self'"],
-        imgSrc: ["'self'", "data:", "https:"],
+        imgSrc: ["'self'", "data:", "blob:", "https:"],
+        mediaSrc: ["'self'", "data:", "blob:", "https:"],
       },
     },
   })
@@ -56,12 +53,8 @@ app.get("/api/health", (req, res) => {
 });
 
 // API Routes
-app.use("/api/projects", projectsRouter);
-app.use("/api/blog", blogRouter);
-app.use("/api/wip", wipRouter);
-app.use("/api/collaborations", collaborationsRouter);
-app.use("/api/learning-path", learningPathRouter);
-app.use("/api/fun-facts", funFactsRouter);
+app.use("/api/posts", postsRouter);
+app.use("/api/media", mediaRouter);
 
 // Error handling middleware
 app.use(errorHandler);

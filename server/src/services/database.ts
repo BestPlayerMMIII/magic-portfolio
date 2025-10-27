@@ -8,7 +8,7 @@ import {
   ContentItem,
 } from "../types/index.js";
 import {
-  CollectionQuery,
+  SchemaQuery,
   GitCMS,
   ContentItem as OriginalContentItem,
 } from "@git-cms/client";
@@ -23,132 +23,103 @@ export class DatabaseService {
     token: process.env.GITCMS_TOKEN || "",
   });
 
-  // Projects CRUD
-  async getProjects(): Promise<ContentItem<Project>[]> {
-    return this.getAll<Project>("project");
-  }
-  async getProjectById(id: string): Promise<ContentItem<Project> | null> {
-    return this.getById<Project>("project", id);
+  // ============================================
+  // GENERIC METHODS (NEW - USE THESE)
+  // ============================================
+
+  /**
+   * Get all items by schemaId (generic method)
+   */
+  async getBySchemaId<T = any>(schemaId: string): Promise<ContentItem<T>[]> {
+    return this.getAll<T>(schemaId);
   }
 
-  // Blog Posts CRUD
-  async getBlogPosts(): Promise<ContentItem<BlogPost>[]> {
-    return this.getAll<BlogPost>("blog-post");
-  }
-  async getBlogPostById(id: string): Promise<ContentItem<BlogPost> | null> {
-    return this.getById<BlogPost>("blog-post", id);
-  }
-
-  // Work in Progress CRUD
-  async getWIPItems(): Promise<ContentItem<WorkInProgress>[]> {
-    return this.getAll<WorkInProgress>("work-in-progress");
-  }
-  async getWIPItemById(
+  /**
+   * Get single item by schemaId and id (generic method)
+   */
+  async getByIdAndSchemaId<T = any>(
+    schemaId: string,
     id: string
-  ): Promise<ContentItem<WorkInProgress> | null> {
-    return this.getById<WorkInProgress>("work-in-progress", id);
+  ): Promise<ContentItem<T> | null> {
+    return this.getById<T>(schemaId, id);
   }
 
-  // Collaborations CRUD
-  async getCollaborations(): Promise<ContentItem<Collaboration>[]> {
-    return this.getAll<Collaboration>("collaboration");
-  }
-  async getCollaborationById(
-    id: string
-  ): Promise<ContentItem<Collaboration> | null> {
-    return this.getById<Collaboration>("collaboration", id);
+  /**
+   * Get content count for a specific schema
+   */
+  async getCountBySchemaId(schemaId: string): Promise<number> {
+    const items = await this.getBySchemaId(schemaId);
+    return items.length;
   }
 
-  // Learning Paths CRUD
-  async getLearningPaths(): Promise<ContentItem<LearningPath>[]> {
-    return this.getAll<LearningPath>("learning-path");
-  }
-  async getLearningPathById(
-    id: string
-  ): Promise<ContentItem<LearningPath> | null> {
-    return this.getById<LearningPath>("learning-path", id);
-  }
+  /**
+   * Get counts for all categories
+   */
+  async getAllCategoryCounts(): Promise<Record<string, number>> {
+    const schemas = [
+      "project",
+      "blog-post",
+      "work-in-progress",
+      "collaboration",
+      "learning-path",
+      "fun-fact",
+    ];
 
-  // Fun Facts CRUD
-  async getFunFacts(): Promise<ContentItem<FunFact>[]> {
-    return this.getAll<FunFact>("fun-fact");
-  }
-
-  async getRandomFunFact(): Promise<ContentItem<FunFact> | null> {
-    const activeFacts = await this.getFunFacts();
-    if (activeFacts.length === 0) return null;
-
-    const randomIndex = Math.floor(Math.random() * activeFacts.length);
-    return activeFacts[randomIndex];
-  }
-
-  async getFunFactsByCategory(
-    category: "personal" | "technical" | "random"
-  ): Promise<ContentItem<FunFact>[]> {
-    return this.getAll<FunFact>("fun-fact", (query) =>
-      query.where("category", category)
-    );
-  }
-
-  // Utility methods
-  async getStats(): Promise<{
-    projectsCount: number;
-    blogPostsCount: number;
-    wipItemsCount: number;
-    collaborationsCount: number;
-    learningPathsCount: number;
-    funFactsCount: number;
-  }> {
-    return {
-      projectsCount: (await this.getProjects()).length,
-      blogPostsCount: (await this.getBlogPosts()).length,
-      wipItemsCount: (await this.getWIPItems()).length,
-      collaborationsCount: (await this.getCollaborations()).length,
-      learningPathsCount: (await this.getLearningPaths()).length,
-      funFactsCount: (await this.getFunFacts()).length,
-    };
+    const counts: Record<string, number> = {};
+    for (const schema of schemas) {
+      counts[schema] = await this.getCountBySchemaId(schema);
+    }
+    return counts;
   }
 
   // private helpers
 
-  private getStandardAllQuery(collection: string): CollectionQuery {
+  private getStandardAllQuery(collection: string): SchemaQuery {
     return this.gitcms
-      .collection(collection)
-      .where("metadata.status", "published")
-      .orderBy("createdAt", "desc");
+      .from(collection)
+      .where("metadata.status", "==", "published")
+      .orderBy("metadata.priority", "desc")
+      .orderBy("metadata.publishedAt", "desc");
   }
 
   private normalizeAs<T>(item: OriginalContentItem): ContentItem<T> {
     return {
+      id: item.id,
       schemaId: item.schemaId,
       data: item.data as T,
       metadata: item.metadata,
     };
   }
 
+  private async getClean<T>(query: SchemaQuery): Promise<ContentItem<T>[]> {
+    const result = await query.debug(false).get();
+    return result.map((item) => this.normalizeAs<T>(item));
+  }
+
   private async getAll<T>(
     collection: string,
-    queryModifier?: (query: CollectionQuery) => CollectionQuery
+    queryModifier?: (query: SchemaQuery) => SchemaQuery
   ): Promise<ContentItem<T>[]> {
     let query = this.getStandardAllQuery(collection);
     if (queryModifier) {
       query = queryModifier(query);
     }
-    return (await query.get()).map((item) => this.normalizeAs<T>(item));
+    return await this.getClean<T>(query);
   }
 
   private async getById<T>(
     collection: string,
     id: string,
-    queryModifier?: (query: CollectionQuery) => CollectionQuery
+    queryModifier?: (query: SchemaQuery) => SchemaQuery
   ): Promise<ContentItem<T> | null> {
-    let query = this.getStandardAllQuery(collection).where("id", id).limit(1);
+    let query = this.getStandardAllQuery(collection)
+      .where("id", "==", id)
+      .limit(1);
     if (queryModifier) {
       query = queryModifier(query);
     }
-    const result = await query.get();
-    if (result.length === 0) return null;
-    return this.normalizeAs<T>(result[0]);
+    const result = await this.getClean<T>(query);
+    return result.length > 0 ? result[0] : null;
   }
 }
 

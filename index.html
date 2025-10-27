@@ -42,43 +42,10 @@
       rel="stylesheet"
     />
 
-    <!-- Preload critical 3D model assets -->
-    <link
-      rel="preload"
-      href="/assets/models/crystal.glb"
-      as="fetch"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="preload"
-      href="/assets/models/cauldron.glb"
-      as="fetch"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="preload"
-      href="/assets/models/book.glb"
-      as="fetch"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="preload"
-      href="/assets/models/magic-circle.glb"
-      as="fetch"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="preload"
-      href="/assets/models/library.glb"
-      as="fetch"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="preload"
-      href="/assets/models/owl.glb"
-      as="fetch"
-      crossorigin="anonymous"
-    />
+    <!-- 
+      Note: 3D models are now loaded on-demand by the MagicPortfolio component
+      This prevents unnecessary preloading when visiting other pages
+    -->
   </head>
   <body
     class="m-0 p-0 overflow-hidden bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900"
