@@ -22,13 +22,6 @@
           alt="Post header image"
           class="w-32 h-32 object-cover rounded-xl shadow-lg border-2 border-purple-300 transition-all duration-300"
         />
-        <!-- Show thumbnail as fallback (comes from server) -->
-        <img
-          v-else-if="post.data.header.image?.thumbnailUrl"
-          :src="post.data.header.image.thumbnailUrl"
-          alt="Post header thumbnail"
-          class="w-32 h-32 object-cover rounded-xl shadow-lg border-2 border-gray-200 transition-all duration-300"
-        />
       </div>
 
       <p
@@ -108,6 +101,9 @@ const fetchFullImage = async (imageField: any) => {
   }
 };
 
+// Initialize header image
+loadedImageUrl.value = props.post.data.header.image.thumbnailUrl || null;
+
 // Progressive enhancement for content HTML
 const enhanceContentMedia = async (schemaId: string, postId: string) => {
   contentLoading.value = true;
@@ -136,7 +132,6 @@ watch(
   () => props.post.data.header.image,
   (imageField) => {
     if (imageField) {
-      loadedImageUrl.value = null;
       fetchFullImage(imageField);
     } else {
       loadedImageUrl.value = null;
