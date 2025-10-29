@@ -21,25 +21,22 @@ export interface ContentItem<T> {
   metadata: Metadata;
 }
 
-export interface Project {
-  title: string;
-  description: string;
-  technologies: string[];
-  githubUrl?: string;
-  liveUrl?: string;
-  imageUrl?: string;
-  featured: boolean;
-}
-
-export interface BlogPostHeader {
+export interface PostHeader {
   title: string;
   excerpt: string;
   image: any;
   tags: string[];
 }
 
+export interface Project {
+  header: PostHeader;
+  technologies: string[];
+  githubUrl?: string;
+  liveUrl?: string;
+}
+
 export interface BlogPost {
-  header: BlogPostHeader;
+  header: PostHeader;
   content: string;
 }
 

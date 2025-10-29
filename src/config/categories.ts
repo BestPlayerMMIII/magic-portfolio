@@ -82,7 +82,7 @@ export const categories: Record<string, CategoryConfig> = {
     enabled: true,
     visibility: "always",
     order: 1,
-    hasMedia: false,
+    hasMedia: true,
   },
 
   "blog-post": {
@@ -119,7 +119,7 @@ export const categories: Record<string, CategoryConfig> = {
     enabled: true,
     visibility: "hide-if-empty",
     order: 3,
-    hasMedia: false,
+    hasMedia: true,
   },
 
   collaboration: {
@@ -137,7 +137,7 @@ export const categories: Record<string, CategoryConfig> = {
     enabled: true,
     visibility: "hide-if-empty",
     order: 4,
-    hasMedia: false,
+    hasMedia: true,
   },
 
   "learning-path": {
@@ -155,7 +155,7 @@ export const categories: Record<string, CategoryConfig> = {
     enabled: true,
     visibility: "hide-if-empty",
     order: 5,
-    hasMedia: false,
+    hasMedia: true,
   },
 
   "fun-fact": {

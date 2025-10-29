@@ -1,19 +1,19 @@
 <template>
-  <div class="relative mt-6 p-6 flex flex-col justify-center max-w-6xl mx-auto">
+  <div class="relative mt-6 p-6 flex flex-col justify-center">
     <!-- Project Header -->
     <header class="w-full text-center mb-8">
       <h1
         class="text-5xl font-bold mb-4"
         :class="{ 'text-gray-900': isDayMode, 'text-white': !isDayMode }"
       >
-        {{ post.data.name }}
+        {{ post.data.header.title }}
       </h1>
 
       <p
         class="text-xl mb-6 max-w-3xl mx-auto"
         :class="{ 'text-gray-600': isDayMode, 'text-gray-300': !isDayMode }"
       >
-        {{ post.data.description }}
+        {{ post.data.header.excerpt }}
       </p>
 
       <!-- Project Metadata -->
@@ -35,11 +35,11 @@
 
       <!-- Tags -->
       <div
-        v-if="post.data.tags && post.data.tags.length"
+        v-if="post.data.header.tags && post.data.header.tags.length"
         class="flex flex-wrap justify-center gap-2 mb-6"
       >
         <span
-          v-for="tag in post.data.tags"
+          v-for="tag in post.data.header.tags"
           :key="tag"
           class="px-4 py-1.5 rounded-full text-sm font-semibold shadow-md transition-all duration-200 cursor-pointer select-none bg-gradient-to-r from-blue-500 via-cyan-400 to-teal-400 text-white hover:scale-105 hover:from-blue-600 hover:to-teal-500"
         >
@@ -47,14 +47,24 @@
         </span>
       </div>
 
-      <hr class="mb-8 border-t" />
+      <hr class="mb-4 border-t" />
     </header>
 
-    <!-- Project Links -->
-    <div
-      v-if="post.data.links && Object.keys(post.data.links).length"
-      class="mb-8"
+    <h2
+      class="text-2xl font-semibold mb-4 text-center"
+      :class="{ 'text-gray-800': isDayMode, 'text-white': !isDayMode }"
     >
+      Overview
+    </h2>
+    <!-- Render raw HTML from post.data.overview -->
+    <div
+      v-html="post.data.overview"
+      class="prose min-w-[60%] mx-auto mb-4"
+      :class="{ 'prose-invert': !isDayMode }"
+    ></div>
+
+    <!-- Project Links -->
+    <div class="mt-4 mb-8">
       <h2
         class="text-2xl font-semibold mb-4 text-center"
         :class="{ 'text-gray-800': isDayMode, 'text-white': !isDayMode }"
@@ -63,8 +73,8 @@
       </h2>
       <div class="flex flex-wrap justify-center gap-4">
         <a
-          v-if="post.data.links.github"
-          :href="post.data.links.github"
+          v-if="post.data.githubUrl"
+          :href="post.data.githubUrl"
           target="_blank"
           rel="noopener noreferrer"
           class="flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all duration-300 hover:scale-105 shadow-lg"
@@ -82,8 +92,8 @@
         </a>
 
         <a
-          v-if="post.data.links.demo"
-          :href="post.data.links.demo"
+          v-if="post.data.liveUrl"
+          :href="post.data.liveUrl"
           target="_blank"
           rel="noopener noreferrer"
           class="flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all duration-300 hover:scale-105 shadow-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600"
@@ -137,7 +147,7 @@
     <!-- Technologies -->
     <div
       v-if="post.data.technologies && post.data.technologies.length"
-      class="mb-8"
+      class="mt-4 mb-8"
     >
       <h2
         class="text-2xl font-semibold mb-4 text-center"
@@ -160,31 +170,22 @@
       </div>
     </div>
 
-    <!-- Long Description / Content -->
+    <!-- Render raw HTML from post.data.content -->
     <div
-      v-if="post.data.longDescription"
-      class="mb-8 max-w-4xl mx-auto"
-      :class="{ 'text-gray-700': isDayMode, 'text-gray-300': !isDayMode }"
-    >
-      <h2
-        class="text-2xl font-semibold mb-4"
-        :class="{ 'text-gray-800': isDayMode, 'text-white': !isDayMode }"
-      >
-        About This Project
-      </h2>
-      <div class="prose max-w-none" :class="{ 'prose-invert': !isDayMode }">
-        <p class="whitespace-pre-wrap">{{ post.data.longDescription }}</p>
-      </div>
-    </div>
+      v-html="enhancedContent"
+      class="prose min-w-[60%] mx-auto"
+      :class="{ 'prose-invert': !isDayMode }"
+    ></div>
 
     <BackButton />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import type { ContentItem } from "@/types";
 import BackButton from "@/components/BackButton.vue";
+import { apiService } from "@/services/api";
 
 interface Props {
   post: ContentItem<any>;
@@ -192,6 +193,41 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const enhancedContent = ref<string>("");
+const contentLoading = ref(false);
+
+// Progressive enhancement for content HTML
+const enhanceContentMedia = async (schemaId: string, postId: string) => {
+  contentLoading.value = true;
+  try {
+    // Fetch the FULL version using the API service
+    const fullPost = await apiService.getPostByIdFull(schemaId, postId);
+
+    if (fullPost?.data?.content) {
+      // Update only the content with full resolution
+      enhancedContent.value = fullPost.data.content;
+      console.log("Content enhanced for post:", enhancedContent.value);
+    }
+  } catch (e) {
+    console.error("Failed to enhance content media:", e);
+    // Fallback to original content
+    enhancedContent.value = props.post.data.content || "";
+  } finally {
+    contentLoading.value = false;
+  }
+};
+// Initialize content
+enhancedContent.value = props.post.data.content || "";
+// Watch for post changes and enhance content
+watch(
+  () => props.post.id,
+  () => {
+    enhancedContent.value = props.post.data.content || "";
+    enhanceContentMedia(props.post.schemaId, props.post.id);
+  },
+  { immediate: true }
+);
 
 // Filter out known links to get custom ones
 const customLinks = computed(() => {

@@ -16,13 +16,13 @@
         class="text-lg sm:text-xl font-semibold mb-2 sm:mb-3"
         :class="{ 'text-gray-900': isDayMode, 'text-white': !isDayMode }"
       >
-        {{ project.data.title }}
+        {{ project.data.header.title }}
       </h3>
       <p
         class="mb-3 sm:mb-4 text-sm line-clamp-10"
         :class="{ 'text-gray-700': isDayMode, 'text-gray-300': !isDayMode }"
       >
-        {{ project.data.description }}
+        {{ project.data.header.excerpt }}
       </p>
 
       <div class="flex flex-wrap gap-1.5 sm:gap-2 mb-3 sm:mb-4">
