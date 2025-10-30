@@ -21,7 +21,7 @@ export const useCacheStore = defineStore("cache", () => {
     project: 30 * 60 * 1000, // 30 minutes
     "blog-post": 15 * 60 * 1000, // 15 minutes
     collaboration: 60 * 60 * 1000, // 1 hour
-    "fun-fact": 60 * 60 * 1000, // 1 hour
+    "fun-facts": 60 * 60 * 1000, // 1 hour
     "learning-path": 60 * 60 * 1000, // 1 hour
     "work-in-progress": 10 * 60 * 1000, // 10 minutes (more dynamic)
     _categories: 15 * 60 * 1000, // 15 minutes for categories list
@@ -97,7 +97,7 @@ export const useCacheStore = defineStore("cache", () => {
 
   // Check if all critical data is cached
   const isFullyCached = computed(() => {
-    const criticalKeys = ["project", "blog-post", "collaboration", "fun-fact"];
+    const criticalKeys = ["project", "blog-post", "collaboration", "fun-facts"];
 
     return criticalKeys.every((key) => {
       const entry = cache.value[key];

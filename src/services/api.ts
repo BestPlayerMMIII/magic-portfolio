@@ -80,6 +80,8 @@ class ApiService {
       throw new Error(
         `Post with id '${id}' not found in category '${category}'`
       );
+    } else {
+      console.log(`Fetched post with id '${id}' in category '${category}'`);
     }
 
     // Process media if needed (fast version)

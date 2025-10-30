@@ -50,7 +50,7 @@ export class DatabaseService {
       "work-in-progress",
       "collaboration",
       "learning-path",
-      "fun-fact",
+      "fun-facts",
     ];
 
     const counts: Record<string, number> = {};

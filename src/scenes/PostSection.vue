@@ -128,7 +128,7 @@
 
           <!-- Fun Facts -->
           <FunFactsList
-            v-else-if="schemaId === 'fun-fact'"
+            v-else-if="schemaId === 'fun-facts'"
             :items="content"
             :isDayMode="isDayMode"
           />

@@ -158,8 +158,8 @@ export const categories: Record<string, CategoryConfig> = {
     hasMedia: true,
   },
 
-  "fun-fact": {
-    id: "fun-fact",
+  "fun-facts": {
+    id: "fun-facts",
     title: "Fun Facts",
     emoji: "🦉",
     description: "Discover interesting tidbits about me",

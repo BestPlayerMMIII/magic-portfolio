@@ -142,7 +142,7 @@ export const wizardLabObjects: ObjectConfig[] = [
   },
   {
     type: "owl",
-    contentType: "fun-fact",
+    contentType: "fun-facts",
     modelPath: "/assets/models/owl.glb",
     position: [5, 7, -9],
     rotation: [0, Math.PI / 2, 0],

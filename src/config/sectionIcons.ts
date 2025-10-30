@@ -113,7 +113,7 @@ export const SectionIcons = {
       ]
     ),
 
-  "fun-fact": (className = "w-5 h-5"): VNode =>
+  "fun-facts": (className = "w-5 h-5"): VNode =>
     h(
       "svg",
       {

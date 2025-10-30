@@ -322,7 +322,7 @@ export class Scene3DManager {
         return "Collaborations";
       case "learning-path":
         return "Learning Paths";
-      case "fun-fact":
+      case "fun-facts":
         return "Fun Facts";
       default:
         return "Unknown";

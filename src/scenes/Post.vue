@@ -113,7 +113,7 @@ const getPostComponent = (schemaId: SchemaType): Component => {
     "work-in-progress": WIPDetail,
     collaboration: CollaborationDetail,
     "learning-path": LearningPathDetail,
-    "fun-fact": FunFactDetail,
+    "fun-facts": FunFactDetail,
   };
 
   return componentMap[schemaId]; // no fallback since we check existence before rendering

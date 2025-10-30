@@ -11,7 +11,7 @@ export type SchemaType =
   | "work-in-progress"
   | "collaboration"
   | "learning-path"
-  | "fun-fact";
+  | "fun-facts";
 export type NullableSchemaType = SchemaType | "";
 
 export interface ContentItem<T> {
@@ -79,6 +79,10 @@ export interface LearningResource {
 export interface FunFact {
   content: string;
   category: "personal" | "technical" | "random";
+}
+
+export interface FunFacts {
+  "fun-facts": FunFact[];
 }
 
 export interface ApiResponse<T> {

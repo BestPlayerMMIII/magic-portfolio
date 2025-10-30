@@ -111,8 +111,8 @@ export const sectionDescriptions: Record<string, SectionDescription> = {
     visibility: "hide-if-empty",
     order: 5,
   },
-  "fun-fact": {
-    id: "fun-fact",
+  "fun-facts": {
+    id: "fun-facts",
     title: "Fun Facts",
     emoji: "🦉",
     description: "Discover interesting tidbits about me",

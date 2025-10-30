@@ -173,7 +173,7 @@
 
           <!-- Fun Facts -->
           <FunFactsList
-            v-else-if="type === 'fun-fact'"
+            v-else-if="type === 'fun-facts'"
             :items="content"
             :isDayMode="false"
           />
@@ -246,7 +246,7 @@ const getTitle = () => {
     "blog-post": "Blog Posts",
     collaboration: "Collaborations",
     "learning-path": "Learning Paths",
-    "fun-fact": "Fun Facts",
+    "fun-facts": "Fun Facts",
   };
   return titles[props.type as keyof typeof titles] || props.type;
 };
