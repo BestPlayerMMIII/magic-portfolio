@@ -8,7 +8,8 @@ import type { NullableSchemaType, SchemaType } from "@/types";
 export interface ObjectConfig {
   type: string;
   contentType: NullableSchemaType; // empty string "" means non-interactive decorative object
-  modelPath?: string; // optional for text objects
+  modelPath?: string; // optional for text objects - local path (deprecated, use modelId instead)
+  modelId?: string; // GitCMS 3D object ID (preferred over modelPath)
   position: [number, number, number];
   rotation: [number, number, number]; // in radians
   scale: number;

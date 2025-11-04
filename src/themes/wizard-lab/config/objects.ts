@@ -8,7 +8,7 @@ export const wizardLabObjects: ObjectConfig[] = [
   {
     type: "crystal",
     contentType: "project",
-    modelPath: "/assets/models/crystal.glb",
+    modelId: "crystal", // GitCMS 3D object ID
     position: [0, 3, -1], // [x, y, z] - left/right, up/down, forward/back
     rotation: [0, 0, 0], // [x, y, z] rotation in radians (0 to 2*PI)
     scale: 0.002,
@@ -35,7 +35,7 @@ export const wizardLabObjects: ObjectConfig[] = [
   {
     type: "cauldron",
     contentType: "work-in-progress",
-    modelPath: "/assets/models/cauldron.glb",
+    modelId: "cauldron", // GitCMS 3D object ID
     position: [7, -0.25, 7],
     rotation: [0, Math.PI / 4, 0], // 45 degree Y rotation
     scale: 3,
@@ -62,7 +62,7 @@ export const wizardLabObjects: ObjectConfig[] = [
   {
     type: "book",
     contentType: "blog-post",
-    modelPath: "/assets/models/book.glb",
+    modelId: "book", // GitCMS 3D object ID
     position: [-6, 5, 8],
     rotation: [0, Math.PI / 3, -Math.PI / 10],
     scale: 0.04,
@@ -89,7 +89,7 @@ export const wizardLabObjects: ObjectConfig[] = [
   {
     type: "circle",
     contentType: "collaboration",
-    modelPath: "/assets/models/magic-circle.glb",
+    modelId: "magic-circle", // GitCMS 3D object ID
     position: [6, -0.2, -6],
     rotation: [0, 0, 0], // 90 degree X rotation (horizontal)
     scale: 0.3,
@@ -116,7 +116,7 @@ export const wizardLabObjects: ObjectConfig[] = [
   {
     type: "library",
     contentType: "learning-path",
-    modelPath: "/assets/models/library.glb",
+    modelId: "library", // GitCMS 3D object ID
     position: [-8, -0.3, -6],
     rotation: [0, 0, 0], // 22.5 degree Y rotation
     scale: 0.1,
@@ -143,7 +143,7 @@ export const wizardLabObjects: ObjectConfig[] = [
   {
     type: "owl",
     contentType: "fun-facts",
-    modelPath: "/assets/models/owl.glb",
+    modelId: "owl", // GitCMS 3D object ID
     position: [5, 7, -9],
     rotation: [0, Math.PI / 2, 0],
     scale: 0.02,
@@ -173,7 +173,7 @@ export const wizardLabObjects: ObjectConfig[] = [
   {
     type: "room",
     contentType: "", // empty = non-interactive
-    modelPath: "/assets/models/room.glb",
+    modelId: "room", // GitCMS 3D object ID
     position: [0, 0, 0], // center the room
     rotation: [0, 0, 0],
     scale: 0.1,
@@ -201,7 +201,7 @@ export const wizardLabObjects: ObjectConfig[] = [
   {
     type: "lectern",
     contentType: "", // empty = non-interactive
-    modelPath: "/assets/models/lectern.glb",
+    modelId: "lectern", // GitCMS 3D object ID
     position: [-6.08, -0.25, 8.08], // position near where book will be
     rotation: [0, (5 * Math.PI) / 6, 0], // match book rotation
     scale: 3.62,

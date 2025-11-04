@@ -30,6 +30,7 @@
     "vite": "^7.1.5"
   },
   "dependencies": {
+    "@git-cms/client": "^0.1.0",
     "@types/three": "^0.157.0",
     "dotenv": "^17.2.2",
     "pinia": "^3.0.3",

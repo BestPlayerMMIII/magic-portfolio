@@ -51,6 +51,7 @@ export class DatabaseService {
       "collaboration",
       "learning-path",
       "fun-facts",
+      "3d-object",
     ];
 
     const counts: Record<string, number> = {};
@@ -80,7 +81,7 @@ export class DatabaseService {
   }
 
   private async getClean<T>(query: SchemaQuery): Promise<ContentItem<T>[]> {
-    const result = await query.debug(false).get();
+    const result = await query.debug(true).get();
     return result.map((item) => this.normalizeAs<T>(item));
   }
 

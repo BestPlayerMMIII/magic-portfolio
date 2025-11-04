@@ -11,7 +11,8 @@ export type SchemaType =
   | "work-in-progress"
   | "collaboration"
   | "learning-path"
-  | "fun-facts";
+  | "fun-facts"
+  | "3d-object";
 export type NullableSchemaType = SchemaType | "";
 
 export interface ContentItem<T> {
@@ -21,10 +22,28 @@ export interface ContentItem<T> {
   metadata: Metadata;
 }
 
+export interface MediaObject {
+  id: string;
+  filename: string;
+  originalName: string;
+  path: string;
+  size: number;
+  mimeType: string;
+  mediaType: string;
+  url: string;
+  metadata: Record<string, any>;
+  uploadedAt: string;
+  uploadedBy: string;
+  repository: {
+    owner: string;
+    repo: string;
+  };
+}
+
 export interface PostHeader {
   title: string;
   excerpt: string;
-  image: any;
+  image: MediaObject;
   tags: string[];
 }
 
@@ -83,6 +102,10 @@ export interface FunFact {
 
 export interface FunFacts {
   "fun-facts": FunFact[];
+}
+
+export interface ThreeDObject {
+  model: MediaObject;
 }
 
 export interface ApiResponse<T> {
