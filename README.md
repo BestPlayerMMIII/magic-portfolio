@@ -2,6 +2,8 @@
 
 An immersive 3D developer portfolio that presents your projects, blog posts, work-in-progress items, collaborations, learning paths, and fun facts through an interactive wizard laboratory environment.
 
+🌐 **Live Demo**: [https://bestplayermmiii.github.io/magic-portfolio/](https://bestplayermmiii.github.io/magic-portfolio/)
+
 ## ✨ Features
 
 - **🎭 Interactive 3D Environment**: Navigate through a magical laboratory with floating crystals, alchemy cauldrons, mystical books, and more
@@ -154,7 +156,44 @@ Replace placeholder geometries with custom 3D models by:
 
 ## 🚀 Deployment
 
-### Vercel Deployment
+### GitHub Pages Deployment (Automatic)
+
+This project is configured to automatically deploy to GitHub Pages on every push to the `main` or `feature/public-repo` branches.
+
+**Live URL**: [https://bestplayermmiii.github.io/magic-portfolio/](https://bestplayermmiii.github.io/magic-portfolio/)
+
+#### Setup (One-Time)
+
+1. Go to your repository settings on GitHub
+2. Navigate to **Settings** > **Pages**
+3. Under "Build and deployment", select **Source**: `GitHub Actions`
+4. The workflow will automatically deploy on the next push
+
+#### Manual Deployment
+
+You can also trigger deployment manually:
+
+```bash
+# Build the project
+npm run build
+
+# The GitHub Actions workflow will handle deployment automatically
+# Or deploy manually using gh-pages (requires gh-pages package)
+npm run deploy
+```
+
+### Environment Variables
+
+The `.env` file is **not** committed to the repository (it's in `.gitignore`). The GitHub Actions workflow includes the necessary environment variables:
+
+```yaml
+VITE_GITCMS_REPOSITORY: BestPlayerMMIII/gitcms-magic-portfolio
+VITE_GITCMS_BRANCH: main
+```
+
+These are set directly in the workflow file (`.github/workflows/deploy.yml`) since GitCMS works with public repositories and doesn't require secrets.
+
+### Alternative: Vercel Deployment
 
 1. Connect your GitHub repository to Vercel
 2. Set environment variables in Vercel dashboard

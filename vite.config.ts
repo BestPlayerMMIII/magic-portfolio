@@ -11,6 +11,7 @@ export default defineConfig(({ mode }) => {
   const PORT = Number(env.VITE_PORT) || 5173;
 
   return {
+    base: mode === 'production' ? '/magic-portfolio/' : '/',
     plugins: [vue()],
     resolve: {
       alias: {
