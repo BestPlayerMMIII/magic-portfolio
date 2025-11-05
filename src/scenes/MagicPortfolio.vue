@@ -64,25 +64,6 @@
       style="z-index: 1"
     ></div>
 
-    <!-- Modal Event Interceptor - Elegant Universal Blocker -->
-    <div
-      v-if="showModal"
-      class="absolute inset-0 w-full h-full bg-transparent"
-      style="z-index: 999; pointer-events: auto; cursor: default"
-      @click.stop.prevent
-      @mousedown.stop.prevent
-      @mouseup.stop.prevent
-      @mousemove.stop.prevent
-      @wheel.stop.prevent
-      @contextmenu.stop.prevent
-      @dblclick.stop.prevent
-      @mouseenter.stop.prevent
-      @mouseleave.stop.prevent
-      @touchstart.stop.prevent
-      @touchend.stop.prevent
-      @touchmove.stop.prevent
-    ></div>
-
     <!-- UI Overlay - always on top (hidden in minimalist mode) -->
     <div
       v-show="!isMinimalistMode"
@@ -94,6 +75,7 @@
         :isDayMode="isDayMode"
         :toggleNavigation="toggleNavigation"
         :toggleDayNightMode="toggleDayNightMode"
+        @openCredits="openCreditsModal"
       />
 
       <!-- Interactive Hints - Enhanced & Mobile Optimized -->
@@ -387,6 +369,13 @@
       style="z-index: 1000"
     />
 
+    <!-- Credits Modal -->
+    <CreditsModal
+      :visible="showCreditsModal"
+      @close="closeCreditsModal"
+      style="z-index: 1000"
+    />
+
     <!-- Minimalist Mode Content -->
     <div
       v-if="isMinimalistMode && !preloaderState.isLoading"
@@ -481,6 +470,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import ContentModal from "../components/ContentModal.vue";
+import CreditsModal from "../components/CreditsModal.vue";
 import NavigationHeader from "../components/NavigationHeader.vue";
 import { Scene3DManager } from "../services/core";
 import { default as defaultTheme } from "../themes";
@@ -522,6 +512,7 @@ const selectedObject = ref<InteractiveObject | null>(null);
 const showModal = ref(false);
 const modalContent = ref<any[]>([]);
 const isLoadingContent = ref(false);
+const showCreditsModal = ref(false);
 
 // UI state management
 const showControlsPanel = ref(false);
@@ -639,6 +630,25 @@ const closeModal = () => {
   modalContent.value = [];
   selectedObject.value = null;
   isLoadingContent.value = false;
+
+  // Re-enable interactions
+  if (scene3DManager) {
+    scene3DManager.setModalOpen(false);
+  }
+};
+
+// Credits modal functions
+const openCreditsModal = () => {
+  showCreditsModal.value = true;
+
+  // Disable interactions
+  if (scene3DManager) {
+    scene3DManager.setModalOpen(true);
+  }
+};
+
+const closeCreditsModal = () => {
+  showCreditsModal.value = false;
 
   // Re-enable interactions
   if (scene3DManager) {

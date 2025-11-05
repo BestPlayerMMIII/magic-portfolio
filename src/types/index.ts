@@ -39,11 +39,14 @@ export interface MediaObject {
     repo: string;
   };
 }
+export interface ImageObject extends MediaObject {
+  thumbnailUrl: string;
+}
 
 export interface PostHeader {
   title: string;
   excerpt: string;
-  image: MediaObject;
+  image: ImageObject;
   tags: string[];
 }
 

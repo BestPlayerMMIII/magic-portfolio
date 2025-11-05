@@ -17,7 +17,7 @@ export const useCacheStore = defineStore("cache", () => {
   const isLoading = ref<Record<string, boolean>>({});
 
   // Default cache TTL configuration by category
-  const defaultTTL: Record<SchemaType | "_categories", number> = {
+  const defaultTTL: Partial<Record<SchemaType | "_categories", number>> = {
     project: 30 * 60 * 1000, // 30 minutes
     "blog-post": 15 * 60 * 1000, // 15 minutes
     collaboration: 60 * 60 * 1000, // 1 hour

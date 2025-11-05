@@ -240,7 +240,7 @@ const sectionDescription = computed<SectionDescription | undefined>(() => {
 });
 
 const getTitle = () => {
-  const titles: Record<SchemaType, string> = {
+  const titles: Partial<Record<SchemaType, string>> = {
     project: "Projects",
     "work-in-progress": "Work in Progress",
     "blog-post": "Blog Posts",

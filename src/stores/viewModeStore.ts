@@ -1,4 +1,5 @@
 import { ref, computed, watch } from "vue";
+import { LightingManager } from "../services/core";
 
 export type ViewMode = "3d" | "minimalist";
 
@@ -10,14 +11,14 @@ const viewMode = ref<ViewMode>(
   (localStorage.getItem(STORAGE_KEY_VIEW_MODE) as ViewMode) || "3d"
 );
 
-// Initialize day mode from localStorage, or auto-detect from system
+// Initialize day mode from localStorage, or fancy fallback to auto-detect in real time
 const getInitialDayMode = (): boolean => {
   const stored = localStorage.getItem(STORAGE_KEY_DAY_MODE);
   if (stored !== null) {
     return stored === "true";
   }
-  // Auto-detect from system preference
-  return !window.matchMedia("(prefers-color-scheme: dark)").matches;
+  // Auto-detect real time day mode
+  return LightingManager.calculateRealTimeMode() === "day";
 };
 
 const isDayMode = ref(getInitialDayMode());

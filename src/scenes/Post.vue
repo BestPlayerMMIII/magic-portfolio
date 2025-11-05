@@ -92,7 +92,6 @@ import BlogPostDetail from "@/components/posts/BlogPostDetail.vue";
 import WIPDetail from "@/components/posts/WIPDetail.vue";
 import CollaborationDetail from "@/components/posts/CollaborationDetail.vue";
 import LearningPathDetail from "@/components/posts/LearningPathDetail.vue";
-import FunFactDetail from "@/components/posts/FunFactDetail.vue";
 import BackButton from "@/components/BackButton.vue";
 import { useViewMode } from "@/stores/viewModeStore";
 import router from "@/router";
@@ -107,16 +106,15 @@ const isLoadingPost = ref(true);
 
 // Map schemaId to component
 const getPostComponent = (schemaId: SchemaType): Component => {
-  const componentMap: Record<SchemaType, Component> = {
+  const componentMap: Partial<Record<SchemaType, Component>> = {
     project: ProjectDetail,
     "blog-post": BlogPostDetail,
     "work-in-progress": WIPDetail,
     collaboration: CollaborationDetail,
     "learning-path": LearningPathDetail,
-    "fun-facts": FunFactDetail,
   };
 
-  return componentMap[schemaId]; // no fallback since we check existence before rendering
+  return componentMap[schemaId] || BlogPostDetail; // fallback to blog post
 };
 
 onMounted(async () => {

@@ -84,10 +84,13 @@ export class InteractionManager {
    * Check if events should be blocked
    */
   private isEventBlocked(event: Event): boolean {
-    // Block ALL events when modal is open
+    // When modal is open, block most events but allow wheel for scrolling
     if (this._isModalOpen || !this._isEnabled) {
-      event.stopPropagation();
-      event.preventDefault();
+      // Allow wheel events to pass through for modal scrolling
+      if (event.type !== "wheel") {
+        event.stopPropagation();
+        event.preventDefault();
+      }
       return true;
     }
 

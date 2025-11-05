@@ -54,6 +54,40 @@
 
         <!-- Right Section: Controls -->
         <div class="flex items-center space-x-4">
+          <!-- Credits Button (NEW) -->
+          <button
+            @click="$emit('openCredits')"
+            class="ui-button relative px-4 py-3 rounded-xl transition-all duration-300 overflow-hidden group shadow-lg hover:shadow-xl bg-gradient-to-r from-pink-500/20 to-rose-500/20 hover:from-pink-500/30 hover:to-rose-500/30 border border-pink-400/50"
+            style="pointer-events: auto; cursor: pointer"
+            title="View 3D Model Credits"
+          >
+            <!-- Enhanced background animation -->
+            <div
+              class="absolute inset-0 transition-all duration-500 bg-gradient-to-r from-pink-600/10 to-rose-600/10"
+            ></div>
+
+            <!-- Content -->
+            <div class="relative z-10 flex items-center gap-2">
+              <svg
+                class="w-5 h-5 text-pink-400 transition-all duration-300 transform group-hover:scale-110"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"
+                />
+              </svg>
+              <span v-if="!isMobile" class="text-pink-300 font-medium text-sm">
+                Credits
+              </span>
+            </div>
+
+            <!-- Enhanced ripple effect -->
+            <div
+              class="absolute inset-0 opacity-0 group-active:opacity-30 transition-opacity duration-150 rounded-xl bg-pink-400"
+            ></div>
+          </button>
+
           <!-- Classic Navigation Button -->
           <router-link
             to="/about"
@@ -196,5 +230,9 @@ defineProps<{
   toggleNavigation: () => void;
   isDayMode: boolean;
   toggleDayNightMode: () => void;
+}>();
+
+defineEmits<{
+  openCredits: [];
 }>();
 </script>
