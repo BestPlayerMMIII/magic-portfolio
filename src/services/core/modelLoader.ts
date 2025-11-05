@@ -19,7 +19,7 @@ export class ModelLoader {
     this._options = {
       enableDRACO: true,
       dracoPath: "https://www.gstatic.com/draco/versioned/decoders/1.5.6/",
-      timeout: 10000,
+      timeout: 30000, // Increased to 30 seconds for large models
       ...options,
     };
 

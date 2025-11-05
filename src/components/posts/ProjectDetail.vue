@@ -207,7 +207,6 @@ const enhanceContentMedia = async (schemaId: string, postId: string) => {
     if (fullPost?.data?.content) {
       // Update only the content with full resolution
       enhancedContent.value = fullPost.data.content;
-      console.log("Content enhanced for post:", enhancedContent.value);
     }
   } catch (e) {
     console.error("Failed to enhance content media:", e);
