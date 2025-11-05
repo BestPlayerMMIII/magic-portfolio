@@ -80,7 +80,7 @@ export class DatabaseService {
   }
 
   private async getClean<T>(query: SchemaQuery): Promise<ContentItem<T>[]> {
-    const result = await query.debug(true).get();
+    const result = await query.debug(false).get();
     return result.map((item) => this.normalizeAs<T>(item));
   }
 

@@ -487,7 +487,8 @@ import "../styles/ui-interactions.css";
 import AppHeader from "@/components/AppHeader.vue";
 
 // View mode state from store
-const { isMinimalistMode, isDayMode, toggleDayMode } = useViewMode();
+const { isMinimalistMode, isDayMode, toggleDayMode, setViewMode } =
+  useViewMode();
 
 // Sections data
 const allSections = getAllSectionDescriptions();
@@ -687,6 +688,18 @@ const toggleDayNightMode = () => {
 };
 
 onMounted(async () => {
+  // Check if mobile and force minimalist mode
+  const deviceType = getDeviceType();
+  const isMobileOrTablet = deviceType === "mobile" || deviceType === "tablet";
+
+  if (isMobileOrTablet && !isMinimalistMode.value) {
+    console.log(
+      `📱 ${deviceType} device detected - forcing classic view for better performance`
+    );
+    // Force minimalist mode on mobile/tablet
+    setViewMode("minimalist");
+  }
+
   window.addEventListener("resize", handleResize);
   handleResize();
 
