@@ -11,8 +11,7 @@ export type SchemaType =
   | "work-in-progress"
   | "collaboration"
   | "learning-path"
-  | "fun-facts"
-  | "3d-object";
+  | "fun-facts";
 export type NullableSchemaType = SchemaType | "";
 
 export interface ContentItem<T> {

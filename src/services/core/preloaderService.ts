@@ -1,6 +1,5 @@
 import type { PreloaderState, ObjectConfig } from ".";
 import { ModelLoader } from ".";
-import { threeDObjectService } from "../threeDObjectService";
 
 /**
  * Service for handling asset preloading with progress tracking
@@ -28,30 +27,16 @@ export class PreloaderService {
    * Preload all models from object configurations
    */
   async preloadAssets(objectsConfig: ObjectConfig[]): Promise<void> {
-    // Collect model paths/IDs from configuration
+    // Collect model paths from configuration
     const modelPaths: string[] = [];
-    const modelIds: string[] = [];
 
     for (const config of objectsConfig) {
-      if (config.modelId) {
-        modelIds.push(config.modelId);
-      } else if (config.modelPath) {
+      if (config.modelPath) {
         modelPaths.push(config.modelPath);
       }
     }
 
-    // Get GitCMS model URLs
-    let gitcmsUrls: Map<string, string> = new Map();
-    if (modelIds.length > 0) {
-      console.log(`🔄 Fetching ${modelIds.length} model URLs from GitCMS...`);
-      gitcmsUrls = await threeDObjectService.getModelUrlsMap(modelIds);
-      console.log(`✅ Fetched ${gitcmsUrls.size} model URLs from GitCMS`);
-    }
-
-    // Combine all paths to load
-    const allPaths = [...modelPaths, ...Array.from(gitcmsUrls.values())];
-
-    if (allPaths.length === 0) {
+    if (modelPaths.length === 0) {
       console.log("No models to preload");
       return;
     }
@@ -60,7 +45,7 @@ export class PreloaderService {
       isLoading: true,
       progress: 0,
       status: "Initializing magical assets...",
-      totalAssets: allPaths.length,
+      totalAssets: modelPaths.length,
       loadedAssets: 0,
     };
 
@@ -68,7 +53,7 @@ export class PreloaderService {
 
     try {
       await this._modelLoader.preloadModels(
-        allPaths,
+        modelPaths,
         this.handleLoadProgress.bind(this)
       );
 

@@ -51,7 +51,6 @@ export class DatabaseService {
       "collaboration",
       "learning-path",
       "fun-facts",
-      "3d-object",
     ];
 
     const counts: Record<string, number> = {};

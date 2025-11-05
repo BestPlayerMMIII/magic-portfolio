@@ -9,7 +9,6 @@ import type {
   AnimationConfig,
 } from ".";
 import { ModelLoader } from ".";
-import { threeDObjectService } from "../threeDObjectService";
 
 /**
  * Service for managing 3D objects in the scene
@@ -71,26 +70,9 @@ export class ObjectManager {
           objectToAdd = await this.createTextObject(config.text);
         }
         // Handle 3D model objects
-        else if (config.modelId || config.modelPath) {
-          // Resolve the actual model URL/path
-          let modelUrl: string;
-
-          if (config.modelId) {
-            console.log(
-              `🔄 Fetching model URL from GitCMS for: ${config.modelId}`
-            );
-            const url = await threeDObjectService.getModelUrl(config.modelId);
-            if (!url) {
-              throw new Error(`Model not found in GitCMS: ${config.modelId}`);
-            }
-            modelUrl = url;
-            console.log(`✅ Got GitCMS model URL: ${modelUrl}`);
-          } else {
-            modelUrl = config.modelPath!;
-            console.log(`🎨 Loading local 3D model: ${modelUrl}`);
-          }
-
-          objectToAdd = await this._modelLoader.loadModel(modelUrl);
+        else if (config.modelPath) {
+          // Resolve the actual model path
+          objectToAdd = await this._modelLoader.loadModel(config.modelPath);
         }
         // Invalid configuration
         else {
