@@ -45,28 +45,15 @@
       </div>
     </div>
 
-    <!-- Navigation Header (shown only in minimalist mode or when not loading) -->
+    <!-- Three.js Canvas Container -->
     <div
-      v-if="!preloaderState.isLoading && isMinimalistMode"
-      class="absolute top-0 left-0 right-0 z-40"
-    >
-      <NavigationHeader
-        :isDayMode="isDayMode"
-        :toggleDayNightMode="toggleDayNightMode"
-      />
-    </div>
-
-    <!-- Three.js Canvas Container (hidden in minimalist mode) -->
-    <div
-      v-show="!isMinimalistMode"
       ref="threeContainer"
       class="absolute inset-0 w-full h-full"
       style="z-index: 1"
     ></div>
 
-    <!-- UI Overlay - always on top (hidden in minimalist mode) -->
+    <!-- UI Overlay - always on top -->
     <div
-      v-show="!isMinimalistMode"
       class="ui-overlay absolute inset-0 w-full h-full"
       style="pointer-events: none"
     >
@@ -375,103 +362,14 @@
       @close="closeCreditsModal"
       style="z-index: 1000"
     />
-
-    <!-- Minimalist Mode Content -->
-    <div
-      v-if="isMinimalistMode && !preloaderState.isLoading"
-      class="absolute inset-0 z-30 overflow-y-auto"
-      :class="{
-        'bg-[rgb(242,242,242)]': isDayMode,
-        'bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900':
-          !isDayMode,
-      }"
-    >
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-16">
-        <div class="text-center mb-12">
-          <h1
-            class="text-5xl md:text-6xl font-bold mb-4"
-            :class="{ 'text-gray-900': isDayMode, 'text-white': !isDayMode }"
-          >
-            Welcome to My Portfolio
-          </h1>
-          <p
-            class="text-xl mb-8"
-            :class="{ 'text-gray-700': isDayMode, 'text-gray-300': !isDayMode }"
-          >
-            Explore my work through these sections
-          </p>
-        </div>
-
-        <!-- Loading state -->
-        <div
-          v-if="isLoadingSections"
-          class="flex items-center justify-center py-20"
-        >
-          <div
-            class="animate-spin rounded-full h-12 w-12 border-b-2"
-            :class="{
-              'border-gray-900': isDayMode,
-              'border-purple-400': !isDayMode,
-            }"
-          ></div>
-        </div>
-
-        <!-- Section cards -->
-        <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <router-link
-            v-for="section in sections"
-            :key="section.id"
-            :to="`/post/${section.id}`"
-            class="group block p-6 rounded-xl transition-all duration-300 hover:scale-105 border"
-            :class="{
-              'bg-white/90 border-gray-300 hover:border-purple-400 hover:shadow-xl':
-                isDayMode,
-              'bg-slate-800/70 border-purple-500/30 hover:border-purple-500/60 hover:shadow-2xl':
-                !isDayMode,
-            }"
-            :style="{
-              boxShadow: !isDayMode
-                ? `0 0 30px ${section.color.accent}20`
-                : 'none',
-            }"
-          >
-            <div class="text-center">
-              <div
-                class="text-5xl mb-3 group-hover:scale-110 transition-transform duration-300"
-              >
-                {{ section.emoji }}
-              </div>
-              <h3
-                class="text-xl font-bold mb-2"
-                :class="{
-                  'text-gray-900': isDayMode,
-                  'text-white': !isDayMode,
-                }"
-              >
-                {{ section.title }}
-              </h3>
-              <p
-                class="text-sm"
-                :class="{
-                  'text-gray-600': isDayMode,
-                  'text-gray-300': !isDayMode,
-                }"
-              >
-                {{ section.description }}
-              </p>
-            </div>
-          </router-link>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from "vue";
+import router from "@/router";
 import ContentModal from "../components/ContentModal.vue";
 import CreditsModal from "../components/CreditsModal.vue";
-import NavigationHeader from "../components/NavigationHeader.vue";
 import { Scene3DManager } from "../services/core";
 import { default as defaultTheme } from "../themes";
 import type { NullableSchemaType } from "@/types";
@@ -487,7 +385,7 @@ import "../styles/ui-interactions.css";
 import AppHeader from "@/components/AppHeader.vue";
 
 // View mode state from store
-const { isMinimalistMode, isDayMode, toggleDayMode } = useViewMode();
+const { isDayMode, toggleDayMode } = useViewMode();
 
 // Sections data
 const allSections = getAllSectionDescriptions();
@@ -541,6 +439,7 @@ let scene3DManager: Scene3DManager | null = null;
 
 // Initialize the 3D scene
 const initThreeJS = async () => {
+  // Mobile/tablet users are already redirected to /about in onMounted
   if (!threeContainer.value) return;
 
   try {
@@ -687,6 +586,14 @@ const toggleDayNightMode = () => {
 };
 
 onMounted(async () => {
+  // Redirect mobile/tablet users to /about for classic view
+  const deviceType = getDeviceType();
+  if (deviceType === "mobile" || deviceType === "tablet") {
+    console.log(`📱 ${deviceType} device detected - redirecting to /about`);
+    router.push("/about");
+    return;
+  }
+
   window.addEventListener("resize", handleResize);
   handleResize();
 
@@ -705,6 +612,7 @@ onMounted(async () => {
     isLoadingSections.value = false;
   }
 
+  // Initialize 3D scene
   initThreeJS();
 });
 

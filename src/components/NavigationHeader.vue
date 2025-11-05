@@ -10,7 +10,7 @@
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
       <div class="flex items-center h-16 relative">
-        <!-- Left Section: Logo + Title + View Mode -->
+        <!-- Left Section: Logo + Title -->
         <div
           class="flex items-center space-x-4 min-w-0"
           style="min-width: 180px"
@@ -35,26 +35,11 @@
               </h1>
             </div>
           </router-link>
-
-          <!-- View Mode Toggle (only on home page) -->
-          <button
-            v-if="isHomePage"
-            @click="toggle3DMode"
-            class="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 font-medium text-sm"
-            :class="{
-              'bg-purple-100 text-purple-700 hover:bg-purple-200': isDayMode,
-              'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/50':
-                !isDayMode,
-            }"
-          >
-            <span>{{ is3DMode ? "🎨" : "🔮" }}</span>
-            <span>{{ is3DMode ? "Minimalist" : "3D View" }}</span>
-          </button>
         </div>
 
-        <!-- Center Section: Navigation Links (minimalist mode) -->
+        <!-- Center Section: Navigation Links -->
         <div
-          v-if="(isMinimalistMode || !isHomePage) && !isLoadingSections"
+          v-if="!isLoadingSections"
           ref="navLinksRef"
           class="hidden md:flex items-center space-x-1 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2"
           style="z-index: 1"
@@ -106,9 +91,8 @@
           class="flex items-center space-x-2 min-w-0 justify-end ml-auto"
           style="min-width: 180px"
         >
-          <!-- Mobile Menu Toggle (for minimalist mode on mobile) -->
+          <!-- Mobile Menu Toggle -->
           <button
-            v-if="isMinimalistMode || !isHomePage"
             @click="toggleMobileMenu"
             class="md:hidden p-2 rounded-lg transition-all duration-200"
             :class="{
@@ -179,13 +163,9 @@
         </div>
       </div>
 
-      <!-- Mobile Menu (for minimalist mode) -->
+      <!-- Mobile Menu -->
       <div
-        v-if="
-          showMobileMenu &&
-          (isMinimalistMode || !isHomePage) &&
-          !isLoadingSections
-        "
+        v-if="showMobileMenu && !isLoadingSections"
         class="md:hidden border-t py-2"
         :class="{
           'border-gray-200': isDayMode,
@@ -230,21 +210,6 @@
           <component :is="getSectionIcon(section.id, 'w-5 h-5')" />
           <span>{{ section.title }}</span>
         </router-link>
-
-        <!-- View Mode Toggle for Mobile -->
-        <button
-          v-if="isHomePage"
-          @click="toggle3DMode"
-          class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 font-medium text-sm mt-2"
-          :class="{
-            'bg-purple-100 text-purple-700 hover:bg-purple-200': isDayMode,
-            'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/50':
-              !isDayMode,
-          }"
-        >
-          <span>{{ is3DMode ? "🎨" : "🔮" }}</span>
-          <span>Switch to {{ is3DMode ? "Minimalist" : "3D View" }}</span>
-        </button>
       </div>
     </div>
   </nav>
@@ -252,7 +217,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
-import { useViewMode } from "@/stores/viewModeStore";
 import { getAllSectionDescriptions } from "@/config/sectionDescriptions";
 import { getSectionIcon } from "@/config/sectionIcons";
 import { apiWithCache } from "@/services/apiWithCache";
@@ -262,8 +226,6 @@ defineProps<{
   isDayMode: boolean;
   toggleDayNightMode: () => void;
 }>();
-
-const { is3DMode, isMinimalistMode, toggle3DMode } = useViewMode();
 
 const showMobileMenu = ref(false);
 const currentPath = ref("");
@@ -277,10 +239,6 @@ const sections = computed(() => {
   return allSections.filter((section) =>
     visibleSections.value.includes(section.id)
   );
-});
-
-const isHomePage = computed(() => {
-  return currentPath.value === "/" || currentPath.value === "";
 });
 
 const isSectionActive = (sectionId: string) => {
