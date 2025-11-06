@@ -70,13 +70,8 @@
         </p>
         <BackButton />
       </div>
-      <!-- Footer component -->
-      <div
-        class="text-center p-6 border-t mt-12 text-sm"
-        :class="{ 'text-gray-800': isDayMode, 'text-white': !isDayMode }"
-      >
-        &copy; 2025 BestPlayer. All rights reserved.
-      </div>
+      <!-- Footer -->
+      <AppFooter :isDayMode="isDayMode" authorName="BestPlayer" />
     </div>
   </div>
 </template>
@@ -93,6 +88,7 @@ import WIPDetail from "@/components/posts/WIPDetail.vue";
 import CollaborationDetail from "@/components/posts/CollaborationDetail.vue";
 import LearningPathDetail from "@/components/posts/LearningPathDetail.vue";
 import BackButton from "@/components/BackButton.vue";
+import AppFooter from "@/components/AppFooter.vue";
 import { useViewMode } from "@/stores/viewModeStore";
 import router from "@/router";
 import { isSectionEnabled } from "@/config/sectionDescriptions";

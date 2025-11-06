@@ -104,15 +104,7 @@
       </div>
 
       <!-- Footer -->
-      <div
-        class="text-center p-6 border-t mt-12 text-sm"
-        :class="{
-          'text-gray-800 border-gray-200': isDayMode,
-          'text-white border-purple-500/30': !isDayMode,
-        }"
-      >
-        &copy; 2025 BestPlayer. All rights reserved.
-      </div>
+      <AppFooter :isDayMode="isDayMode" authorName="BestPlayer" />
     </div>
   </div>
 </template>
@@ -121,6 +113,7 @@
 import { ref, onMounted } from "vue";
 import NavigationHeader from "@/components/NavigationHeader.vue";
 import BackButton from "@/components/BackButton.vue";
+import AppFooter from "@/components/AppFooter.vue";
 import { useViewMode } from "@/stores/viewModeStore";
 import { apiService } from "@/services/api";
 
