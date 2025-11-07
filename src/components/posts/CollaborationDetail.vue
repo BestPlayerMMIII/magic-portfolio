@@ -1,5 +1,5 @@
 <template>
-  <div class="relative mt-6 p-6 flex flex-col justify-center max-w-4xl mx-auto">
+  <BasePostDetail :post="post" :isDayMode="isDayMode">
     <header class="w-full text-center mb-6">
       <h1
         class="text-4xl font-bold mb-4"
@@ -51,14 +51,12 @@
         More details about this collaboration coming soon...
       </p>
     </div>
-
-    <BackButton />
-  </div>
+  </BasePostDetail>
 </template>
 
 <script setup lang="ts">
 import type { ContentItem } from "@/types";
-import BackButton from "@/components/BackButton.vue";
+import BasePostDetail from "./BasePostDetail.vue";
 
 interface Props {
   post: ContentItem<any>;

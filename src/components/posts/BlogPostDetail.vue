@@ -1,5 +1,9 @@
 <template>
-  <div class="relative mt-6 p-6 flex flex-col justify-center">
+  <BasePostDetail
+    :post="post"
+    :isDayMode="isDayMode"
+    v-slot="{ enhancedContent }"
+  >
     <!-- Blog Post Header -->
     <header class="w-full text-center mb-6">
       <h1
@@ -52,20 +56,17 @@
     <!-- Render raw HTML from post.data.content -->
     <div
       v-html="enhancedContent"
-      class="prose min-w-[60%] mx-auto"
+      class="prose w-full max-w-none md:min-w-[60%] mx-auto content-wrapper"
       :class="{ 'prose-invert': !isDayMode }"
     ></div>
-
-    <BackButton />
-  </div>
+  </BasePostDetail>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import type { ContentItem } from "@/types";
 import mediaService from "@/services/mediaService";
-import BackButton from "@/components/BackButton.vue";
-import { apiService } from "@/services/api";
+import BasePostDetail from "./BasePostDetail.vue";
 
 interface Props {
   post: ContentItem<any>;
@@ -77,8 +78,6 @@ const props = defineProps<Props>();
 // Media loading states
 const loadedImageUrl = ref<string | null>(null);
 const imageLoading = ref(false);
-const enhancedContent = ref<string>("");
-const contentLoading = ref(false);
 
 // Progressive enhancement for header image
 const fetchFullImage = async (imageField: any) => {
@@ -104,29 +103,6 @@ const fetchFullImage = async (imageField: any) => {
 // Initialize header image
 loadedImageUrl.value = props.post.data.header.image.thumbnailUrl || null;
 
-// Progressive enhancement for content HTML
-const enhanceContentMedia = async (schemaId: string, postId: string) => {
-  contentLoading.value = true;
-  try {
-    // Fetch the FULL version using the API service
-    const fullPost = await apiService.getPostByIdFull(schemaId, postId);
-
-    if (fullPost?.data?.content) {
-      // Update only the content with full resolution
-      enhancedContent.value = fullPost.data.content;
-    }
-  } catch (e) {
-    console.error("Failed to enhance content media:", e);
-    // Fallback to original content
-    enhancedContent.value = props.post.data.content || "";
-  } finally {
-    contentLoading.value = false;
-  }
-};
-
-// Initialize content
-enhancedContent.value = props.post.data.content || "";
-
 // Watch for image changes and load full resolution
 watch(
   () => props.post.data.header.image,
@@ -136,16 +112,6 @@ watch(
     } else {
       loadedImageUrl.value = null;
     }
-  },
-  { immediate: true }
-);
-
-// Watch for post changes and enhance content
-watch(
-  () => props.post.id,
-  () => {
-    enhancedContent.value = props.post.data.content || "";
-    enhanceContentMedia(props.post.schemaId, props.post.id);
   },
   { immediate: true }
 );
