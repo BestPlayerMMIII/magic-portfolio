@@ -84,10 +84,11 @@ export class PreloaderService {
     this._state.progress = (loaded / total) * 90;
 
     if (currentPath) {
-      const filename = currentPath.split("/").pop() || currentPath;
-      this._state.status = `Loading ${filename}...`;
+      const filename =
+        currentPath.split("/").pop()?.replace(".glb", "") || currentPath;
+      this._state.status = `Loading ${filename}... (${loaded}/${total})`;
     } else {
-      this._state.status = `Loaded ${loaded}/${total} magical artifacts...`;
+      this._state.status = `Loading magical artifacts... (${loaded}/${total})`;
     }
 
     this.notifyProgress();

@@ -49,7 +49,7 @@ export class Scene3DManager {
     // Initialize services
     this._modelLoader = new ModelLoader({
       enableDRACO: true,
-      timeout: 45000, // 45 seconds timeout for slower connections
+      timeout: 60000, // 1 minute timeout for large models and slower connections
     });
 
     this._sceneManager = new SceneManager();

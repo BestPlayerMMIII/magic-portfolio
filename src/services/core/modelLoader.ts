@@ -19,7 +19,7 @@ export class ModelLoader {
     this._options = {
       enableDRACO: true,
       dracoPath: "https://www.gstatic.com/draco/versioned/decoders/1.5.6/",
-      timeout: 45000, // Increased to 45 seconds for slower connections
+      timeout: 60000, // 1 minute timeout for large models and slower connections
       ...options,
     };
 
@@ -79,15 +79,21 @@ export class ModelLoader {
   private createLoadPromise(modelPath: string): Promise<THREE.Group> {
     return new Promise((resolve, reject) => {
       const startTime = Date.now();
+      let isComplete = false;
 
       // Set a timeout for loading
       const timeout = setTimeout(() => {
-        reject(new Error(`Timeout loading model: ${modelPath}`));
+        if (!isComplete) {
+          isComplete = true;
+          reject(new Error(`Timeout loading model: ${modelPath}`));
+        }
       }, this._options.timeout);
 
       this._gltfLoader.load(
         modelPath,
         (gltf) => {
+          if (isComplete) return; // Already timed out
+          isComplete = true;
           clearTimeout(timeout);
           const loadTime = Date.now() - startTime;
 
@@ -120,10 +126,10 @@ export class ModelLoader {
             reject(error);
           }
         },
-        (_progress) => {
-          // Optional: could emit progress events here
-        },
+        undefined, // No progress callback - reduces console spam
         (error) => {
+          if (isComplete) return; // Already timed out or resolved
+          isComplete = true;
           clearTimeout(timeout);
           console.error(`❌ Failed to load model ${modelPath}:`, error);
           const errorMessage =
@@ -259,7 +265,8 @@ export class ModelLoader {
   }
 
   /**
-   * Preload multiple models
+   * Preload multiple models SEQUENTIALLY to avoid network congestion
+   * Loading in parallel can cause timeouts on slower connections
    */
   async preloadModels(
     modelPaths: string[],
@@ -269,12 +276,16 @@ export class ModelLoader {
     let loadedCount = 0;
     let failedCount = 0;
 
-    const loadPromises = modelPaths.map(async (modelPath) => {
+    // Load models SEQUENTIALLY to avoid overwhelming the network
+    for (const modelPath of modelPaths) {
       try {
         if (onProgress) {
           onProgress(loadedCount, totalModels, modelPath);
         }
 
+        console.log(
+          `📦 Loading model ${loadedCount + 1}/${totalModels}: ${modelPath}`
+        );
         await this.loadModel(modelPath);
         loadedCount++;
 
@@ -282,7 +293,9 @@ export class ModelLoader {
           onProgress(loadedCount, totalModels, modelPath);
         }
 
-        console.log(`✅ Preloaded: ${modelPath}`);
+        console.log(
+          `✅ Preloaded (${loadedCount}/${totalModels}): ${modelPath}`
+        );
       } catch (error) {
         console.warn(`⚠️ Failed to preload ${modelPath}:`, error);
         failedCount++;
@@ -292,9 +305,7 @@ export class ModelLoader {
           onProgress(loadedCount, totalModels, modelPath);
         }
       }
-    });
-
-    await Promise.allSettled(loadPromises);
+    }
 
     // Log summary
     const successCount = loadedCount - failedCount;
