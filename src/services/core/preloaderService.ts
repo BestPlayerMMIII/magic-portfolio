@@ -57,15 +57,12 @@ export class PreloaderService {
         this.handleLoadProgress.bind(this)
       );
 
-      this._state.status = "Magic laboratory ready!";
-      this._state.progress = 100;
+      // Update to 90% - still need to finalize scene initialization
+      this._state.status = "Finalizing scene...";
+      this._state.progress = 90;
       this.notifyProgress();
 
-      // Small delay before completing for UX
-      setTimeout(() => {
-        this._state.isLoading = false;
-        this.notifyComplete();
-      }, 500);
+      // Note: Loading state will be set to false externally when scene is fully ready
     } catch (error) {
       console.error("Failed to preload assets:", error);
       this._state.status = "Failed to load some assets";
@@ -83,7 +80,8 @@ export class PreloaderService {
     currentPath: string
   ): void {
     this._state.loadedAssets = loaded;
-    this._state.progress = (loaded / total) * 100;
+    // Models take 90% of the loading, remaining 10% is for scene finalization
+    this._state.progress = (loaded / total) * 90;
 
     if (currentPath) {
       const filename = currentPath.split("/").pop() || currentPath;
@@ -166,6 +164,26 @@ export class PreloaderService {
       totalAssets: 0,
       loadedAssets: 0,
     };
+  }
+
+  /**
+   * Mark scene as ready and complete loading
+   */
+  setSceneReady(): void {
+    if (!this._state.isLoading) {
+      console.warn("PreloaderService is not in loading state");
+      return;
+    }
+
+    this._state.status = "Magic laboratory ready!";
+    this._state.progress = 100;
+    this.notifyProgress();
+
+    // Small delay before completing for UX
+    setTimeout(() => {
+      this._state.isLoading = false;
+      this.notifyComplete();
+    }, 500);
   }
 
   /**

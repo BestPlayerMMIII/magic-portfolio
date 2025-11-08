@@ -49,7 +49,7 @@ export class Scene3DManager {
     // Initialize services
     this._modelLoader = new ModelLoader({
       enableDRACO: true,
-      timeout: 10000,
+      timeout: 45000, // 45 seconds timeout for slower connections
     });
 
     this._sceneManager = new SceneManager();
@@ -214,6 +214,9 @@ export class Scene3DManager {
 
     this._isInitialized = true;
     console.log("✅ Scene3DManager initialized successfully");
+
+    // Now that scene is fully ready, mark preloader as complete
+    this._preloaderService.setSceneReady();
   }
 
   /**

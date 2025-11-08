@@ -19,7 +19,7 @@ export class ModelLoader {
     this._options = {
       enableDRACO: true,
       dracoPath: "https://www.gstatic.com/draco/versioned/decoders/1.5.6/",
-      timeout: 30000, // Increased to 30 seconds for large models
+      timeout: 45000, // Increased to 45 seconds for slower connections
       ...options,
     };
 
@@ -267,6 +267,7 @@ export class ModelLoader {
   ): Promise<void> {
     const totalModels = modelPaths.length;
     let loadedCount = 0;
+    let failedCount = 0;
 
     const loadPromises = modelPaths.map(async (modelPath) => {
       try {
@@ -284,6 +285,7 @@ export class ModelLoader {
         console.log(`✅ Preloaded: ${modelPath}`);
       } catch (error) {
         console.warn(`⚠️ Failed to preload ${modelPath}:`, error);
+        failedCount++;
         loadedCount++;
 
         if (onProgress) {
@@ -293,6 +295,18 @@ export class ModelLoader {
     });
 
     await Promise.allSettled(loadPromises);
+
+    // Log summary
+    const successCount = loadedCount - failedCount;
+    if (failedCount > 0) {
+      console.warn(
+        `⚠️ Preloading complete: ${successCount}/${totalModels} models loaded successfully, ${failedCount} failed`
+      );
+    } else {
+      console.log(
+        `✅ Preloading complete: ${successCount}/${totalModels} models loaded successfully`
+      );
+    }
   }
 
   /**
