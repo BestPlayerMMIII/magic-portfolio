@@ -7,6 +7,17 @@ import "./style.css";
 
 console.log("🎨 Initializing Magic Portfolio app...");
 
+// Fix mobile viewport height (for browser navigation bars)
+function setViewportHeight() {
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty("--vh", `${vh}px`);
+}
+
+// Set on load and on resize
+setViewportHeight();
+window.addEventListener("resize", setViewportHeight);
+window.addEventListener("orientationchange", setViewportHeight);
+
 // Create Vue app
 const app = createApp(App);
 

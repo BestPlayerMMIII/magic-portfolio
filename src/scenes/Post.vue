@@ -73,6 +73,9 @@
       <!-- Footer -->
       <AppFooter :isDayMode="isDayMode" authorName="BestPlayer" />
     </div>
+
+    <!-- Scroll to Top Button -->
+    <ScrollToTopButton />
   </div>
 </template>
 
@@ -88,6 +91,7 @@ import WIPDetail from "@/components/posts/WIPDetail.vue";
 import CollaborationDetail from "@/components/posts/CollaborationDetail.vue";
 import LearningPathDetail from "@/components/posts/LearningPathDetail.vue";
 import BackButton from "@/components/BackButton.vue";
+import ScrollToTopButton from "@/components/ScrollToTopButton.vue";
 import AppFooter from "@/components/AppFooter.vue";
 import { useViewMode } from "@/stores/viewModeStore";
 import router from "@/router";

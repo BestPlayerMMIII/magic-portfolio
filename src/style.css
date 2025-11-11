@@ -13,16 +13,32 @@
   padding: 0;
 }
 
+/* Mobile viewport fix for browser navigation bars */
+html {
+  height: 100%;
+  /* Use CSS environment variables for safe areas (notches, navigation bars) */
+  height: -webkit-fill-available;
+}
+
 body {
   font-family: "Inter", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  height: 100%;
+  /* Support for safe area insets (iOS notch, Android navigation) */
+  /* Note: bottom padding handled by scrollable containers */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) 0
+    env(safe-area-inset-left);
 }
 
 #app {
   width: 100vw;
+  /* Fix for mobile viewport height issues with browser navigation */
   height: 100vh;
+  height: calc(var(--vh, 1vh) * 100);
   overflow: hidden;
+  /* Prevent pull-to-refresh on mobile */
+  overscroll-behavior-y: contain;
 }
 
 /* Custom scrollbar */
@@ -70,4 +86,14 @@ body {
 
 .glow-pink {
   box-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
+}
+
+/* Mobile-specific: Ensure footer is always visible above mobile browser UI */
+@media (max-width: 768px) {
+  /* The scrollable container should scroll its content naturally */
+  .overflow-y-auto {
+    padding-bottom: 0 !important;
+    /* Use box-sizing to ensure padding doesn't add to height */
+    box-sizing: border-box !important;
+  }
 }

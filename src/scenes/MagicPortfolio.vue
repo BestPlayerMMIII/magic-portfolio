@@ -119,93 +119,23 @@
 
       <!-- Collapsible Controls Panel -->
       <div class="ui-instructions absolute bottom-6 left-6">
-        <div
-          class="instructions-container transition-all duration-500 ease-in-out opacity-100 transform translate-y-0"
-          v-if="showControlsPanel"
-        >
+        <div class="flex items-end gap-3">
+          <!-- Controls Panel Container (opens to the left) -->
           <div
-            class="ui-panel bg-gradient-to-br from-indigo-900/95 to-purple-900/95 backdrop-blur-lg text-white p-6 rounded-2xl border border-indigo-400/50 shadow-2xl max-w-sm relative overflow-hidden"
+            class="instructions-container transition-all duration-500 ease-in-out"
+            v-if="showControlsPanel"
           >
-            <!-- Close button -->
-            <button
-              @click="toggleControlsPanel"
-              class="ui-button absolute top-3 right-3 p-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors duration-200"
-              style="pointer-events: auto; cursor: pointer"
+            <div
+              class="ui-panel bg-gradient-to-br from-indigo-900/95 to-purple-900/95 backdrop-blur-lg text-white p-6 rounded-2xl border border-indigo-400/50 shadow-2xl max-w-sm relative overflow-hidden"
             >
-              <svg
-                class="w-4 h-4 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"
-                ></path>
-              </svg>
-            </button>
-
-            <h3
-              class="text-lg font-bold mb-4 text-indigo-300 flex items-center"
-            >
-              <span class="mr-2">🎮</span>
-              Controls
-            </h3>
-            <div class="space-y-3 text-sm">
-              <!-- Mobile/Tablet Controls -->
-              <template v-if="isMobile">
-                <div class="flex items-center p-2 rounded-lg bg-white/5">
-                  <span class="text-2xl mr-3">👆</span>
-                  <span>Tap and drag to rotate</span>
-                </div>
-                <div
-                  class="flex items-center p-2 rounded-lg bg-white/5 cursor-pointer hover:bg-white/10 transition-colors"
-                  @click="toggleInteractiveObjectsPopup"
-                  style="pointer-events: auto"
-                >
-                  <span class="text-2xl mr-3">🔍</span>
-                  <span>Tap objects to explore</span>
-                </div>
-                <div class="flex items-center p-2 rounded-lg bg-white/5">
-                  <span class="text-2xl mr-3">🤏</span>
-                  <span>Pinch to zoom</span>
-                </div>
-              </template>
-
-              <!-- Desktop Controls -->
-              <template v-else>
-                <div class="flex items-center p-2 rounded-lg bg-white/5">
-                  <span class="text-2xl mr-3">🖱️</span>
-                  <span>Left click + drag to rotate</span>
-                </div>
-                <div
-                  class="flex items-center p-2 rounded-lg bg-white/5 cursor-pointer hover:bg-white/10 transition-colors"
-                  @click="toggleInteractiveObjectsPopup"
-                  style="pointer-events: auto"
-                >
-                  <span class="text-2xl mr-3">🔍</span>
-                  <span>Click objects to explore</span>
-                </div>
-                <div class="flex items-center p-2 rounded-lg bg-white/5">
-                  <span class="text-2xl mr-3">🔄</span>
-                  <span>Mouse wheel to zoom</span>
-                </div>
-              </template>
-            </div>
-
-            <!-- Reset View Button -->
-            <button
-              @click="resetCamera"
-              class="ui-button group relative overflow-hidden w-full mt-4 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 border border-white/20"
-              style="pointer-events: auto; cursor: pointer"
-            >
-              <span
-                class="relative z-10 flex items-center justify-center space-x-2 text-sm font-medium"
+              <!-- Close button -->
+              <button
+                @click="toggleControlsPanel"
+                class="ui-button absolute top-3 right-3 p-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors duration-200"
+                style="pointer-events: auto; cursor: pointer"
               >
                 <svg
-                  class="w-4 h-4 transition-transform group-hover:rotate-180 duration-300"
+                  class="w-4 h-4 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -214,39 +144,146 @@
                     stroke-linecap="round"
                     stroke-linejoin="round"
                     stroke-width="2"
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    d="M6 18L18 6M6 6l12 12"
                   ></path>
                 </svg>
-                <span>Reset View</span>
-              </span>
-              <div
-                class="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              ></div>
-            </button>
-          </div>
-        </div>
+              </button>
 
-        <!-- Show Controls Button (when hidden) -->
-        <button
-          v-else
-          @click="toggleControlsPanel"
-          class="ui-button mt-4 p-3 bg-indigo-600/80 hover:bg-indigo-600 text-white rounded-xl transition-all duration-300 shadow-lg backdrop-blur-sm border border-indigo-400/50"
-          style="pointer-events: auto; cursor: pointer"
-        >
-          <svg
-            class="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+              <h3
+                class="text-lg font-bold mb-4 text-indigo-300 flex items-center"
+              >
+                <span class="mr-2">🎮</span>
+                Controls
+              </h3>
+              <div class="space-y-3 text-sm">
+                <!-- Mobile/Tablet Controls -->
+                <template v-if="isMobile">
+                  <div class="flex items-center p-2 rounded-lg bg-white/5">
+                    <span class="text-2xl mr-3">👆</span>
+                    <span>Tap and drag to rotate</span>
+                  </div>
+                  <div
+                    class="flex items-center p-2 rounded-lg bg-white/5 cursor-pointer hover:bg-white/10 transition-colors"
+                    @click="toggleInteractiveObjectsPopup"
+                    style="pointer-events: auto"
+                  >
+                    <span class="text-2xl mr-3">🔍</span>
+                    <span>Tap objects to explore</span>
+                  </div>
+                  <div class="flex items-center p-2 rounded-lg bg-white/5">
+                    <span class="text-2xl mr-3">🤏</span>
+                    <span>Pinch to zoom</span>
+                  </div>
+                </template>
+
+                <!-- Desktop Controls -->
+                <template v-else>
+                  <div class="flex items-center p-2 rounded-lg bg-white/5">
+                    <span class="text-2xl mr-3">🖱️</span>
+                    <span>Left click + drag to rotate</span>
+                  </div>
+                  <div
+                    class="flex items-center p-2 rounded-lg bg-white/5 cursor-pointer hover:bg-white/10 transition-colors"
+                    @click="toggleInteractiveObjectsPopup"
+                    style="pointer-events: auto"
+                  >
+                    <span class="text-2xl mr-3">🔍</span>
+                    <span>Click objects to explore</span>
+                  </div>
+                  <div class="flex items-center p-2 rounded-lg bg-white/5">
+                    <span class="text-2xl mr-3">🔄</span>
+                    <span>Mouse wheel to zoom</span>
+                  </div>
+                </template>
+              </div>
+
+              <!-- Reset View Button -->
+              <button
+                @click="resetCamera"
+                class="ui-button group relative overflow-hidden w-full mt-4 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 border border-white/20"
+                style="pointer-events: auto; cursor: pointer"
+              >
+                <span
+                  class="relative z-10 flex items-center justify-center space-x-2 text-sm font-medium"
+                >
+                  <svg
+                    class="w-4 h-4 transition-transform group-hover:rotate-180 duration-300"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    ></path>
+                  </svg>
+                  <span>Reset View</span>
+                </span>
+                <div
+                  class="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                ></div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Help/Controls Button -->
+          <button
+            v-if="!showControlsPanel"
+            @click="toggleControlsPanel"
+            class="ui-button group relative overflow-hidden p-3 bg-gradient-to-br from-indigo-900/95 to-purple-900/95 backdrop-blur-lg text-white rounded-xl transition-all duration-300 shadow-lg border border-indigo-400/50 hover:scale-105"
+            style="pointer-events: auto; cursor: pointer"
+            title="Show Controls"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            ></path>
-          </svg>
-        </button>
+            <div class="relative z-10 flex items-center justify-center">
+              <svg
+                class="w-6 h-6 transition-transform group-hover:scale-110"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+              </svg>
+            </div>
+            <div
+              class="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            ></div>
+          </button>
+
+          <!-- About Me Button (always visible) -->
+          <button
+            @click="openAboutModal"
+            class="ui-button group relative overflow-hidden p-3 bg-gradient-to-br from-indigo-900/95 to-purple-900/95 backdrop-blur-lg text-white rounded-xl transition-all duration-300 shadow-lg border border-indigo-400/50 hover:scale-105"
+            style="pointer-events: auto; cursor: pointer"
+            title="About Me"
+          >
+            <div class="relative z-10 flex items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6 transition-transform group-hover:scale-110"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div
+              class="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            ></div>
+          </button>
+        </div>
       </div>
 
       <!-- Interactive Objects Info Popup -->
@@ -362,6 +399,13 @@
       @close="closeCreditsModal"
       style="z-index: 1000"
     />
+
+    <!-- About Modal -->
+    <AboutModal
+      :visible="showAboutModal"
+      @close="closeAboutModal"
+      style="z-index: 1000"
+    />
   </div>
 </template>
 
@@ -370,6 +414,7 @@ import { ref, onMounted, onUnmounted, computed } from "vue";
 import router from "@/router";
 import ContentModal from "../components/ContentModal.vue";
 import CreditsModal from "../components/CreditsModal.vue";
+import AboutModal from "../components/AboutModal.vue";
 import { Scene3DManager } from "../services/core";
 import { default as defaultTheme } from "../themes";
 import type { NullableSchemaType } from "@/types";
@@ -411,6 +456,7 @@ const showModal = ref(false);
 const modalContent = ref<any[]>([]);
 const isLoadingContent = ref(false);
 const showCreditsModal = ref(false);
+const showAboutModal = ref(false);
 
 // UI state management
 const showControlsPanel = ref(false);
@@ -548,6 +594,25 @@ const openCreditsModal = () => {
 
 const closeCreditsModal = () => {
   showCreditsModal.value = false;
+
+  // Re-enable interactions
+  if (scene3DManager) {
+    scene3DManager.setModalOpen(false);
+  }
+};
+
+// About modal functions
+const openAboutModal = () => {
+  showAboutModal.value = true;
+
+  // Disable interactions
+  if (scene3DManager) {
+    scene3DManager.setModalOpen(true);
+  }
+};
+
+const closeAboutModal = () => {
+  showAboutModal.value = false;
 
   // Re-enable interactions
   if (scene3DManager) {

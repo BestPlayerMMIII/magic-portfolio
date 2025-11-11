@@ -1,6 +1,7 @@
 import { ref, computed, watch } from "vue";
 import { LightingManager } from "../services/core";
 import { getDeviceType } from "@/utils/deviceDetection";
+import { updateThemeColor } from "@/utils/themeColor";
 
 export type ViewMode = "3d" | "minimalist";
 
@@ -36,6 +37,9 @@ const getInitialDayMode = (): boolean => {
 
 const isDayMode = ref(getInitialDayMode());
 
+// Initialize theme color on load
+updateThemeColor(isDayMode.value);
+
 // Watch and persist changes to localStorage (only for desktop)
 watch(viewMode, (newMode) => {
   if (deviceSupports3D()) {
@@ -45,6 +49,8 @@ watch(viewMode, (newMode) => {
 
 watch(isDayMode, (newMode) => {
   localStorage.setItem(STORAGE_KEY_DAY_MODE, String(newMode));
+  // Update mobile browser theme color
+  updateThemeColor(newMode);
 });
 
 /**
