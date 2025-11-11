@@ -108,6 +108,19 @@
           </p>
         </div>
       </div>
+
+      <div class="mt-4">
+        <button
+          class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all"
+          :class="{
+            'bg-emerald-500 hover:bg-emerald-600 text-white': isDayMode,
+            'bg-emerald-600 hover:bg-emerald-700 text-white': !isDayMode,
+          }"
+          @click="$emit('item-click', path)"
+        >
+          Read More &rarr;
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -118,6 +131,10 @@ import type { ContentItem, LearningPath, LearningResource } from "@/types";
 defineProps<{
   items: ContentItem<LearningPath>[];
   isDayMode: boolean;
+}>();
+
+defineEmits<{
+  "item-click": [item: ContentItem<LearningPath>];
 }>();
 
 const getDifficultyClass = (difficulty: string) => {

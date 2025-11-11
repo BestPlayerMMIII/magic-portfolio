@@ -8,7 +8,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import type { ContentItem } from "@/types";
-import BackButton from "@/components/BackButton.vue";
+import BackButton from "@/components/ui/BackButton.vue";
 import { apiService } from "@/services/api";
 
 interface Props {

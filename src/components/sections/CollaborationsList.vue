@@ -74,6 +74,18 @@
         v-if="collab.data.githubUrl || collab.data.liveUrl"
         class="flex flex-wrap gap-2"
       >
+        <button
+          :class="[
+            baseButtonLink,
+            {
+              'bg-purple-500 hover:bg-purple-600 text-white': isDayMode,
+              'bg-purple-600 hover:bg-purple-700 text-white': !isDayMode,
+            },
+          ]"
+          @click="$emit('item-click', collab)"
+        >
+          Read More &rarr;
+        </button>
         <a
           v-if="collab.data.githubUrl"
           :href="collab.data.githubUrl"
@@ -99,16 +111,33 @@
           Live Demo
         </a>
       </div>
+      <div v-else class="flex flex-wrap gap-2">
+        <button
+          class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all"
+          :class="{
+            'bg-cyan-500 hover:bg-cyan-600 text-white': isDayMode,
+            'bg-cyan-600 hover:bg-cyan-700 text-white': !isDayMode,
+          }"
+          @click="$emit('item-click', collab)"
+        >
+          Read More &rarr;
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { ContentItem, Collaboration } from "@/types";
+import { baseButtonLink } from "@/utils/links";
 
 defineProps<{
   items: ContentItem<Collaboration>[];
   isDayMode: boolean;
+}>();
+
+defineEmits<{
+  "item-click": [item: ContentItem<Collaboration>];
 }>();
 
 const getStatusClass = (status: string) => {

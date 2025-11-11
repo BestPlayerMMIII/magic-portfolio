@@ -77,6 +77,19 @@
       >
         Expected completion: {{ formatDate(item.data.expectedCompletion) }}
       </p>
+
+      <div class="mt-4">
+        <button
+          class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all"
+          :class="{
+            'bg-amber-500 hover:bg-amber-600 text-white': isDayMode,
+            'bg-amber-600 hover:bg-amber-700 text-white': !isDayMode,
+          }"
+          @click="$emit('item-click', item)"
+        >
+          Read More &rarr;
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -87,6 +100,10 @@ import type { ContentItem, WorkInProgress } from "@/types";
 defineProps<{
   items: ContentItem<WorkInProgress>[];
   isDayMode: boolean;
+}>();
+
+defineEmits<{
+  "item-click": [item: ContentItem<WorkInProgress>];
 }>();
 
 const getPriorityClass = (priority: string) => {

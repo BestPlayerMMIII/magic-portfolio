@@ -3,14 +3,13 @@
     <div
       v-for="project in items"
       :key="project.id"
-      class="project-card rounded-lg p-4 sm:p-6 border transition-all duration-300 cursor-pointer hover:scale-[1.02]"
+      class="project-card rounded-lg p-4 sm:p-6 border transition-all duration-300"
       :class="{
         'bg-white/90 border-gray-300 hover:border-purple-400 hover:shadow-xl':
           isDayMode,
         'bg-slate-800/70 border-purple-500/30 hover:border-purple-500/60 hover:shadow-2xl hover:shadow-purple-500/20':
           !isDayMode,
       }"
-      @click="$emit('item-click', project)"
     >
       <div
         class="flex flex-col sm:flex-row items-start space-y-3 sm:space-y-0 sm:space-x-4"
@@ -18,7 +17,7 @@
         <!-- Thumbnail Image -->
         <div
           v-if="project.data.header.image?.thumbnailUrl"
-          class="flex-shrink-0 w-full sm:w-32 h-48 sm:h-32 rounded-lg overflow-hidden"
+          class="flex-shrink-0 w-full sm:w-48 h-48 sm:h-48 rounded-lg overflow-hidden"
           :class="{
             'bg-gray-100': isDayMode,
             'bg-slate-900/50': !isDayMode,
@@ -84,33 +83,23 @@
           </div>
 
           <!-- Action Links -->
-          <div class="flex flex-wrap gap-2">
-            <a
-              v-if="project.data.githubUrl"
-              :href="project.data.githubUrl"
-              target="_blank"
-              class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all"
-              :class="{
-                'bg-gray-800 hover:bg-gray-900 text-white': isDayMode,
-                'bg-purple-600 hover:bg-purple-700 text-white': !isDayMode,
-              }"
-              @click.stop
+          <div class="flex flex-wrap gap-4">
+            <button
+              :class="[
+                baseButtonLink,
+                {
+                  'bg-purple-500 hover:bg-purple-600 text-white': isDayMode,
+                  'bg-purple-600 hover:bg-purple-700 text-white': !isDayMode,
+                },
+              ]"
+              @click="$emit('item-click', project)"
             >
-              GitHub
-            </a>
-            <a
-              v-if="project.data.liveUrl"
-              :href="project.data.liveUrl"
-              target="_blank"
-              class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all"
-              :class="{
-                'bg-blue-500 hover:bg-blue-600 text-white': isDayMode,
-                'bg-fuchsia-600 hover:bg-fuchsia-700 text-white': !isDayMode,
-              }"
-              @click.stop
-            >
-              Live Demo
-            </a>
+              Read More &rarr;
+            </button>
+            <ExternalLinks
+              :links="getLinksFromPost(project)"
+              :isDayMode="isDayMode"
+            />
           </div>
         </div>
       </div>
@@ -120,6 +109,8 @@
 
 <script setup lang="ts">
 import type { ContentItem, Project } from "@/types";
+import ExternalLinks from "@/components/ui/ExternalLinkButtons.vue";
+import { baseButtonLink, getLinksFromPost } from "@/utils/links";
 
 defineProps<{
   items: ContentItem<Project>[];

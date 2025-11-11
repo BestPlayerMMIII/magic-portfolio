@@ -161,7 +161,7 @@ import { ref, onMounted, computed, watch } from "vue";
 import router from "@/router";
 import apiWithCache from "@/services/apiWithCache";
 import NavigationHeader from "@/components/NavigationHeader.vue";
-import BackButton from "@/components/BackButton.vue";
+import BackButton from "@/components/ui/BackButton.vue";
 import AppFooter from "@/components/AppFooter.vue";
 import SectionHeader from "@/components/sections/SectionHeader.vue";
 import ProjectsList from "@/components/sections/ProjectsList.vue";

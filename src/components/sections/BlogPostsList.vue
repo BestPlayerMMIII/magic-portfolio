@@ -3,21 +3,20 @@
     <div
       v-for="post in items"
       :key="post.id"
-      class="blog-post-card rounded-lg p-4 sm:p-6 border cursor-pointer transition-all duration-300 hover:scale-[1.02]"
+      class="blog-post-card rounded-lg p-4 sm:p-6 border transition-all duration-300"
       :class="{
         'bg-white/90 border-gray-300 hover:border-fuchsia-400 hover:shadow-xl':
           isDayMode,
         'bg-slate-800/70 border-fuchsia-500/30 hover:border-fuchsia-500/60 hover:shadow-2xl hover:shadow-fuchsia-500/20':
           !isDayMode,
       }"
-      @click="$emit('item-click', post)"
     >
       <div
         class="flex flex-col sm:flex-row items-start space-y-3 sm:space-y-0 sm:space-x-4"
       >
         <div
           v-if="post.data.header.image?.thumbnailUrl"
-          class="flex-shrink-0 w-full sm:w-32 h-48 sm:h-32 rounded-lg overflow-hidden"
+          class="flex-shrink-0 w-full sm:w-48 h-48 sm:h-48 rounded-lg overflow-hidden"
         >
           <img
             :src="post.data.header.image.thumbnailUrl"
@@ -62,6 +61,21 @@
             By {{ post.metadata.author }} •
             {{ formatDate(post.metadata.updatedAt) }}
           </p>
+
+          <div class="mt-4">
+            <button
+              :class="[
+                baseButtonLink,
+                {
+                  'bg-fuchsia-500 hover:bg-fuchsia-600 text-white': isDayMode,
+                  'bg-fuchsia-600 hover:bg-fuchsia-700 text-white': !isDayMode,
+                },
+              ]"
+              @click="$emit('item-click', post)"
+            >
+              Read More &rarr;
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -70,6 +84,7 @@
 
 <script setup lang="ts">
 import type { ContentItem, BlogPost } from "@/types";
+import { baseButtonLink } from "@/utils/links";
 
 defineProps<{
   items: ContentItem<BlogPost>[];

@@ -112,7 +112,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import NavigationHeader from "@/components/NavigationHeader.vue";
-import BackButton from "@/components/BackButton.vue";
+import BackButton from "@/components/ui/BackButton.vue";
 import AppFooter from "@/components/AppFooter.vue";
 import { useViewMode } from "@/stores/viewModeStore";
 import { apiService } from "@/services/api";
