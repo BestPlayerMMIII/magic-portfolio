@@ -6,6 +6,7 @@ import {
   getEnabledCategories,
   shouldShowCategory,
 } from "@/config/categories";
+import { resolveToolcallsWithDefaults } from "./toolcallsService";
 
 /**
  * API Service for Frontend
@@ -159,15 +160,16 @@ class ApiService {
     return categoriesWithCounts;
   }
 
-  /**
-   * Health check (for backward compatibility)
-   * @deprecated No longer needed without backend
-   */
-  async healthCheck(): Promise<{ status: string; timestamp: string }> {
-    return {
-      status: "healthy",
-      timestamp: new Date().toISOString(),
-    };
+  async getAboutContent(): Promise<string | null> {
+    try {
+      const aboutPost = await this.getPostByIdFull("html", "about");
+      if (aboutPost.data.content) {
+        return resolveToolcallsWithDefaults(aboutPost.data.content);
+      }
+    } catch (error) {
+      console.error("Error fetching About content:", error);
+    }
+    return null;
   }
 }
 

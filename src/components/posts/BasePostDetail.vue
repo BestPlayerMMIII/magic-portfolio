@@ -10,6 +10,7 @@ import { ref, watch } from "vue";
 import type { ContentItem } from "@/types";
 import BackButton from "@/components/ui/BackButton.vue";
 import { apiService } from "@/services/api";
+import { resolveToolcallsWithDefaults } from "@/services/toolcallsService";
 
 interface Props {
   post: ContentItem<any>;
@@ -29,26 +30,32 @@ const enhanceContentMedia = async (schemaId: string, postId: string) => {
     const fullPost = await apiService.getPostByIdFull(schemaId, postId);
 
     if (fullPost?.data?.content) {
-      // Update only the content with full resolution
-      enhancedContent.value = fullPost.data.content;
+      // Update content with full resolution and resolve toolcalls
+      const contentWithMedia = fullPost.data.content;
+      enhancedContent.value = resolveToolcallsWithDefaults(contentWithMedia);
     }
   } catch (e) {
     console.error("Failed to enhance content media:", e);
-    // Fallback to original content
-    enhancedContent.value = props.post.data.content || "";
+    // Fallback to original content with toolcalls resolved
+    const fallbackContent = props.post.data.content || "";
+    enhancedContent.value = resolveToolcallsWithDefaults(fallbackContent);
   } finally {
     contentLoading.value = false;
   }
 };
 
-// Initialize content
-enhancedContent.value = props.post.data.content || "";
+// Initialize content with toolcalls resolved
+enhancedContent.value = resolveToolcallsWithDefaults(
+  props.post.data.content || ""
+);
 
 // Watch for post changes and enhance content
 watch(
   () => props.post.id,
   () => {
-    enhancedContent.value = props.post.data.content || "";
+    enhancedContent.value = resolveToolcallsWithDefaults(
+      props.post.data.content || ""
+    );
     enhanceContentMedia(props.post.schemaId, props.post.id);
   },
   { immediate: true }

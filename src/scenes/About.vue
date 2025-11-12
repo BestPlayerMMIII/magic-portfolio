@@ -130,10 +130,10 @@ onMounted(async () => {
     error.value = null;
 
     // Fetch full version of about page using the API service
-    const aboutPost = await apiService.getPostByIdFull("html", "about");
+    const aboutContentResponse = await apiService.getAboutContent();
 
-    if (aboutPost?.data?.content) {
-      aboutContent.value = aboutPost.data.content;
+    if (aboutContentResponse) {
+      aboutContent.value = aboutContentResponse;
     } else {
       throw new Error("About page content is empty");
     }

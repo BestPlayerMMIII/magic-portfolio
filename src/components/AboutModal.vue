@@ -38,10 +38,10 @@ const loadContent = async () => {
     loading.value = true;
     error.value = null;
 
-    const aboutPost = await apiService.getPostByIdFull("html", "about");
+    const aboutContentResponse = await apiService.getAboutContent();
 
-    if (aboutPost?.data?.content) {
-      aboutContent.value = aboutPost.data.content;
+    if (aboutContentResponse) {
+      aboutContent.value = aboutContentResponse;
     } else {
       throw new Error("About page content is empty");
     }
