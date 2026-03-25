@@ -80,12 +80,17 @@ defineExpose({
 :deep(.content-wrapper video),
 :deep(.content-wrapper iframe) {
   max-width: 100% !important;
-  width: 100% !important;
+  width: auto !important;
   height: auto !important;
   display: block;
   margin-left: auto;
   margin-right: auto;
   object-fit: contain;
+}
+
+:deep(.content-wrapper video),
+:deep(.content-wrapper iframe) {
+  width: 100% !important;
 }
 
 /* Ensure any container elements don't overflow */
@@ -120,7 +125,6 @@ defineExpose({
 
 /* Mobile-specific constraints */
 @media (max-width: 768px) {
-  :deep(.content-wrapper img),
   :deep(.content-wrapper video),
   :deep(.content-wrapper iframe) {
     max-width: 100vw !important;

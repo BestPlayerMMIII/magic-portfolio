@@ -5,34 +5,34 @@
     v-slot="{ enhancedContent }"
   >
     <!-- Blog Post Header -->
-    <header class="w-full text-center mb-6">
+    <article class="blog-post-shell w-full mx-auto">
+      <header class="w-full mb-8 text-left">
       <h1
-        class="text-4xl font-bold mb-4 text-center"
+        class="blog-post-title text-4xl md:text-5xl font-bold mb-4"
         :class="{ 'text-gray-900': isDayMode, 'text-white': !isDayMode }"
       >
         {{ post.data.header.title }}
       </h1>
-
-      <div class="flex justify-center mb-4">
+      
+      <div class="mt-5 mb-5">
         <!-- Show loading state while fetching full resolution -->
         <div
           v-if="!loadedImageUrl && imageLoading"
-          class="w-32 h-32 rounded-xl bg-gradient-to-br from-purple-300 via-pink-200 to-indigo-200 animate-pulse"
+          class="w-full h-64 md:h-80 rounded-2xl bg-gradient-to-br from-purple-300 via-pink-200 to-indigo-200 animate-pulse"
         ></div>
         <!-- Show full resolution image when loaded -->
         <img
           v-else-if="loadedImageUrl"
           :src="loadedImageUrl"
           alt="Post header image"
-          class="w-32 h-32 object-cover rounded-xl shadow-lg border-2 border-purple-300 transition-all duration-300"
+          class="blog-hero-image"
         />
       </div>
 
       <p
-        class="text-sm mb-2 text-center"
+        class="text-sm mb-4 text-center"
         :class="{ 'text-gray-700': isDayMode, 'text-gray-300': !isDayMode }"
       >
-        By {{ post.metadata.author }} |
         {{ new Date(post.metadata.updatedAt).toLocaleDateString() }}
       </p>
 
@@ -56,9 +56,10 @@
     <!-- Render raw HTML from post.data.content -->
     <div
       v-html="enhancedContent"
-      class="prose w-full max-w-none md:min-w-[60%] mx-auto content-wrapper"
+      class="prose prose-lg max-w-none mx-auto content-wrapper blog-post-body"
       :class="{ 'prose-invert': !isDayMode }"
     ></div>
+    </article>
   </BasePostDetail>
 </template>
 
@@ -116,3 +117,42 @@ watch(
   { immediate: true }
 );
 </script>
+
+<style scoped>
+.blog-post-shell {
+  max-width: 860px;
+}
+
+.blog-post-title {
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.blog-hero-image {
+  width: 100%;
+  max-height: 62vh;
+  object-fit: contain;
+  border-radius: 1rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.blog-post-body {
+  line-height: 1.8;
+}
+
+:deep(.blog-post-body p) {
+  margin-top: 1.15em;
+  margin-bottom: 1.15em;
+}
+
+@media (max-width: 768px) {
+  .blog-post-shell {
+    max-width: 100%;
+  }
+
+  .blog-hero-image {
+    max-height: 42vh;
+  }
+}
+</style>
