@@ -42,19 +42,23 @@
         v-if="post.data.header.tags && post.data.header.tags.length"
         class="flex flex-wrap justify-center gap-2 mb-6"
       >
-        <span
+        <a
           v-for="tag in post.data.header.tags"
           :key="tag"
-          class="px-4 py-1.5 rounded-full text-sm font-semibold shadow-md transition-all duration-200 cursor-pointer select-none border"
+          :href="getTagSearchUrl(tag)"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="px-4 py-1.5 rounded-full text-sm font-semibold shadow-md transition-all duration-200 cursor-pointer select-none border no-underline"
           :class="[
             colors.badgeBg,
             colors.badgeText,
             colors.badgeBorder,
             'hover:scale-105',
           ]"
+          :title="`Search 'what is ${tag}?' on Google`"
         >
           {{ tag }}
-        </span>
+        </a>
       </div>
 
       <hr class="mb-4 border-t" :class="colors.cardBorder" />
@@ -165,5 +169,11 @@ const getStatusIcon = (status: string): VNode => {
     icon,
     size: 16,
   });
+};
+
+const getTagSearchUrl = (tag: string): string => {
+  const cleanTag = tag.trim().replace(/\?+$/, "");
+  const formattedTag = encodeURIComponent(cleanTag).replace(/%20/g, "+");
+  return `https://www.google.com/search?q=what+is+${formattedTag}%3F`;
 };
 </script>
