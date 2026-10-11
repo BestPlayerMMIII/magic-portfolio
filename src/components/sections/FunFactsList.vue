@@ -4,7 +4,7 @@
     <div class="text-center mb-4">
       <p
         class="text-sm font-medium"
-        :class="{ 'text-gray-600': isDayMode, 'text-gray-400': !isDayMode }"
+        :class="colors.cardTextMuted"
       >
         {{ currentIndex + 1 }} / {{ allItems.length }}
       </p>
@@ -27,35 +27,39 @@
         @touchend="endDrag"
         style="touch-action: pan-y; user-select: none"
       >
-        <!-- Preview Card (shows next or previous based on drag direction) -->
+        <!-- Preview Card (shows next or preview based on drag direction) -->
         <div
           v-if="previewFact"
-          class="absolute inset-0 rounded-2xl p-8 sm:p-12 border transition-opacity duration-200"
-          :class="{
-            'bg-white/95 border-gray-300': isDayMode,
-            'bg-slate-800/90 border-rose-500/30': !isDayMode,
-          }"
+          class="absolute inset-0 rounded-2xl p-8 sm:p-12 border transition-opacity duration-200 shadow-xl"
+          :class="[
+            colors.cardBackground,
+            colors.cardBorder,
+          ]"
           :style="{
             opacity: Math.abs(dragOffset) / 200,
             zIndex: 0,
           }"
         >
           <div class="flex flex-col items-center text-center gap-6">
-            <span class="text-5xl sm:text-6xl">{{
-              getCategoryEmoji(previewFact.category)
-            }}</span>
+            <div
+              class="w-14 h-14 rounded-2xl border flex items-center justify-center"
+              :class="[colors.accentBg, colors.accentBorder, colors.accentColor]"
+            >
+              <component :is="getCategoryIcon(previewFact.category)" class="w-7 h-7" />
+            </div>
             <span
-              class="px-4 py-2 rounded-full text-sm font-medium"
-              :class="getCategoryClass(previewFact.category)"
+              class="px-4 py-2 rounded-full text-sm font-medium border"
+              :class="[
+                colors.badgeBg,
+                colors.badgeText,
+                colors.badgeBorder,
+              ]"
             >
               {{ previewFact.category }}
             </span>
             <p
               class="text-lg sm:text-xl leading-relaxed"
-              :class="{
-                'text-gray-800': isDayMode,
-                'text-gray-200': !isDayMode,
-              }"
+              :class="colors.cardText"
             >
               {{ previewFact.content }}
             </p>
@@ -66,11 +70,11 @@
         <div
           v-if="currentFact"
           class="relative rounded-2xl p-8 sm:p-12 border transition-shadow duration-300 shadow-2xl cursor-grab active:cursor-grabbing"
-          :class="{
-            'bg-white/95 border-gray-300': isDayMode,
-            'bg-slate-800/90 border-rose-500/30 hover:shadow-rose-500/20':
-              !isDayMode,
-          }"
+          :class="[
+            colors.cardBackground,
+            colors.cardBorder,
+            colors.cardHoverBorder,
+          ]"
           :style="{
             transform: `translateX(${dragOffset}px) rotate(${
               dragOffset * 0.02
@@ -80,21 +84,25 @@
           }"
         >
           <div class="flex flex-col items-center text-center gap-6">
-            <span class="text-5xl sm:text-6xl">{{
-              getCategoryEmoji(currentFact.category)
-            }}</span>
+            <div
+              class="w-14 h-14 rounded-2xl border flex items-center justify-center"
+              :class="[colors.accentBg, colors.accentBorder, colors.accentColor]"
+            >
+              <component :is="getCategoryIcon(currentFact.category)" class="w-7 h-7" />
+            </div>
             <span
-              class="px-4 py-2 rounded-full text-sm font-medium"
-              :class="getCategoryClass(currentFact.category)"
+              class="px-4 py-2 rounded-full text-sm font-medium border"
+              :class="[
+                colors.badgeBg,
+                colors.badgeText,
+                colors.badgeBorder,
+              ]"
             >
               {{ currentFact.category }}
             </span>
             <p
               class="text-lg sm:text-xl leading-relaxed"
-              :class="{
-                'text-gray-800': isDayMode,
-                'text-gray-200': !isDayMode,
-              }"
+              :class="colors.cardText"
             >
               {{ currentFact.content }}
             </p>
@@ -106,18 +114,31 @@
     <!-- Swipe Hint -->
     <div class="text-center mt-6">
       <p
-        class="text-xs"
-        :class="{ 'text-gray-500': isDayMode, 'text-gray-400': !isDayMode }"
+        class="text-xs inline-flex items-center gap-1.5 justify-center"
+        :class="colors.cardTextMuted"
       >
-        👆 Swipe or drag to navigate
+        <HugeiconsIcon :icon="Touch01Icon" :size="14" />
+        <span>Swipe or drag to navigate</span>
       </p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, h } from "vue";
+import type { VNode } from "vue";
+import { HugeiconsIcon } from "@hugeicons/vue";
+import {
+  Touch01Icon,
+  BubbleChatIcon,
+  ComputerIcon,
+  DicesIcon,
+  Idea01Icon,
+} from "@hugeicons/core-free-icons";
 import type { ContentItem, FunFact, FunFacts } from "@/types";
+import { useTheme } from "@/stores/themeStore";
+
+const { colors } = useTheme();
 
 const { items, isDayMode } = defineProps<{
   items: ContentItem<FunFacts>[];
@@ -202,23 +223,15 @@ const endDrag = () => {
   dragOffset.value = 0;
 };
 
-const getCategoryClass = (category: string) => {
-  const classes = {
-    personal: "bg-pink-100 text-pink-700",
-    technical: "bg-blue-100 text-blue-700",
-    random: "bg-purple-100 text-purple-700",
-  };
-  return (
-    classes[category as keyof typeof classes] || "bg-gray-100 text-gray-700"
-  );
-};
+const getCategoryIcon = (category: string): VNode => {
+  let icon = Idea01Icon;
+  if (category === "personal") icon = BubbleChatIcon;
+  else if (category === "technical") icon = ComputerIcon;
+  else if (category === "random") icon = DicesIcon;
 
-const getCategoryEmoji = (category: string) => {
-  const emojis = {
-    personal: "💭",
-    technical: "💻",
-    random: "🎲",
-  };
-  return emojis[category as keyof typeof emojis] || "💡";
+  return h(HugeiconsIcon, {
+    icon,
+    size: 28,
+  });
 };
 </script>

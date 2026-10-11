@@ -21,12 +21,12 @@ export const getClass = (key: string, isDayMode: boolean) => {
         : "bg-green-600 text-white hover:bg-green-500";
     case "read-more":
       return isDayMode
-        ? "bg-purple-500 text-white hover:bg-purple-600"
-        : "bg-purple-600 text-white hover:bg-purple-500";
+        ? "bg-amber-500 text-slate-950 font-semibold hover:bg-amber-600"
+        : "bg-amber-500 text-slate-950 font-semibold hover:bg-amber-400";
     default:
       return isDayMode
-        ? "bg-blue-500 text-white hover:bg-blue-600"
-        : "bg-blue-600 text-white hover:bg-blue-500";
+        ? "bg-slate-800 text-white hover:bg-slate-900"
+        : "bg-slate-700 text-white hover:bg-slate-600";
   }
 };
 

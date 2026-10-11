@@ -1,7 +1,7 @@
 <template>
   <div
     class="h-screen w-screen flex flex-col"
-    :class="{ 'bg-[rgb(242,242,242)]': isDayMode }"
+    :class="colors.pageBackground"
   >
     <!-- Navigation Header -->
     <NavigationHeader
@@ -25,14 +25,11 @@
       >
         <div
           class="animate-spin rounded-full h-16 w-16 border-b-2"
-          :class="{
-            'border-gray-900': isDayMode,
-            'border-purple-400': !isDayMode,
-          }"
+          :class="isDayMode ? 'border-amber-600' : 'border-amber-400'"
         ></div>
         <p
           class="text-lg"
-          :class="{ 'text-gray-600': isDayMode, 'text-gray-300': !isDayMode }"
+          :class="colors.panelTextMuted"
         >
           Loading post...
         </p>
@@ -44,7 +41,8 @@
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          class="h-16 w-16 text-gray-400 mb-2"
+          class="h-16 w-16 mb-2"
+          :class="colors.panelTextMuted"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -58,7 +56,7 @@
         </svg>
         <h2
           class="text-2xl font-semibold"
-          :class="{ 'text-gray-600': isDayMode, 'text-gray-300': !isDayMode }"
+          :class="colors.panelTitle"
         >
           Post not found
         </h2>
@@ -71,7 +69,7 @@
         <BackButton />
       </div>
       <!-- Footer -->
-      <AppFooter :isDayMode="isDayMode" authorName="BestPlayer" />
+      <AppFooter :isDayMode="isDayMode" />
     </div>
 
     <!-- Scroll to Top Button -->
@@ -94,10 +92,12 @@ import BackButton from "@/components/ui/BackButton.vue";
 import ScrollToTopButton from "@/components/ui/ScrollToTopButton.vue";
 import AppFooter from "@/components/AppFooter.vue";
 import { useViewMode } from "@/stores/viewModeStore";
+import { useTheme } from "@/stores/themeStore";
 import router from "@/router";
 import { isSectionEnabled } from "@/config/sectionDescriptions";
 
-// Use day mode from store
+// Use theme and day mode
+const { colors } = useTheme();
 const { isDayMode, toggleDayMode } = useViewMode();
 
 // Register BackButton for template usage (script setup auto-registers)

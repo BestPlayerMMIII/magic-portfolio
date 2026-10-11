@@ -1,47 +1,124 @@
 <template>
   <div class="w-full h-full relative overflow-hidden">
-    <!-- Magical Preloader -->
+    <!-- Magical Preloader with About Me Presentation -->
     <div
-      v-if="preloaderState.isLoading"
-      class="absolute inset-0 z-50 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center"
+      v-if="showLoadingScreen"
+      class="absolute inset-0 z-50 flex flex-col items-center justify-between p-4 sm:p-8 overflow-y-auto transition-all duration-700"
+      :class="[
+        is3DSceneReady
+          ? 'backdrop-blur-md opacity-95'
+          : 'backdrop-blur-xl',
+        colors.preloaderBackdrop
+      ]"
     >
-      <div class="text-center">
-        <!-- Magical loading animation -->
-        <div class="relative mb-8">
+      <!-- Top Bar: Title & Loading Status / Ready Action -->
+      <div
+        class="w-full max-w-4xl flex items-center justify-between border-b pb-4 mb-6"
+        :class="colors.preloaderCardBorder"
+      >
+        <div class="flex items-center gap-3">
           <div
-            class="w-32 h-32 rounded-full border-4 border-purple-300/30 relative"
+            class="w-9 h-9 rounded-xl border flex items-center justify-center"
+            :class="colors.header3DLogoButton"
           >
-            <div
-              class="absolute inset-0 rounded-full border-4 border-transparent border-t-purple-400 border-r-pink-400 animate-spin"
-              style="animation-duration: 2s"
-            ></div>
-            <div
-              class="absolute inset-2 rounded-full border-4 border-transparent border-t-pink-400 border-r-indigo-400 animate-spin"
-              style="animation-duration: 1.5s; animation-direction: reverse"
-            ></div>
-            <div
-              class="absolute inset-4 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center"
-            >
-              <span class="text-4xl">✨</span>
-            </div>
+            <HugeiconsIcon :icon="AiMagicIcon" :size="20" />
+          </div>
+          <div>
+            <h2 class="font-bold text-lg tracking-tight" :class="colors.preloaderTitle">
+              {{ strings.authorName }}
+            </h2>
+            <p class="text-xs" :class="colors.preloaderSubtitle">
+              {{ strings.themeTitle }} &bull; {{ strings.themeSubtitle }}
+            </p>
           </div>
         </div>
 
+        <!-- Right action: Loading status OR "Enter 3D Laboratory" button once loaded -->
+        <div class="flex items-center gap-3">
+          <!-- When still loading -->
+          <template v-if="!is3DSceneReady">
+            <div
+              class="w-5 h-5 border-2 rounded-full animate-spin"
+              :class="isDayMode ? 'border-stone-400 border-t-amber-600' : 'border-slate-700 border-t-amber-400'"
+            ></div>
+            <span
+              class="text-xs font-semibold px-2.5 py-1 rounded-full border"
+              :class="colors.preloaderStatusBadge"
+            >
+              Loading 3D: {{ Math.round(preloaderState.progress) }}%
+            </span>
+          </template>
+
+          <!-- When 3D environment is ready (single prominent action) -->
+          <template v-else>
+            <button
+              @click="enter3DScene"
+              class="ui-button px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg transition-all duration-300 flex items-center gap-2"
+              :class="`${colors.primaryButtonBg} ${colors.primaryButtonHover} ${colors.primaryButtonText}`"
+              style="pointer-events: auto; cursor: pointer"
+            >
+              <span>{{ strings.enterButton }}</span>
+              <HugeiconsIcon :icon="SparklesIcon" :size="16" />
+            </button>
+          </template>
+        </div>
+      </div>
+
+      <!-- Center Container: Full About Me view while assets load -->
+      <div
+        class="w-full max-w-4xl flex-1 rounded-2xl border p-6 sm:p-8 shadow-2xl overflow-y-auto max-h-[60vh] mb-6"
+        :class="`${colors.cardBackground} ${colors.cardBorder}`"
+      >
+        <div
+          class="mb-4 pb-3 border-b flex items-center justify-between"
+          :class="colors.preloaderCardBorder"
+        >
+          <span
+            class="text-xs uppercase tracking-wider font-semibold flex items-center gap-1.5"
+            :class="colors.accentColor"
+          >
+            <HugeiconsIcon :icon="Book01Icon" :size="14" />
+            <span>{{ strings.aboutPrompt }}</span>
+          </span>
+        </div>
+        <AboutContent />
+      </div>
+
+      <!-- Bottom Progress Section -->
+      <div class="w-full max-w-xl text-center">
         <!-- Progress bar -->
         <div
-          class="w-80 h-2 bg-purple-900/50 rounded-full mb-4 overflow-hidden"
+          class="w-full h-2 rounded-full mb-3 overflow-hidden shadow-inner border"
+          :class="colors.preloaderProgressTrack"
         >
           <div
-            class="h-full bg-gradient-to-r from-purple-400 to-pink-400 rounded-full transition-all duration-300 ease-out"
-            :style="{ width: `${preloaderState.progress}%` }"
+            class="h-full rounded-full transition-all duration-300 ease-out"
+            :class="`bg-gradient-to-r ${theme.ui?.preloaderProgressGradient || 'from-amber-500 via-amber-400 to-amber-300'}`"
+            :style="{
+              width: `${is3DSceneReady ? 100 : preloaderState.progress}%`,
+            }"
           ></div>
         </div>
-
         <!-- Status text -->
-        <p class="text-white text-lg mb-2">{{ preloaderState.status }}</p>
-        <p class="text-purple-300 text-sm">
-          {{ Math.round(preloaderState.progress) }}% complete
-        </p>
+        <div v-if="!is3DSceneReady">
+          <p class="text-sm font-medium mb-1" :class="colors.preloaderStatusText">
+            {{ preloaderState.status }}
+          </p>
+          <p class="text-xs" :class="colors.preloaderStatusMuted">
+            {{ strings.loadingStatus }} &bull;
+            {{ Math.round(preloaderState.progress) }}% complete
+          </p>
+        </div>
+        <div v-else class="text-xs" :class="colors.preloaderStatusMuted">
+          <span
+            class="inline-flex items-center gap-1.5 font-medium mr-2"
+            :class="colors.readyBadgeText"
+          >
+            <span class="w-2 h-2 rounded-full" :class="colors.readyBadgeDot || (isDayMode ? 'bg-emerald-600' : 'bg-emerald-400')"></span>
+            {{ strings.readyStatus }}
+          </span>
+          <span>&bull; {{ strings.exploreHint }}</span>
+        </div>
       </div>
     </div>
 
@@ -65,55 +142,48 @@
         @openCredits="openCreditsModal"
       />
 
-      <!-- Interactive Hints - Enhanced & Mobile Optimized -->
+      <!-- Interactive Hints - Clean & refined without emojis -->
       <div
         v-if="hoveredObject"
         class="ui-hints ui-hint absolute left-1/2 transform -translate-x-1/2 transition-all duration-300 px-4 w-full max-w-md bottom-24 sm:bottom-32"
       >
         <div
-          class="hints-container relative group bg-gradient-to-r from-indigo-900/95 via-purple-900/95 to-pink-900/95 backdrop-blur-xl text-white rounded-2xl sm:rounded-3xl shadow-2xl border border-purple-400/60 overflow-hidden hover:scale-105 transition-all duration-500 px-4 py-3 sm:px-10 sm:py-5"
+          class="hints-container relative group backdrop-blur-xl rounded-2xl shadow-2xl border hover:scale-105 transition-all duration-300 px-5 py-3 sm:px-8 sm:py-4"
+          :class="[colors.panelBackground, colors.panelBorder]"
         >
-          <!-- Enhanced animated background with multiple layers -->
-          <div
-            class="absolute inset-0 bg-gradient-to-r from-purple-600/30 to-pink-600/30 animate-pulse"
-          ></div>
-          <div
-            class="absolute inset-0 bg-gradient-to-45 from-transparent via-white/5 to-transparent group-hover:via-white/10 transition-all duration-700"
-          ></div>
-
-          <!-- Sparkle effects -->
-          <div
-            class="absolute top-2 left-4 w-1 h-1 bg-white/60 rounded-full animate-ping"
-          ></div>
-          <div
-            class="absolute top-4 right-6 w-1.5 h-1.5 bg-purple-300/50 rounded-full animate-pulse delay-300"
-          ></div>
-          <div
-            class="absolute bottom-3 left-8 w-1 h-1 bg-pink-300/60 rounded-full animate-ping delay-700"
-          ></div>
-
-          <!-- Main content -->
-          <div class="relative z-10 flex items-center space-x-2 sm:space-x-3">
-            <div class="text-xl sm:text-2xl flex-shrink-0">✨</div>
+          <div class="relative z-10 flex items-center justify-between gap-3">
+            <div
+              class="w-9 h-9 rounded-xl border flex items-center justify-center flex-shrink-0"
+              :class="[colors.accentBg, colors.accentBorder, colors.accentColor]"
+            >
+              <HugeiconsIcon :icon="AiMagicIcon" :size="20" />
+            </div>
             <div class="text-center flex-1 min-w-0">
               <p
-                class="text-sm sm:text-lg font-bold text-white mb-0.5 sm:mb-1 tracking-wide truncate"
+                class="text-sm sm:text-base font-bold tracking-wide truncate"
+                :class="colors.panelTitle"
               >
                 {{ isMobile ? "Tap" : "Click" }} {{ hoveredObject?.type }}
               </p>
               <p
-                class="text-xs sm:text-sm font-medium text-purple-200 uppercase tracking-wider truncate"
+                class="text-xs font-semibold uppercase tracking-wider truncate"
+                :class="colors.accentColor"
               >
                 {{ getObjectTitle(hoveredObject?.contentType || "") }}
               </p>
             </div>
-            <div class="text-xl sm:text-2xl flex-shrink-0">🔮</div>
+            <div
+              class="w-9 h-9 rounded-xl border flex items-center justify-center flex-shrink-0"
+              :class="[colors.accentBg, colors.accentBorder, colors.accentColor]"
+            >
+              <component
+                :is="
+                  getSectionIcon(hoveredObject?.contentType || '', 'w-5 h-5')
+                "
+                v-if="hoveredObject?.contentType"
+              />
+            </div>
           </div>
-
-          <!-- Bottom glow effect -->
-          <div
-            class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-3/4 h-4 bg-purple-500/30 rounded-full blur-lg"
-          ></div>
         </div>
       </div>
 
@@ -126,16 +196,18 @@
             v-if="showControlsPanel"
           >
             <div
-              class="ui-panel bg-gradient-to-br from-indigo-900/95 to-purple-900/95 backdrop-blur-lg text-white p-6 rounded-2xl border border-indigo-400/50 shadow-2xl max-w-sm relative overflow-hidden"
+              class="ui-panel backdrop-blur-xl p-6 rounded-2xl border shadow-2xl max-w-sm relative overflow-hidden"
+              :class="[colors.panelBackground, colors.panelBorder, colors.panelText]"
             >
               <!-- Close button -->
               <button
                 @click="toggleControlsPanel"
-                class="ui-button absolute top-3 right-3 p-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors duration-200"
+                class="ui-button absolute top-3 right-3 p-1.5 rounded-lg transition-colors duration-200"
+                :class="colors.panelCloseButton"
                 style="pointer-events: auto; cursor: pointer"
               >
                 <svg
-                  class="w-4 h-4 text-white"
+                  class="w-4 h-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -150,49 +222,98 @@
               </button>
 
               <h3
-                class="text-lg font-bold mb-4 text-indigo-300 flex items-center"
+                class="text-lg font-bold mb-4 flex items-center gap-2"
+                :class="colors.panelTitle"
               >
-                <span class="mr-2">🎮</span>
-                Controls
+                <HugeiconsIcon
+                  :icon="GameController01Icon"
+                  :size="20"
+                  :class="colors.accentColor"
+                />
+                <span>Controls</span>
               </h3>
               <div class="space-y-3 text-sm">
                 <!-- Mobile/Tablet Controls -->
                 <template v-if="isMobile">
-                  <div class="flex items-center p-2 rounded-lg bg-white/5">
-                    <span class="text-2xl mr-3">👆</span>
-                    <span>Tap and drag to rotate</span>
+                  <div
+                    class="flex items-center p-2.5 rounded-lg gap-3 border"
+                    :class="[colors.cardBackground, colors.cardBorder]"
+                  >
+                    <HugeiconsIcon
+                      :icon="Touch01Icon"
+                      :size="20"
+                      :class="colors.accentColor"
+                      class="flex-shrink-0"
+                    />
+                    <span :class="colors.cardText">Tap and drag to rotate</span>
                   </div>
                   <div
-                    class="flex items-center p-2 rounded-lg bg-white/5 cursor-pointer hover:bg-white/10 transition-colors"
+                    class="flex items-center p-2.5 rounded-lg cursor-pointer transition-colors gap-3 border"
+                    :class="[colors.cardBackground, colors.cardBorder, colors.cardHoverBorder]"
                     @click="toggleInteractiveObjectsPopup"
                     style="pointer-events: auto"
                   >
-                    <span class="text-2xl mr-3">🔍</span>
-                    <span>Tap objects to explore</span>
+                    <HugeiconsIcon
+                      :icon="Search01Icon"
+                      :size="20"
+                      :class="colors.accentColor"
+                      class="flex-shrink-0"
+                    />
+                    <span :class="colors.cardText">Tap objects to explore</span>
                   </div>
-                  <div class="flex items-center p-2 rounded-lg bg-white/5">
-                    <span class="text-2xl mr-3">🤏</span>
-                    <span>Pinch to zoom</span>
+                  <div
+                    class="flex items-center p-2.5 rounded-lg gap-3 border"
+                    :class="[colors.cardBackground, colors.cardBorder]"
+                  >
+                    <HugeiconsIcon
+                      :icon="ZoomInAreaIcon"
+                      :size="20"
+                      :class="colors.accentColor"
+                      class="flex-shrink-0"
+                    />
+                    <span :class="colors.cardText">Pinch to zoom</span>
                   </div>
                 </template>
 
                 <!-- Desktop Controls -->
                 <template v-else>
-                  <div class="flex items-center p-2 rounded-lg bg-white/5">
-                    <span class="text-2xl mr-3">🖱️</span>
-                    <span>Left click + drag to rotate</span>
+                  <div
+                    class="flex items-center p-2.5 rounded-lg gap-3 border"
+                    :class="[colors.cardBackground, colors.cardBorder]"
+                  >
+                    <HugeiconsIcon
+                      :icon="Cursor01Icon"
+                      :size="20"
+                      :class="colors.accentColor"
+                      class="flex-shrink-0"
+                    />
+                    <span :class="colors.cardText">Left click + drag to rotate</span>
                   </div>
                   <div
-                    class="flex items-center p-2 rounded-lg bg-white/5 cursor-pointer hover:bg-white/10 transition-colors"
+                    class="flex items-center p-2.5 rounded-lg cursor-pointer transition-colors gap-3 border"
+                    :class="[colors.cardBackground, colors.cardBorder, colors.cardHoverBorder]"
                     @click="toggleInteractiveObjectsPopup"
                     style="pointer-events: auto"
                   >
-                    <span class="text-2xl mr-3">🔍</span>
-                    <span>Click objects to explore</span>
+                    <HugeiconsIcon
+                      :icon="Search01Icon"
+                      :size="20"
+                      :class="colors.accentColor"
+                      class="flex-shrink-0"
+                    />
+                    <span :class="colors.cardText">Click objects to explore</span>
                   </div>
-                  <div class="flex items-center p-2 rounded-lg bg-white/5">
-                    <span class="text-2xl mr-3">🔄</span>
-                    <span>Mouse wheel to zoom</span>
+                  <div
+                    class="flex items-center p-2.5 rounded-lg gap-3 border"
+                    :class="[colors.cardBackground, colors.cardBorder]"
+                  >
+                    <HugeiconsIcon
+                      :icon="RefreshIcon"
+                      :size="20"
+                      :class="colors.accentColor"
+                      class="flex-shrink-0"
+                    />
+                    <span :class="colors.cardText">Mouse wheel to zoom</span>
                   </div>
                 </template>
               </div>
@@ -200,30 +321,25 @@
               <!-- Reset View Button -->
               <button
                 @click="resetCamera"
-                class="ui-button group relative overflow-hidden w-full mt-4 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 border border-white/20"
+                class="ui-button group relative overflow-hidden w-full mt-4 px-4 py-2.5 rounded-xl transition-all duration-300 shadow-lg border"
+                :class="[
+                  colors.secondaryButtonBg,
+                  colors.secondaryButtonBorder,
+                  colors.secondaryButtonText,
+                  'hover:scale-102',
+                ]"
                 style="pointer-events: auto; cursor: pointer"
               >
                 <span
                   class="relative z-10 flex items-center justify-center space-x-2 text-sm font-medium"
                 >
-                  <svg
-                    class="w-4 h-4 transition-transform group-hover:rotate-180 duration-300"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    ></path>
-                  </svg>
+                  <HugeiconsIcon
+                    :icon="RefreshIcon"
+                    :size="16"
+                    class="transition-transform group-hover:rotate-180 duration-500"
+                  />
                   <span>Reset View</span>
                 </span>
-                <div
-                  class="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                ></div>
               </button>
             </div>
           </div>
@@ -232,56 +348,33 @@
           <button
             v-if="!showControlsPanel"
             @click="toggleControlsPanel"
-            class="ui-button group relative overflow-hidden p-3 bg-gradient-to-br from-indigo-900/95 to-purple-900/95 backdrop-blur-lg text-white rounded-xl transition-all duration-300 shadow-lg border border-indigo-400/50 hover:scale-105"
+            class="ui-button group relative overflow-hidden p-3 backdrop-blur-lg rounded-xl transition-all duration-300 shadow-lg border hover:scale-105"
+            :class="[colors.header3DButtonBg]"
             style="pointer-events: auto; cursor: pointer"
             title="Show Controls"
           >
-            <div class="relative z-10 flex items-center justify-center">
-              <svg
-                class="w-6 h-6 transition-transform group-hover:scale-110"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                ></path>
-              </svg>
-            </div>
             <div
-              class="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            ></div>
+              class="relative z-10 flex items-center justify-center"
+              :class="colors.accentColor"
+            >
+              <HugeiconsIcon :icon="GameController01Icon" :size="22" />
+            </div>
           </button>
 
           <!-- About Me Button (always visible) -->
           <button
             @click="openAboutModal"
-            class="ui-button group relative overflow-hidden p-3 bg-gradient-to-br from-indigo-900/95 to-purple-900/95 backdrop-blur-lg text-white rounded-xl transition-all duration-300 shadow-lg border border-indigo-400/50 hover:scale-105"
+            class="ui-button group relative overflow-hidden p-3 backdrop-blur-lg rounded-xl transition-all duration-300 shadow-lg border hover:scale-105"
+            :class="[colors.header3DButtonBg]"
             style="pointer-events: auto; cursor: pointer"
-            title="About Me"
+            title="About Me / Wizard Profile"
           >
-            <div class="relative z-10 flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-6 w-6 transition-transform group-hover:scale-110"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
             <div
-              class="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            ></div>
+              class="relative z-10 flex items-center justify-center"
+              :class="colors.accentColor"
+            >
+              <HugeiconsIcon :icon="InformationCircleIcon" :size="22" />
+            </div>
           </button>
         </div>
       </div>
@@ -301,16 +394,18 @@
 
         <!-- Popup content -->
         <div
-          class="relative bg-gradient-to-br from-indigo-900/95 to-purple-900/95 backdrop-blur-lg text-white p-6 rounded-2xl border border-indigo-400/50 shadow-2xl max-w-md w-full"
+          class="relative backdrop-blur-xl p-6 rounded-2xl border shadow-2xl max-w-md w-full"
+          :class="[colors.panelBackground, colors.panelBorder]"
           @click.stop
         >
           <!-- Close button -->
           <button
             @click="toggleInteractiveObjectsPopup"
-            class="absolute top-3 right-3 p-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors duration-200"
+            class="absolute top-3 right-3 p-1.5 rounded-lg transition-colors duration-200"
+            :class="colors.panelCloseButton"
           >
             <svg
-              class="w-4 h-4 text-white"
+              class="w-4 h-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -326,59 +421,59 @@
 
           <!-- Header -->
           <h3
-            class="text-xl font-semibold mb-4 text-indigo-300 flex items-center"
+            class="text-xl font-semibold mb-4 flex items-center gap-2"
+            :class="colors.panelTitle"
           >
-            Types of Interactive Objects
+            <HugeiconsIcon
+              :icon="SparklesIcon"
+              :size="20"
+              :class="colors.accentColor"
+            />
+            <span>{{ strings.artifactsHeader }}</span>
           </h3>
 
           <!-- Interactive objects list -->
           <div class="space-y-3">
-            <div>
-              <ul class="space-y-3">
-                <li
-                  v-for="info in sections"
-                  :key="info.id"
-                  class="flex flex-col gap-2 p-3 rounded-lg bg-white/10 hover:bg-white/15 transition-colors"
-                >
-                  <div class="flex items-start">
-                    <span class="text-3xl mr-3 flex-shrink-0">
-                      {{ info.emoji }}
-                    </span>
-                    <div class="flex-1">
-                      <h5 class="font-semibold text-white mb-1">
-                        {{ info.title }}
-                      </h5>
-                      <p class="text-xs text-purple-200">
-                        Search for a
-                        <span class="font-semibold mx-1">{{
-                          mapSectionObject[info.id] || "special object"
-                        }}</span>
-                        in the scene!
-                      </p>
-                    </div>
+            <ul class="space-y-3">
+              <li
+                v-for="info in sections"
+                :key="info.id"
+                class="flex flex-col gap-2 p-3 rounded-lg border transition-colors"
+                :class="[colors.cardBackground, colors.cardBorder, colors.cardHoverBorder]"
+              >
+                <div class="flex items-start gap-3">
+                  <div
+                    class="w-9 h-9 rounded-lg border flex items-center justify-center flex-shrink-0"
+                    :class="[colors.accentBg, colors.accentBorder, colors.accentColor]"
+                  >
+                    <component :is="getSectionIcon(info.id, 'w-5 h-5')" />
                   </div>
-                </li>
-              </ul>
-            </div>
+                  <div class="flex-1 min-w-0">
+                    <h5 class="font-semibold mb-0.5" :class="colors.cardTitle">
+                      {{ info.title }}
+                    </h5>
+                    <p class="text-xs" :class="colors.cardTextMuted">
+                      {{
+                        strings.objectSearchPrompt.replace(
+                          "{object}",
+                          mapSectionObject[info.id] || "artifact"
+                        )
+                      }}
+                    </p>
+                  </div>
+                </div>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
 
-      <!-- Magical ambient overlay -->
+      <!-- Magical ambient overlay (customized by theme) -->
       <div
         class="magical-overlay absolute inset-0 pointer-events-none transition-opacity duration-1000"
-        style="
-          background: radial-gradient(
-              circle at 20% 80%,
-              rgba(99, 102, 241, 0.08) 0%,
-              transparent 50%
-            ),
-            radial-gradient(
-              circle at 80% 20%,
-              rgba(217, 70, 239, 0.08) 0%,
-              transparent 50%
-            );
-        "
+        :style="{
+          background: `radial-gradient(circle at 20% 80%, ${colors.ambientOverlay?.radial1 || 'transparent'} 0%, transparent 50%), radial-gradient(circle at 80% 20%, ${colors.ambientOverlay?.radial2 || 'transparent'} 0%, transparent 50%)`,
+        }"
       ></div>
     </div>
 
@@ -415,15 +510,30 @@ import router from "@/router";
 import ContentModal from "../components/ContentModal.vue";
 import CreditsModal from "../components/CreditsModal.vue";
 import AboutModal from "../components/AboutModal.vue";
+import AboutContent from "../components/AboutContent.vue";
+import { HugeiconsIcon } from "@hugeicons/vue";
+import {
+  AiMagicIcon,
+  Book01Icon,
+  GameController01Icon,
+  Touch01Icon,
+  Search01Icon,
+  ZoomInAreaIcon,
+  Cursor01Icon,
+  RefreshIcon,
+  InformationCircleIcon,
+  SparklesIcon,
+} from "@hugeicons/core-free-icons";
+import { getSectionIcon } from "@/config/sectionIcons";
 import { Scene3DManager } from "../services/core";
 import { default as defaultTheme } from "../themes";
 import type { NullableSchemaType } from "@/types";
 import type { InteractiveObject, PreloaderState } from "../types/3d";
 import { useViewMode } from "@/stores/viewModeStore";
+import { useTheme } from "@/stores/themeStore";
 import { getAllSectionDescriptions } from "@/config/sectionDescriptions";
 import { apiWithCache } from "@/services/apiWithCache";
 import { getDeviceType } from "@/utils/deviceDetection";
-import { wizardLabObjects } from "@/themes/wizard-lab";
 
 // Import UI interaction styles
 import "../styles/ui-interactions.css";
@@ -432,19 +542,29 @@ import AppHeader from "@/components/AppHeader.vue";
 // View mode state from store
 const { isDayMode, toggleDayMode } = useViewMode();
 
+// Theme state from store
+const { theme, strings, colors, sceneBackgroundColor } = useTheme();
+
 // Sections data
 const allSections = getAllSectionDescriptions();
 const visibleSectionIds = ref<string[]>([]);
-const mapSectionObject = wizardLabObjects.reduce((map, obj) => {
-  map[obj.contentType] = obj.type;
-  return map;
-}, {} as Record<string, string>);
+const mapSectionObject = computed(() => {
+  return (theme.value.objects || []).reduce(
+    (map, obj) => {
+      if (obj.contentType) {
+        map[obj.contentType] = obj.type;
+      }
+      return map;
+    },
+    {} as Record<string, string>,
+  );
+});
 const isLoadingSections = ref(true);
 
 // Filter sections based on visibility rules
 const sections = computed(() => {
   return allSections.filter((section) =>
-    visibleSectionIds.value.includes(section.id)
+    visibleSectionIds.value.includes(section.id),
   );
 });
 
@@ -480,6 +600,13 @@ const preloaderState = ref<PreloaderState>({
   loadedAssets: 0,
 });
 
+const is3DSceneReady = ref(false);
+const showLoadingScreen = ref(true);
+
+const enter3DScene = () => {
+  showLoadingScreen.value = false;
+};
+
 // Scene manager instance
 let scene3DManager: Scene3DManager | null = null;
 
@@ -506,25 +633,21 @@ const initThreeJS = async () => {
 
     scene3DManager.onPreloadComplete(() => {
       preloaderState.value.isLoading = false;
+      is3DSceneReady.value = true;
     });
 
-    // Initialize with wizard lab theme
-    await scene3DManager.initialize(threeContainer.value, defaultTheme);
+    // Initialize with active theme
+    await scene3DManager.initialize(threeContainer.value, theme.value);
 
-    // Sync 3D scene with store's day mode
-    const currentMode = scene3DManager.getCurrentLightingMode();
-    const sceneIsDayMode = currentMode === "day";
-
-    // If store's mode differs from scene's initial mode, toggle scene
-    if (isDayMode.value !== sceneIsDayMode) {
-      scene3DManager.toggleDayNightMode();
-    }
+    // Sync 3D scene background and lighting with store's day mode
+    scene3DManager.setLightingMode(isDayMode.value);
 
     console.log("✅ Magic Portfolio initialized successfully");
   } catch (error) {
     console.error("❌ Failed to initialize Magic Portfolio:", error);
     preloaderState.value.isLoading = false;
     preloaderState.value.status = "Failed to initialize";
+    is3DSceneReady.value = false;
   }
 };
 
@@ -643,11 +766,10 @@ const toggleNavigation = () => {
 
 // Day/Night mode toggle function
 const toggleDayNightMode = () => {
-  if (scene3DManager) {
-    scene3DManager.toggleDayNightMode();
-  }
-  // Update store (which persists to localStorage)
   toggleDayMode();
+  if (scene3DManager) {
+    scene3DManager.setLightingMode(isDayMode.value);
+  }
 };
 
 onMounted(async () => {

@@ -3,7 +3,12 @@
     <button
       v-if="showButton"
       @click="scrollToTop"
-      class="fixed bottom-12 left-6 z-40 p-3 rounded-full bg-gradient-to-r from-purple-500 via-pink-400 to-indigo-400 text-white shadow-lg hover:scale-110 hover:shadow-xl"
+      class="fixed bottom-12 left-6 z-40 p-3 rounded-full shadow-lg hover:scale-110 transition-all duration-200 border"
+      :class="[
+        colors.secondaryButtonBg,
+        colors.secondaryButtonBorder,
+        colors.accentColor,
+      ]"
       title="Scroll to top"
     >
       <svg
@@ -26,18 +31,31 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
+import { useTheme } from "@/stores/themeStore";
+
+const { colors } = useTheme();
 
 const showButton = ref(false);
-const scrollThreshold = 300; // Show button after scrolling 300px
+// Show button only when near the bottom of the page (within 450px from bottom, and scrolled at least 150px)
+const bottomThreshold = 450;
+const minScrollTop = 150;
 
 const checkScroll = () => {
   // Check the scrollable container (the overflow-y-auto div in Post.vue)
   const scrollableContent = document.querySelector(".overflow-y-auto");
   if (scrollableContent) {
-    showButton.value = scrollableContent.scrollTop > scrollThreshold;
+    const { scrollTop, scrollHeight, clientHeight } = scrollableContent;
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+    showButton.value =
+      scrollTop > minScrollTop && distanceFromBottom <= bottomThreshold;
   } else {
     // Fallback to window scroll
-    showButton.value = window.scrollY > scrollThreshold;
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight;
+    const clientHeight = window.innerHeight;
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+    showButton.value =
+      scrollTop > minScrollTop && distanceFromBottom <= bottomThreshold;
   }
 };
 

@@ -9,18 +9,25 @@
 
     <!-- Modal Content -->
     <div
-      class="relative bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 max-w-3xl w-full max-h-[85vh] overflow-y-auto border border-purple-500/30 shadow-2xl"
+      class="relative rounded-2xl p-6 max-w-3xl w-full max-h-[85vh] overflow-y-auto border shadow-2xl"
+      :class="`${colors.panelBackground} ${colors.panelBorder}`"
       @click.stop
     >
       <!-- Header -->
       <div class="flex justify-between items-center mb-6">
         <div class="flex items-center gap-3">
-          <span class="text-4xl">🎨</span>
-          <h2 class="text-2xl font-bold text-white pr-6">3D Model Credits</h2>
+          <div
+            class="w-10 h-10 rounded-xl border flex items-center justify-center"
+            :class="`${colors.accentBg} ${colors.accentBorder} ${colors.accentColor}`"
+          >
+            <HugeiconsIcon :icon="PaintBoardIcon" :size="24" />
+          </div>
+          <h2 class="text-2xl font-bold pr-6" :class="colors.panelTitle">3D Model Credits</h2>
         </div>
         <button
           @click="$emit('close')"
-          class="text-gray-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
+          class="p-2 rounded-lg transition-colors"
+          :class="colors.panelCloseButton"
         >
           <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
             <path
@@ -34,9 +41,10 @@
 
       <!-- Description -->
       <div
-        class="mb-6 p-4 rounded-xl backdrop-blur-sm border border-purple-500/20 bg-gradient-to-r from-purple-500/10 to-pink-500/10"
+        class="mb-6 p-4 rounded-xl backdrop-blur-sm border"
+        :class="`${colors.cardBackground} ${colors.cardBorder}`"
       >
-        <p class="text-gray-300 text-sm leading-relaxed">
+        <p class="text-sm leading-relaxed" :class="colors.cardText">
           All 3D models used in this portfolio are licensed under Creative
           Commons Attribution. We are grateful to the talented artists who
           created these amazing works and made them available to the community.
@@ -48,24 +56,27 @@
         <div
           v-for="(credit, index) in credits"
           :key="index"
-          class="p-4 rounded-lg bg-slate-800/50 border border-gray-700/50 hover:border-purple-500/30 transition-all duration-200"
+          class="p-4 rounded-lg border transition-all duration-200"
+          :class="`${colors.cardBackground} ${colors.cardBorder} ${colors.cardHoverBorder}`"
         >
           <div class="flex flex-col gap-2">
             <div class="flex items-start justify-between gap-2">
               <h3
-                class="font-semibold text-lg text-purple-400 hover:text-purple-300 underline transition-colors"
+                class="font-semibold text-lg underline transition-colors"
+                :class="colors.accentColor"
               >
                 <a :href="credit.url" target="_blank" rel="noopener noreferrer">
                   {{ credit.name }}</a
                 >
               </h3>
               <span
-                class="px-2 py-1 rounded-md bg-purple-500/20 text-purple-300 text-xs font-medium whitespace-nowrap"
+                class="px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap border"
+                :class="`${colors.badgeBg} ${colors.badgeText} ${colors.badgeBorder}`"
               >
                 {{ credit.filename }}
               </span>
             </div>
-            <p class="text-gray-400 text-sm">
+            <p class="text-sm" :class="colors.cardTextMuted">
               by
               {{ credit.author }}
             </p>
@@ -73,7 +84,8 @@
               :href="credit.licenseUrl"
               target="_blank"
               rel="noopener noreferrer"
-              class="text-gray-500 text-xs hover:text-gray-400 transition-colors inline-flex items-center gap-1"
+              class="text-xs transition-colors inline-flex items-center gap-1 opacity-80 hover:opacity-100"
+              :class="colors.accentColor"
             >
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path
@@ -89,9 +101,10 @@
       </div>
 
       <!-- Footer -->
-      <div class="mt-6 pt-4 border-t border-gray-700/50 text-center">
-        <p class="text-gray-400 text-sm">
-          Thank you to all the artists for their incredible work! ❤️
+      <div class="mt-6 pt-4 border-t text-center" :class="colors.cardBorder">
+        <p class="text-sm inline-flex items-center gap-1.5 justify-center" :class="colors.cardTextMuted">
+          <span>Thank you to all the artists for their incredible work!</span>
+          <HugeiconsIcon :icon="HeartIcon" :size="16" class="text-rose-400" />
         </p>
       </div>
     </div>
@@ -99,6 +112,11 @@
 </template>
 
 <script setup lang="ts">
+import { HugeiconsIcon } from "@hugeicons/vue";
+import { PaintBoardIcon, HeartIcon } from "@hugeicons/core-free-icons";
+import { useTheme } from "@/stores/themeStore";
+
+const { colors } = useTheme();
 interface Credit {
   name: string;
   url: string;
@@ -189,12 +207,12 @@ const credits: Credit[] = [
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.6);
+  background: rgba(245, 158, 11, 0.3);
   border-radius: 4px;
   transition: background 0.2s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.8);
+  background: rgba(245, 158, 11, 0.55);
 }
 </style>

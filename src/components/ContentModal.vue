@@ -2,7 +2,7 @@
   <UnifiedModal
     :visible="visible"
     :title="getTitle()"
-    :emoji="getSectionEmoji()"
+    :sectionId="props.type"
     :loading="props.loading"
     loading-text="Gathering magical knowledge from the ethereal realm..."
     @close="$emit('close')"
@@ -10,21 +10,19 @@
     <!-- Section Description -->
     <div
       v-if="sectionDescription && !props.loading"
-      class="mb-6 p-4 rounded-xl backdrop-blur-sm border"
-      :style="{
-        background: `linear-gradient(135deg, ${sectionDescription.color.from}15, ${sectionDescription.color.to}15)`,
-        borderColor: `${sectionDescription.color.accent}40`,
-      }"
+      class="mb-6 p-5 rounded-2xl border transition-all"
+      :class="isDayMode ? 'bg-amber-50/80 border-amber-200/90 shadow-sm' : 'bg-slate-900/60 border-slate-800'"
     >
-      <p class="text-gray-300 text-sm leading-relaxed">
+      <p class="text-sm leading-relaxed mb-4" :class="colors.panelText">
         {{ sectionDescription.longDescription }}
       </p>
       <router-link
         :to="`/post/${sectionDescription.id}`"
-        class="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105"
-        :style="{
-          background: `linear-gradient(90deg, ${sectionDescription.color.from}, ${sectionDescription.color.to})`,
-        }"
+        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-105 shadow-md !no-underline"
+        :class="[
+          colors.primaryGradient || `${colors.primaryButtonBg} ${colors.primaryButtonHover}`,
+          colors.primaryGradientText || colors.primaryButtonText,
+        ]"
       >
         <span>View Full Section</span>
         <svg
@@ -49,7 +47,7 @@
       <ProjectsList
         v-if="type === 'project'"
         :items="content"
-        :isDayMode="false"
+        :isDayMode="isDayMode"
         @item-click="openPost"
       />
 
@@ -57,7 +55,7 @@
       <BlogPostsList
         v-else-if="type === 'blog-post'"
         :items="content"
-        :isDayMode="false"
+        :isDayMode="isDayMode"
         @item-click="openPost"
       />
 
@@ -65,28 +63,28 @@
       <WIPList
         v-else-if="type === 'work-in-progress'"
         :items="content"
-        :isDayMode="false"
+        :isDayMode="isDayMode"
       />
 
       <!-- Collaborations -->
       <CollaborationsList
         v-else-if="type === 'collaboration'"
         :items="content"
-        :isDayMode="false"
+        :isDayMode="isDayMode"
       />
 
       <!-- Learning Paths -->
       <LearningPathsList
         v-else-if="type === 'learning-path'"
         :items="content"
-        :isDayMode="false"
+        :isDayMode="isDayMode"
       />
 
       <!-- Fun Facts -->
       <FunFactsList
         v-else-if="type === 'fun-facts'"
         :items="content"
-        :isDayMode="false"
+        :isDayMode="isDayMode"
       />
 
       <!-- Empty state -->
@@ -94,7 +92,7 @@
         v-if="!loading && (!content || content.length === 0)"
         class="text-center py-8"
       >
-        <div class="text-gray-400 mb-2">
+        <div class="mb-2" :class="colors.panelTextMuted">
           <svg
             class="w-16 h-16 mx-auto"
             fill="currentColor"
@@ -107,8 +105,8 @@
             />
           </svg>
         </div>
-        <p class="text-gray-400">No content available yet</p>
-        <p class="text-gray-500 text-sm mt-1">Check back later for updates!</p>
+        <p :class="colors.panelText">No content available yet</p>
+        <p class="text-sm mt-1" :class="colors.panelTextMuted">Check back later for updates!</p>
       </div>
     </div>
   </UnifiedModal>
@@ -122,6 +120,7 @@ import {
   getSectionById,
   type SectionDescription,
 } from "@/config/sectionDescriptions";
+import { useTheme } from "@/stores/themeStore";
 import UnifiedModal from "./UnifiedModal.vue";
 import ProjectsList from "./sections/ProjectsList.vue";
 import BlogPostsList from "./sections/BlogPostsList.vue";
@@ -129,6 +128,8 @@ import WIPList from "./sections/WIPList.vue";
 import CollaborationsList from "./sections/CollaborationsList.vue";
 import LearningPathsList from "./sections/LearningPathsList.vue";
 import FunFactsList from "./sections/FunFactsList.vue";
+
+const { colors, isDayMode } = useTheme();
 
 interface Props {
   visible: boolean;
@@ -157,10 +158,6 @@ const getTitle = () => {
     "fun-facts": "Fun Facts",
   };
   return titles[props.type as keyof typeof titles] || props.type;
-};
-
-const getSectionEmoji = () => {
-  return sectionDescription.value?.emoji || "✨";
 };
 
 const openPost = <T>(post: ContentItem<T>) => {

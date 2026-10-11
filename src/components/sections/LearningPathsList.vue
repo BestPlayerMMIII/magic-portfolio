@@ -4,24 +4,29 @@
       v-for="path in items"
       :key="path.id"
       class="learning-path-card rounded-lg p-4 sm:p-6 border transition-all duration-300"
-      :class="{
-        'bg-white/90 border-gray-300 hover:shadow-lg': isDayMode,
-        'bg-slate-800/70 border-emerald-500/30 hover:shadow-2xl hover:shadow-emerald-500/20':
-          !isDayMode,
-      }"
+      :class="[
+        colors.cardBackground,
+        colors.cardBorder,
+        colors.cardHoverBorder,
+        'hover:shadow-xl',
+      ]"
     >
       <div
         class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3"
       >
         <h3
           class="text-lg sm:text-xl font-semibold"
-          :class="{ 'text-gray-900': isDayMode, 'text-white': !isDayMode }"
+          :class="colors.cardTitle"
         >
           {{ path.data.title }}
         </h3>
         <span
-          class="px-3 py-1 rounded-full text-xs font-medium self-start"
-          :class="getDifficultyClass(path.data.difficulty)"
+          class="px-3 py-1 rounded-full text-xs font-medium self-start border"
+          :class="[
+            colors.accentBg,
+            colors.accentColor,
+            colors.accentBorder,
+          ]"
         >
           {{ path.data.difficulty }}
         </span>
@@ -29,14 +34,14 @@
 
       <p
         class="mb-2 text-sm line-clamp-10"
-        :class="{ 'text-gray-700': isDayMode, 'text-gray-300': !isDayMode }"
+        :class="colors.cardText"
       >
         {{ path.data.description }}
       </p>
 
       <p
         class="mb-4 text-xs"
-        :class="{ 'text-gray-600': isDayMode, 'text-gray-400': !isDayMode }"
+        :class="colors.cardTextMuted"
       >
         Category: {{ path.data.category }}
       </p>
@@ -44,20 +49,20 @@
       <div class="mb-4">
         <div
           class="flex justify-between text-xs mb-2"
-          :class="{ 'text-gray-600': isDayMode, 'text-gray-400': !isDayMode }"
+          :class="colors.cardTextMuted"
         >
           <span>Progress</span>
           <span>{{ path.data.progress }}%</span>
         </div>
         <div
-          class="w-full h-2 rounded-full overflow-hidden"
-          :class="{ 'bg-gray-200': isDayMode, 'bg-gray-700': !isDayMode }"
+          class="w-full h-2 rounded-full overflow-hidden border"
+          :class="colors.preloaderProgressTrack"
         >
           <div
             class="h-2 rounded-full transition-all duration-300"
+            :class="`bg-gradient-to-r ${theme.ui?.preloaderProgressGradient || 'from-amber-500 via-amber-400 to-amber-300'}`"
             :style="{
               width: `${path.data.progress}%`,
-              background: `linear-gradient(90deg, #10b981, #14b8a6)`,
             }"
           ></div>
         </div>
@@ -66,7 +71,7 @@
       <div v-if="path.data.resources && path.data.resources.length > 0">
         <p
           class="text-xs mb-2 font-medium"
-          :class="{ 'text-gray-700': isDayMode, 'text-gray-300': !isDayMode }"
+          :class="colors.cardTextMuted"
         >
           Resources ({{ getCompletedCount(path.data.resources) }}/{{
             path.data.resources.length
@@ -79,22 +84,24 @@
             :key="idx"
             class="flex items-center gap-2"
           >
-            <span class="text-lg">{{ resource.completed ? "✅" : "⏳" }}</span>
+            <component
+              :is="resource.completed ? getCompletedIcon() : getPendingIcon()"
+              class="w-4 h-4 flex-shrink-0"
+              :class="resource.completed ? colors.accentColor : colors.cardTextMuted"
+            />
             <span
               class="text-xs flex-1"
-              :class="{
-                'text-gray-700': isDayMode,
-                'text-gray-300': !isDayMode,
-              }"
+              :class="colors.cardText"
             >
               {{ resource.title }}
             </span>
             <span
-              class="text-xs px-2 py-0.5 rounded"
-              :class="{
-                'bg-emerald-100 text-emerald-700': isDayMode,
-                'bg-emerald-500/20 text-emerald-300': !isDayMode,
-              }"
+              class="text-xs px-2 py-0.5 rounded border"
+              :class="[
+                colors.badgeBg,
+                colors.badgeText,
+                colors.badgeBorder,
+              ]"
             >
               {{ resource.type }}
             </span>
@@ -102,7 +109,7 @@
           <p
             v-if="path.data.resources.length > 3"
             class="text-xs"
-            :class="{ 'text-gray-600': isDayMode, 'text-gray-400': !isDayMode }"
+            :class="colors.cardTextMuted"
           >
             + {{ path.data.resources.length - 3 }} more resources
           </p>
@@ -111,11 +118,12 @@
 
       <div class="mt-4">
         <button
-          class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all"
-          :class="{
-            'bg-emerald-500 hover:bg-emerald-600 text-white': isDayMode,
-            'bg-emerald-600 hover:bg-emerald-700 text-white': !isDayMode,
-          }"
+          :class="[
+            baseButtonLink,
+            colors.primaryButtonBg,
+            colors.primaryButtonHover,
+            colors.primaryButtonText,
+          ]"
           @click="$emit('item-click', path)"
         >
           Read More &rarr;
@@ -126,7 +134,15 @@
 </template>
 
 <script setup lang="ts">
+import { h } from "vue";
+import type { VNode } from "vue";
+import { HugeiconsIcon } from "@hugeicons/vue";
+import { CheckmarkCircle01Icon, Clock01Icon } from "@hugeicons/core-free-icons";
 import type { ContentItem, LearningPath, LearningResource } from "@/types";
+import { baseButtonLink } from "@/utils/links";
+import { useTheme } from "@/stores/themeStore";
+
+const { theme, colors } = useTheme();
 
 defineProps<{
   items: ContentItem<LearningPath>[];
@@ -137,16 +153,11 @@ defineEmits<{
   "item-click": [item: ContentItem<LearningPath>];
 }>();
 
-const getDifficultyClass = (difficulty: string) => {
-  const classes = {
-    beginner: "bg-green-100 text-green-700",
-    intermediate: "bg-yellow-100 text-yellow-700",
-    advanced: "bg-red-100 text-red-700",
-  };
-  return (
-    classes[difficulty as keyof typeof classes] || "bg-gray-100 text-gray-700"
-  );
-};
+const getCompletedIcon = (): VNode =>
+  h(HugeiconsIcon, { icon: CheckmarkCircle01Icon, size: 16 });
+
+const getPendingIcon = (): VNode =>
+  h(HugeiconsIcon, { icon: Clock01Icon, size: 16 });
 
 const getCompletedCount = (resources: LearningResource[]) => {
   return resources.filter((r) => r.completed).length;

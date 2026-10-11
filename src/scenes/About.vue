@@ -1,7 +1,7 @@
 <template>
   <div
     class="h-screen w-screen flex flex-col"
-    :class="{ 'bg-[rgb(242,242,242)]': isDayMode }"
+    :class="colors.pageBackground"
   >
     <!-- Navigation Header -->
     <NavigationHeader
@@ -14,7 +14,7 @@
       <div v-if="loading" class="flex items-center justify-center h-full">
         <div class="flex flex-col items-center gap-4">
           <div
-            class="w-16 h-16 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin"
+            class="w-16 h-16 border-4 border-slate-700 border-t-amber-400 rounded-full animate-spin"
           ></div>
           <p
             class="text-lg font-medium"
@@ -60,8 +60,8 @@
           to="/"
           class="px-6 py-2 rounded-lg font-medium transition-all duration-200"
           :class="{
-            'bg-purple-600 text-white hover:bg-purple-700': isDayMode,
-            'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/50':
+            'bg-amber-500 text-slate-950 font-semibold hover:bg-amber-400': isDayMode,
+            'bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/40':
               !isDayMode,
           }"
         >
@@ -78,15 +78,12 @@
         <div
           class="max-w-4xl mx-auto w-full mb-8 text-center animate-fade-in-up"
         >
-          <h1 class="text-6xl md:text-7xl font-bold mb-6 tracking-tight">
-            <span
-              class="bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent animate-gradient-shift"
-            >
-              About Me
-            </span>
+          <h1 class="text-5xl md:text-6xl font-bold mb-6 tracking-tight" :class="colors.panelTitle">
+            About Me
           </h1>
           <div
-            class="w-24 h-1 mx-auto rounded-full bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 animate-fade-in-up"
+            class="w-20 h-1 mx-auto rounded-full"
+            :class="colors.primaryButtonBg"
           ></div>
         </div>
 
@@ -94,7 +91,7 @@
         <div
           v-html="aboutContent"
           class="prose lg:prose-xl max-w-4xl mx-auto"
-          :class="{ 'prose-invert': !isDayMode }"
+          :class="colors.proseClass"
         ></div>
 
         <!-- Back Button -->
@@ -104,7 +101,7 @@
       </div>
 
       <!-- Footer -->
-      <AppFooter :isDayMode="isDayMode" authorName="BestPlayer" />
+      <AppFooter :isDayMode="isDayMode" />
     </div>
   </div>
 </template>
@@ -115,9 +112,11 @@ import NavigationHeader from "@/components/NavigationHeader.vue";
 import BackButton from "@/components/ui/BackButton.vue";
 import AppFooter from "@/components/AppFooter.vue";
 import { useViewMode } from "@/stores/viewModeStore";
+import { useTheme } from "@/stores/themeStore";
 import { apiService } from "@/services/api";
 
-// Use day mode from store
+// Use theme and day mode
+const { colors } = useTheme();
 const { isDayMode, toggleDayMode } = useViewMode();
 
 const aboutContent = ref<string | null>(null);
@@ -224,11 +223,11 @@ const toggleDayNightMode = () => {
 }
 
 :deep(.prose a) {
-  @apply text-purple-600 hover:text-purple-700 underline;
+  @apply text-amber-600 hover:text-amber-700 underline;
 }
 
 :deep(.prose-invert a) {
-  @apply text-purple-400 hover:text-purple-300;
+  @apply text-amber-400 hover:text-amber-300;
 }
 
 :deep(.prose img) {

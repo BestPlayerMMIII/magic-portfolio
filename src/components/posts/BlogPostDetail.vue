@@ -9,7 +9,7 @@
       <header class="w-full mb-8 text-left">
       <h1
         class="blog-post-title text-4xl md:text-5xl font-bold mb-4"
-        :class="{ 'text-gray-900': isDayMode, 'text-white': !isDayMode }"
+        :class="colors.panelTitle"
       >
         {{ post.data.header.title }}
       </h1>
@@ -18,7 +18,8 @@
         <!-- Show loading state while fetching full resolution -->
         <div
           v-if="!loadedImageUrl && imageLoading"
-          class="w-full h-64 md:h-80 rounded-2xl bg-gradient-to-br from-purple-300 via-pink-200 to-indigo-200 animate-pulse"
+          class="w-full h-64 md:h-80 rounded-2xl animate-pulse border"
+          :class="[colors.cardBackground, colors.cardBorder]"
         ></div>
         <!-- Show full resolution image when loaded -->
         <img
@@ -31,7 +32,7 @@
 
       <p
         class="text-sm mb-4 text-center"
-        :class="{ 'text-gray-700': isDayMode, 'text-gray-300': !isDayMode }"
+        :class="colors.cardTextMuted"
       >
         {{ new Date(post.metadata.updatedAt).toLocaleDateString() }}
       </p>
@@ -44,20 +45,26 @@
         <span
           v-for="tag in post.data.header.tags"
           :key="tag"
-          class="px-3 py-1 rounded-full text-xs font-semibold shadow-md transition-all duration-200 cursor-pointer select-none bg-gradient-to-r from-purple-500 via-pink-400 to-indigo-400 text-white hover:scale-105 hover:from-purple-600 hover:to-indigo-500"
+          class="px-3 py-1 rounded-full text-xs font-semibold shadow-sm transition-all duration-200 cursor-pointer select-none border"
+          :class="[
+            colors.badgeBg,
+            colors.badgeText,
+            colors.badgeBorder,
+            'hover:scale-105',
+          ]"
         >
           #{{ tag }}
         </span>
       </div>
 
-      <hr class="mb-6 border-t" />
+      <hr class="mb-6 border-t" :class="colors.cardBorder" />
     </header>
 
     <!-- Render raw HTML from post.data.content -->
     <div
       v-html="enhancedContent"
       class="prose prose-lg max-w-none mx-auto content-wrapper blog-post-body"
-      :class="{ 'prose-invert': !isDayMode }"
+      :class="colors.proseClass"
     ></div>
     </article>
   </BasePostDetail>
@@ -68,6 +75,9 @@ import { ref, watch } from "vue";
 import type { ContentItem } from "@/types";
 import mediaService from "@/services/mediaService";
 import BasePostDetail from "./BasePostDetail.vue";
+import { useTheme } from "@/stores/themeStore";
+
+const { colors } = useTheme();
 
 interface Props {
   post: ContentItem<any>;

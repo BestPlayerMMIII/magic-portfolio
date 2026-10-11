@@ -1,10 +1,11 @@
 <template>
   <footer
     class="text-center border-t mt-12 text-sm mobile-safe-footer"
-    :class="{
-      'text-gray-800 border-gray-200 bg-white/50': isDayMode,
-      'text-white border-purple-500/30 bg-black/20': !isDayMode,
-    }"
+    :class="[
+      colors.cardTextMuted,
+      colors.cardBorder,
+      colors.navHeaderBackground,
+    ]"
   >
     <div class="max-w-7xl mx-auto py-8 px-4">
       <p class="mb-2">
@@ -13,7 +14,7 @@
           href="https://bestplayer.dev"
           target="_blank"
           rel="noopener noreferrer"
-          >{{ authorName }}</a
+          >{{ authorName || strings.authorName }}</a
         >. All rights reserved.
       </p>
     </div>
@@ -22,6 +23,9 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { useTheme } from "@/stores/themeStore";
+
+const { strings, colors } = useTheme();
 
 defineProps<{
   isDayMode: boolean;

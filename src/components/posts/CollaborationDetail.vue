@@ -3,14 +3,14 @@
     <header class="w-full text-center mb-6">
       <h1
         class="text-4xl font-bold mb-4"
-        :class="{ 'text-gray-900': isDayMode, 'text-white': !isDayMode }"
+        :class="colors.panelTitle"
       >
         {{ post.data.title || post.data.name || "Collaboration" }}
       </h1>
       <p
         v-if="post.data.description"
         class="text-lg mb-4"
-        :class="{ 'text-gray-700': isDayMode, 'text-gray-300': !isDayMode }"
+        :class="colors.panelTextMuted"
       >
         {{ post.data.description }}
       </p>
@@ -20,7 +20,7 @@
     <div v-if="post.data.collaborators" class="mb-6">
       <h2
         class="text-2xl font-semibold mb-3 text-center"
-        :class="{ 'text-gray-800': isDayMode, 'text-white': !isDayMode }"
+        :class="colors.panelTitle"
       >
         Collaborators
       </h2>
@@ -28,11 +28,12 @@
         <span
           v-for="collab in post.data.collaborators"
           :key="collab"
-          class="px-4 py-2 rounded-lg text-sm font-medium"
-          :class="{
-            'bg-indigo-100 text-indigo-700': isDayMode,
-            'bg-indigo-500/20 text-indigo-300': !isDayMode,
-          }"
+          class="px-4 py-2 rounded-lg text-sm font-medium border"
+          :class="[
+            colors.badgeBg,
+            colors.badgeText,
+            colors.badgeBorder,
+          ]"
         >
           {{ collab }}
         </span>
@@ -42,12 +43,12 @@
     <!-- Content -->
     <div
       class="prose max-w-none mx-auto"
-      :class="{ 'prose-invert': !isDayMode }"
+      :class="colors.proseClass"
     >
       <p v-if="post.data.details" class="whitespace-pre-wrap">
         {{ post.data.details }}
       </p>
-      <p v-else class="text-center text-gray-500">
+      <p v-else class="text-center" :class="colors.cardTextMuted">
         More details about this collaboration coming soon...
       </p>
     </div>
@@ -57,6 +58,9 @@
 <script setup lang="ts">
 import type { ContentItem } from "@/types";
 import BasePostDetail from "./BasePostDetail.vue";
+import { useTheme } from "@/stores/themeStore";
+
+const { colors } = useTheme();
 
 interface Props {
   post: ContentItem<any>;

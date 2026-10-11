@@ -212,6 +212,9 @@ export class Scene3DManager {
     // Start animation loop
     this._sceneManager.startAnimation();
 
+    // Apply theme's day/night background and fog
+    this.updateModeVisuals(this.getCurrentLightingMode() === "day");
+
     this._isInitialized = true;
     console.log("✅ Scene3DManager initialized successfully");
 
@@ -274,6 +277,45 @@ export class Scene3DManager {
    */
   toggleDayNightMode(): void {
     this._effectsManager.toggleDayNightMode();
+    const isDay = this.getCurrentLightingMode() === "day";
+    this.updateModeVisuals(isDay);
+  }
+
+  /**
+   * Set specific lighting mode and sync 3D background & fog
+   */
+  setLightingMode(isDay: boolean): void {
+    const currentIsDay = this.getCurrentLightingMode() === "day";
+    if (currentIsDay !== isDay) {
+      this._effectsManager.toggleDayNightMode();
+    }
+    this.updateModeVisuals(isDay);
+  }
+
+  /**
+   * Apply theme's day/night background and fog to Three.js scene
+   */
+  updateModeVisuals(isDay: boolean): void {
+    if (!this._currentTheme) return;
+
+    const bgConfig = this._currentTheme.scene.background;
+    const fogByMode = this._currentTheme.scene.fogByMode;
+
+    if (bgConfig) {
+      const bgColor = isDay ? bgConfig.day : bgConfig.night;
+      const fogConfig = fogByMode
+        ? isDay
+          ? fogByMode.day
+          : fogByMode.night
+        : undefined;
+
+      this._sceneManager.setBackgroundAndFog(
+        bgColor,
+        fogConfig?.color,
+        fogConfig?.near,
+        fogConfig?.far
+      );
+    }
   }
 
   /**

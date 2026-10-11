@@ -33,6 +33,8 @@
   "dependencies": {
     "@git-cms/client": "^0.1.8",
     "@git-cms/core": "^0.1.3",
+    "@hugeicons/core-free-icons": "^4.3.5",
+    "@hugeicons/vue": "^1.0.8",
     "@types/three": "^0.157.0",
     "dotenv": "^17.2.2",
     "pinia": "^3.0.3",

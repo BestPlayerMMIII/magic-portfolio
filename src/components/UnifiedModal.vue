@@ -7,31 +7,43 @@
     >
       <!-- Modal Container -->
       <div
-        class="relative bg-gradient-to-br from-indigo-900/95 to-purple-900/95 backdrop-blur-lg rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden border border-purple-400/50"
+        class="relative rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden border"
+        :class="`${colors.panelBackground} ${colors.panelBorder}`"
         @click.stop
       >
         <!-- Header -->
         <div
-          class="sticky top-0 z-10 bg-gradient-to-r from-purple-600/90 to-indigo-600/90 backdrop-blur-md px-6 py-4 border-b border-purple-400/30"
+          class="sticky top-0 z-10 px-6 py-4 border-b"
+          :class="`${colors.navHeaderBackground} ${colors.panelBorder}`"
         >
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div
-                v-if="iconType"
-                class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 flex items-center justify-center"
+                v-if="iconType || sectionId"
+                class="w-10 h-10 rounded-xl border flex items-center justify-center"
+                :class="`${colors.accentBg} ${colors.accentBorder} ${colors.accentColor}`"
               >
-                <component :is="getIcon" class="h-6 w-6 text-white" />
+                <component
+                  :is="getIcon"
+                  v-if="iconType"
+                  class="h-5 w-5"
+                />
+                <component
+                  :is="getSectionIconComponent"
+                  v-else-if="sectionId"
+                  class="h-5 w-5"
+                />
               </div>
-              <span v-else-if="emoji" class="text-4xl">{{ emoji }}</span>
-              <h2 class="text-2xl font-bold text-white">{{ title }}</h2>
+              <h2 class="text-2xl font-bold" :class="colors.panelTitle">{{ title }}</h2>
             </div>
             <button
               @click="handleClose"
-              class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors duration-200 group"
+              class="p-2 rounded-lg transition-colors duration-200 group"
+              :class="colors.panelCloseButton"
               title="Close"
             >
               <svg
-                class="w-6 h-6 text-white group-hover:rotate-90 transition-transform duration-200"
+                class="w-6 h-6 group-hover:rotate-90 transition-transform duration-200"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -48,16 +60,20 @@
         </div>
 
         <!-- Content Area -->
-        <div class="overflow-y-auto max-h-[calc(90vh-100px)] p-6">
+        <div
+          class="overflow-y-auto max-h-[calc(90vh-100px)] p-6 modal-content-area"
+          :class="[isDayMode ? 'mode-light' : 'mode-dark', colors.proseClass]"
+        >
           <!-- Loading State -->
           <div
             v-if="loading"
             class="flex flex-col items-center justify-center py-12"
           >
             <div
-              class="w-16 h-16 border-4 border-purple-400/30 border-t-purple-400 rounded-full animate-spin mb-4"
+              class="w-16 h-16 border-4 rounded-full animate-spin mb-4"
+              :class="isDayMode ? 'border-stone-300 border-t-amber-600' : 'border-slate-700 border-t-amber-400'"
             ></div>
-            <p class="text-purple-300 text-lg">{{ loadingText }}</p>
+            <p class="text-lg font-medium" :class="colors.accentColor">{{ loadingText }}</p>
           </div>
 
           <!-- Error State -->
@@ -79,10 +95,10 @@
                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <h3 class="text-xl font-semibold text-white mb-2">
+            <h3 class="text-xl font-semibold mb-2" :class="colors.panelTitle">
               Failed to load
             </h3>
-            <p class="text-purple-300">{{ error }}</p>
+            <p :class="colors.panelTextMuted">{{ error }}</p>
           </div>
 
           <!-- Content -->
@@ -97,11 +113,18 @@
 
 <script setup lang="ts">
 import { computed, h } from "vue";
+import { HugeiconsIcon } from "@hugeicons/vue";
+import { InformationCircleIcon, Book01Icon } from "@hugeicons/core-free-icons";
+import { getSectionIcon } from "@/config/sectionIcons";
+import { useTheme } from "@/stores/themeStore";
+
+const { colors, isDayMode } = useTheme();
 
 const props = defineProps<{
   visible: boolean;
   title: string;
   emoji?: string;
+  sectionId?: string;
   iconType?: "info" | "content";
   loading?: boolean;
   error?: string | null;
@@ -115,37 +138,22 @@ const emit = defineEmits<{
 // Get the appropriate icon based on type
 const getIcon = computed(() => {
   if (props.iconType === "info") {
-    return h(
-      "svg",
-      {
-        xmlns: "http://www.w3.org/2000/svg",
-        fill: "none",
-        viewBox: "0 0 24 24",
-        stroke: "currentColor",
-      },
-      h("path", {
-        "stroke-linecap": "round",
-        "stroke-linejoin": "round",
-        "stroke-width": "2",
-        d: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
-      })
-    );
+    return h(HugeiconsIcon, {
+      icon: InformationCircleIcon,
+      size: 24,
+    });
   } else if (props.iconType === "content") {
-    return h(
-      "svg",
-      {
-        xmlns: "http://www.w3.org/2000/svg",
-        fill: "none",
-        viewBox: "0 0 24 24",
-        stroke: "currentColor",
-      },
-      h("path", {
-        "stroke-linecap": "round",
-        "stroke-linejoin": "round",
-        "stroke-width": "2",
-        d: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
-      })
-    );
+    return h(HugeiconsIcon, {
+      icon: Book01Icon,
+      size: 24,
+    });
+  }
+  return null;
+});
+
+const getSectionIconComponent = computed(() => {
+  if (props.sectionId) {
+    return getSectionIcon(props.sectionId, "h-5 w-5");
   }
   return null;
 });
@@ -181,56 +189,85 @@ const handleClose = () => {
 }
 
 /* Prose styling for content */
-:deep(.prose) {
+.modal-content-area {
   @apply text-base leading-relaxed;
 }
 
-:deep(.prose h1) {
-  @apply text-3xl font-bold mb-4 mt-8 text-white;
+/* Dark Mode Typography */
+.mode-dark :deep(h1) {
+  @apply text-3xl font-bold mb-4 mt-8 text-white !important;
+}
+.mode-dark :deep(h2) {
+  @apply text-2xl font-bold mb-3 mt-6 text-amber-200 !important;
+}
+.mode-dark :deep(h3) {
+  @apply text-xl font-semibold mb-2 mt-4 text-indigo-200 !important;
+}
+.mode-dark :deep(p) {
+  @apply mb-4 text-slate-200 font-normal !important;
+}
+.mode-dark :deep(ul),
+.mode-dark :deep(ol) {
+  @apply ml-6 mb-4 text-slate-200 !important;
+}
+.mode-dark :deep(strong) {
+  @apply text-white font-bold !important;
+}
+.mode-dark :deep(.prose a),
+.mode-dark :deep(p a),
+.mode-dark :deep(li a) {
+  @apply text-amber-400 hover:text-amber-300 underline font-semibold !important;
+}
+.mode-dark :deep(code) {
+  @apply bg-slate-800 px-1.5 py-0.5 rounded text-amber-300 border border-slate-700 font-mono text-sm !important;
+}
+.mode-dark :deep(pre) {
+  @apply bg-black/40 p-4 rounded-lg overflow-x-auto border border-slate-800 text-slate-200 !important;
+}
+.mode-dark :deep(blockquote) {
+  @apply border-l-4 border-amber-400 pl-4 italic text-slate-300 !important;
 }
 
-:deep(.prose h2) {
-  @apply text-2xl font-bold mb-3 mt-6 text-purple-200;
+/* Light Mode Typography (High Contrast) */
+.mode-light :deep(h1) {
+  @apply text-3xl font-bold mb-4 mt-8 text-stone-950 !important;
 }
-
-:deep(.prose h3) {
-  @apply text-xl font-semibold mb-2 mt-4 text-purple-300;
+.mode-light :deep(h2) {
+  @apply text-2xl font-bold mb-3 mt-6 text-stone-900 !important;
 }
-
-:deep(.prose p) {
-  @apply mb-4 text-gray-200;
+.mode-light :deep(h3) {
+  @apply text-xl font-semibold mb-2 mt-4 text-amber-900 !important;
 }
-
-:deep(.prose ul),
-:deep(.prose ol) {
-  @apply ml-6 mb-4 text-gray-200;
+.mode-light :deep(p) {
+  @apply mb-4 text-stone-900 font-normal !important;
+}
+.mode-light :deep(ul),
+.mode-light :deep(ol) {
+  @apply ml-6 mb-4 text-stone-900 !important;
+}
+.mode-light :deep(strong) {
+  @apply text-stone-950 font-bold !important;
+}
+.mode-light :deep(.prose a),
+.mode-light :deep(p a),
+.mode-light :deep(li a) {
+  @apply text-amber-800 hover:text-amber-950 underline font-semibold !important;
+}
+.mode-light :deep(code) {
+  @apply bg-stone-200/90 border border-stone-300 px-1.5 py-0.5 rounded text-amber-950 font-mono text-sm font-medium !important;
+}
+.mode-light :deep(pre) {
+  @apply bg-stone-900 p-4 rounded-lg overflow-x-auto border border-stone-800 text-stone-100 !important;
+}
+.mode-light :deep(blockquote) {
+  @apply border-l-4 border-amber-600 pl-4 italic text-stone-800 !important;
 }
 
 :deep(.prose li) {
   @apply mb-2;
 }
 
-:deep(.prose a) {
-  @apply text-purple-400 hover:text-purple-300 underline;
-}
-
 :deep(.prose img) {
   @apply rounded-lg shadow-lg my-6;
-}
-
-:deep(.prose strong) {
-  @apply text-white font-semibold;
-}
-
-:deep(.prose code) {
-  @apply bg-purple-500/20 px-1.5 py-0.5 rounded text-purple-300;
-}
-
-:deep(.prose pre) {
-  @apply bg-black/30 p-4 rounded-lg overflow-x-auto;
-}
-
-:deep(.prose blockquote) {
-  @apply border-l-4 border-purple-400 pl-4 italic text-purple-200;
 }
 </style>

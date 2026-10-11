@@ -164,6 +164,28 @@ export class SceneManager {
   }
 
   /**
+   * Set scene background and fog colors dynamically based on lighting mode and theme
+   */
+  setBackgroundAndFog(
+    bgColor: string | number,
+    fogColor?: number,
+    fogNear?: number,
+    fogFar?: number
+  ): void {
+    if (!this._scene || !this._renderer) return;
+
+    const threeBgColor = new THREE.Color(bgColor as any);
+    this._scene.background = threeBgColor;
+    this._renderer.setClearColor(threeBgColor, 1);
+
+    if (this._scene.fog && fogColor !== undefined) {
+      this._scene.fog.color = new THREE.Color(fogColor);
+      if (fogNear !== undefined) (this._scene.fog as THREE.Fog).near = fogNear;
+      if (fogFar !== undefined) (this._scene.fog as THREE.Fog).far = fogFar;
+    }
+  }
+
+  /**
    * Start the animation loop
    */
   startAnimation(): void {

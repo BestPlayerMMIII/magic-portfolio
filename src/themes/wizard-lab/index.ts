@@ -3,6 +3,8 @@ import wizardLabObjects from "./config/objects";
 import wizardLabLighting from "./config/lighting";
 import wizardLabParticles from "./config/particles";
 import wizardLabScene from "./config/scene";
+import wizardLabUi from "./config/ui";
+import wizardLabStrings from "./config/strings";
 
 // 🧙‍♂️ WIZARD LABORATORY THEME
 // Complete theme configuration combining all aspects of the wizard laboratory
@@ -12,6 +14,8 @@ export const wizardLabTheme: ThemeConfig = {
   lighting: wizardLabLighting,
   particles: wizardLabParticles,
   scene: wizardLabScene,
+  ui: wizardLabUi,
+  strings: wizardLabStrings,
   metadata: {
     displayName: "Wizard Laboratory",
     description:
@@ -28,6 +32,8 @@ export {
   wizardLabLighting,
   wizardLabParticles,
   wizardLabScene,
+  wizardLabUi,
+  wizardLabStrings,
 };
 
 // Export as default theme

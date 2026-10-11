@@ -3,7 +3,13 @@
     <!-- Back Button -->
     <button
       @click="handleBack"
-      class="px-6 py-2 rounded-full bg-gradient-to-r from-purple-500 via-pink-400 to-indigo-400 text-white font-bold shadow-lg hover:scale-105 hover:from-purple-600 hover:to-indigo-500 transition-all duration-200 flex items-center gap-2"
+      class="px-6 py-2.5 rounded-full font-semibold shadow-lg hover:scale-105 transition-all duration-200 flex items-center gap-2 border"
+      :class="[
+        colors.secondaryButtonBg,
+        colors.secondaryButtonBorder,
+        colors.secondaryButtonText,
+        'hover:border-amber-400',
+      ]"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -28,6 +34,9 @@
 import { computed, onMounted, ref } from "vue";
 import router from "@/router";
 import { getDeviceType } from "@/utils/deviceDetection";
+import { useTheme } from "@/stores/themeStore";
+
+const { colors } = useTheme();
 
 const deviceType = ref<"mobile" | "tablet" | "desktop">("desktop");
 const isMobile = computed(

@@ -12,8 +12,10 @@
       class="nav-container transition-all duration-700 ease-in-out"
       :class="
         isNavigationMinimized
-          ? 'flex justify-between items-center bg-black/30 backdrop-blur-sm px-6 py-3 mx-auto'
-          : 'w-full bg-gradient-to-r from-black/80 via-black/90 to-black/80 backdrop-blur-md px-8 py-3 border-b border-purple-500/30 shadow-lg'
+          ? (isDayMode
+              ? 'flex justify-between items-center bg-stone-900/40 backdrop-blur-md px-6 py-3 mx-auto border border-stone-600/30 shadow-md text-amber-100'
+              : 'flex justify-between items-center bg-black/40 backdrop-blur-sm px-6 py-3 mx-auto border border-white/10 text-white')
+          : `w-full ${colors.header3DBackground} px-8 py-3`
       "
       :style="{
         borderRadius: isNavigationMinimized ? '50px' : '0',
@@ -31,129 +33,82 @@
         <div class="flex items-center space-x-3">
           <div
             @click="toggleNavigation"
-            class="ui-button w-9 h-9 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 flex items-center justify-center hover:scale-110 transition-all duration-300 shadow-lg hover:shadow-purple-500/50"
+            class="ui-button w-9 h-9 rounded-xl border flex items-center justify-center hover:scale-105 transition-all duration-300 shadow-md"
+            :class="colors.header3DLogoButton"
             style="pointer-events: auto; cursor: pointer"
           >
-            <span class="text-white text-lg font-bold">✨</span>
+            <HugeiconsIcon :icon="AiMagicIcon" :size="20" />
           </div>
           <div class="flex flex-col">
             <h1
-              class="ui-title text-2xl font-bold text-white transition-all duration-300"
+              class="ui-title text-xl font-bold transition-all duration-300 tracking-tight"
             >
               <span
-                class="gradient-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent"
+                class="transition-colors duration-300"
+                :class="colors.header3DTitle"
               >
-                Magic Portfolio
+                {{ strings.siteTitle }}
               </span>
             </h1>
-            <p class="text-purple-300 text-xs font-medium tracking-wide">
-              Interactive 3D Experience
+            <p
+              class="text-xs font-medium tracking-wider uppercase transition-colors duration-300"
+              :class="colors.header3DSubtitle"
+            >
+              {{ strings.siteSubtitle }}
             </p>
           </div>
         </div>
 
         <!-- Right Section: Controls -->
-        <div class="flex items-center space-x-4">
-          <!-- Credits Button (NEW) -->
+        <div class="flex items-center space-x-3">
+          <!-- Credits Button -->
           <button
             @click="$emit('openCredits')"
-            class="ui-button relative px-4 py-3 rounded-xl transition-all duration-300 overflow-hidden group shadow-lg hover:shadow-xl bg-gradient-to-r from-pink-500/20 to-rose-500/20 hover:from-pink-500/30 hover:to-rose-500/30 border border-pink-400/50"
+            class="ui-button relative px-3.5 py-2.5 rounded-xl transition-all duration-300 overflow-hidden group shadow-md hover:shadow-lg border"
+            :class="colors.header3DButtonBg"
             style="pointer-events: auto; cursor: pointer"
             title="View 3D Model Credits"
           >
-            <!-- Enhanced background animation -->
-            <div
-              class="absolute inset-0 transition-all duration-500 bg-gradient-to-r from-pink-600/10 to-rose-600/10"
-            ></div>
-
             <!-- Content -->
             <div class="relative z-10 flex items-center gap-2">
-              <svg
-                class="w-5 h-5 text-pink-400 transition-all duration-300 transform group-hover:scale-110"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"
-                />
-              </svg>
-              <span v-if="!isMobile" class="text-pink-300 font-medium text-sm">
+              <HugeiconsIcon :icon="PaintBoardIcon" :size="18" :class="colors.accentColor" class="transition-transform group-hover:scale-110" />
+              <span v-if="!isMobile" class="font-medium text-sm">
                 Credits
               </span>
             </div>
-
-            <!-- Enhanced ripple effect -->
-            <div
-              class="absolute inset-0 opacity-0 group-active:opacity-30 transition-opacity duration-150 rounded-xl bg-pink-400"
-            ></div>
           </button>
 
           <!-- Classic Navigation Button -->
           <router-link
             to="/about"
-            class="ui-button relative px-4 py-3 rounded-xl transition-all duration-300 overflow-hidden group shadow-lg hover:shadow-xl bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-400/50"
+            class="ui-button relative px-3.5 py-2.5 rounded-xl transition-all duration-300 overflow-hidden group shadow-md hover:shadow-lg border"
+            :class="colors.header3DButtonBg"
             style="pointer-events: auto; cursor: pointer"
             title="Switch to Classic Navigation"
           >
-            <!-- Enhanced background animation -->
-            <div
-              class="absolute inset-0 transition-all duration-500 bg-gradient-to-r from-cyan-600/10 to-blue-600/10"
-            ></div>
-
             <!-- Content -->
             <div class="relative z-10 flex items-center gap-2">
-              <svg
-                class="w-5 h-5 text-cyan-400 transition-all duration-300 transform group-hover:scale-110"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-              <span v-if="!isMobile" class="text-cyan-300 font-medium text-sm">
+              <HugeiconsIcon :icon="Book01Icon" :size="18" :class="colors.accentColor" class="transition-transform group-hover:scale-110" />
+              <span v-if="!isMobile" class="font-medium text-sm">
                 Classic View
               </span>
             </div>
-
-            <!-- Enhanced ripple effect -->
-            <div
-              class="absolute inset-0 opacity-0 group-active:opacity-30 transition-opacity duration-150 rounded-xl bg-cyan-400"
-            ></div>
           </router-link>
 
           <!-- Day/Night Mode Toggle -->
           <button
             @click="toggleDayNightMode"
-            class="ui-button day-night-toggle relative p-3 rounded-xl transition-all duration-300 overflow-hidden group shadow-lg hover:shadow-xl"
-            :class="
-              isDayMode
-                ? 'bg-gradient-to-r from-orange-500/20 to-yellow-500/20 hover:from-orange-500/30 hover:to-yellow-500/30 border border-orange-400/50'
-                : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 hover:from-purple-500/30 hover:to-indigo-500/30 border border-purple-400/50'
-            "
+            class="ui-button day-night-toggle relative p-2.5 rounded-xl transition-all duration-300 overflow-hidden group shadow-md hover:shadow-lg border"
+            :class="colors.header3DButtonBg"
             style="pointer-events: auto; cursor: pointer"
             :title="isDayMode ? 'Switch to Night Mode' : 'Switch to Day Mode'"
           >
-            <!-- Enhanced background animation -->
-            <div
-              class="absolute inset-0 transition-all duration-500"
-              :class="
-                isDayMode
-                  ? 'bg-gradient-to-r from-yellow-400/10 to-orange-500/10'
-                  : 'bg-gradient-to-r from-purple-600/10 to-indigo-600/10'
-              "
-            ></div>
-
             <!-- Icon container -->
             <div class="relative z-10 flex items-center justify-center">
               <!-- Day icon (sun) -->
               <div
                 v-if="isDayMode"
-                class="w-7 h-7 text-yellow-400 transition-all duration-300 transform group-hover:scale-110 group-hover:rotate-12"
+                class="w-5 h-5 text-amber-300 transition-all duration-300 transform group-hover:scale-110 group-hover:rotate-12"
               >
                 <svg fill="currentColor" viewBox="0 0 24 24">
                   <path
@@ -165,7 +120,8 @@
               <!-- Night icon (moon) -->
               <div
                 v-else
-                class="w-7 h-7 text-indigo-400 transition-all duration-300 transform group-hover:scale-110 group-hover:-rotate-12"
+                class="w-5 h-5 transition-all duration-300 transform group-hover:scale-110 group-hover:-rotate-12"
+                :class="colors.accentColor"
               >
                 <svg fill="currentColor" viewBox="0 0 24 24">
                   <path
@@ -176,12 +132,6 @@
                 </svg>
               </div>
             </div>
-
-            <!-- Enhanced ripple effect -->
-            <div
-              class="absolute inset-0 opacity-0 group-active:opacity-30 transition-opacity duration-150 rounded-xl"
-              :class="isDayMode ? 'bg-orange-400' : 'bg-purple-400'"
-            ></div>
           </button>
         </div>
       </div>
@@ -196,9 +146,10 @@
           >
             <div
               @click="toggleNavigation"
-              class="ui-button w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center"
+              class="ui-button w-8 h-8 rounded-lg border flex items-center justify-center transition-all duration-300"
+              :class="colors.header3DLogoButton"
             >
-              <span class="text-white text-lg font-bold">✨</span>
+              <HugeiconsIcon :icon="AiMagicIcon" :size="18" />
             </div>
           </div>
         </div>
@@ -210,6 +161,15 @@
 <script setup lang="ts">
 import { defineProps, ref, onMounted, onUnmounted } from "vue";
 import { isMobileDevice } from "@/utils/deviceDetection"; // adjust path if needed
+import { useTheme } from "@/stores/themeStore";
+import { HugeiconsIcon } from "@hugeicons/vue";
+import {
+  AiMagicIcon,
+  PaintBoardIcon,
+  Book01Icon,
+} from "@hugeicons/core-free-icons";
+
+const { strings, colors } = useTheme();
 
 const isMobile = ref(false);
 function handleResize() {

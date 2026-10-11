@@ -1,12 +1,7 @@
 <template>
   <nav
     class="navigation-header w-full transition-all duration-300"
-    :class="{
-      'bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm':
-        isDayMode,
-      'bg-gradient-to-r from-black/80 via-black/90 to-black/80 backdrop-blur-md border-b border-purple-500/30 shadow-lg':
-        !isDayMode,
-    }"
+    :class="colors.navHeaderBackground"
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
       <div class="flex items-center h-16 relative">
@@ -21,16 +16,18 @@
             class="flex items-center space-x-2 group transition-all duration-300 hover:scale-105"
           >
             <div
-              class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 flex items-center justify-center shadow-lg group-hover:shadow-purple-500/50 transition-all duration-300"
+              class="w-9 h-9 rounded-xl border flex items-center justify-center shadow-lg transition-colors"
+              :class="colors.navHeaderLogoButton || colors.header3DLogoButton"
             >
-              <span class="text-white text-lg font-bold">✨</span>
+              <HugeiconsIcon :icon="AiMagicIcon" :size="20" />
             </div>
             <div class="hidden sm:block">
-              <h1 class="text-lg font-bold">
+              <h1 class="text-base font-bold">
                 <span
-                  class="gradient-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent"
+                  class="transition-colors duration-300"
+                  :class="colors.navHeaderTitle"
                 >
-                  Magic Portfolio
+                  {{ strings.siteTitle }}
                 </span>
               </h1>
             </div>
@@ -48,16 +45,7 @@
           <router-link
             to="/about"
             class="nav-link group px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium flex items-center overflow-hidden"
-            :class="{
-              'text-gray-700 hover:bg-gray-100 hover:text-purple-600':
-                isDayMode && !isSectionActive('about'),
-              'bg-purple-100 text-purple-700':
-                isDayMode && isSectionActive('about'),
-              'text-gray-300 hover:bg-white/10 hover:text-purple-300':
-                !isDayMode && !isSectionActive('about'),
-              'bg-purple-500/20 text-purple-300 border border-purple-500/50':
-                !isDayMode && isSectionActive('about'),
-            }"
+            :class="isSectionActive('about') ? colors.navHeaderLinkActive : colors.navHeaderLink"
           >
             <component :is="getSectionIcon('about', 'w-5 h-5 flex-shrink-0')" />
             <span class="nav-text whitespace-nowrap">About</span>
@@ -68,16 +56,7 @@
             :key="section.id"
             :to="`/post/${section.id}`"
             class="nav-link group px-4 py-2 rounded-lg transition-all duration-300 text-sm font-medium flex items-center overflow-hidden"
-            :class="{
-              'text-gray-700 hover:bg-gray-100 hover:text-purple-600':
-                isDayMode && !isSectionActive(section.id),
-              'bg-purple-100 text-purple-700':
-                isDayMode && isSectionActive(section.id),
-              'text-gray-300 hover:bg-white/10 hover:text-purple-300':
-                !isDayMode && !isSectionActive(section.id),
-              'bg-purple-500/20 text-purple-300 border border-purple-500/50':
-                !isDayMode && isSectionActive(section.id),
-            }"
+            :class="isSectionActive(section.id) ? colors.navHeaderLinkActive : colors.navHeaderLink"
           >
             <component
               :is="getSectionIcon(section.id, 'w-5 h-5 flex-shrink-0')"
@@ -94,11 +73,8 @@
           <!-- Mobile Menu Toggle -->
           <button
             @click="toggleMobileMenu"
-            class="md:hidden p-2 rounded-lg transition-all duration-200"
-            :class="{
-              'text-gray-700 hover:bg-gray-100': isDayMode,
-              'text-gray-300 hover:bg-white/10': !isDayMode,
-            }"
+            class="md:hidden p-2 rounded-lg transition-all duration-200 border"
+            :class="colors.navHeaderButtonBg || colors.header3DButtonBg"
           >
             <svg
               class="w-6 h-6"
@@ -126,18 +102,14 @@
           <!-- Day/Night Mode Toggle -->
           <button
             @click="toggleDayNightMode"
-            class="p-2.5 rounded-lg transition-all duration-300 group"
-            :class="{
-              'bg-orange-100 hover:bg-orange-200': isDayMode,
-              'bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400/50':
-                !isDayMode,
-            }"
+            class="p-2.5 rounded-lg transition-all duration-300 group border"
+            :class="colors.navHeaderButtonBg || colors.header3DButtonBg"
             :title="isDayMode ? 'Switch to Night Mode' : 'Switch to Day Mode'"
           >
             <!-- Day icon (sun) -->
             <div
               v-if="isDayMode"
-              class="w-5 h-5 text-yellow-600 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12"
+              class="w-5 h-5 text-amber-600 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12"
             >
               <svg fill="currentColor" viewBox="0 0 24 24">
                 <path
@@ -149,7 +121,8 @@
             <!-- Night icon (moon) -->
             <div
               v-else
-              class="w-5 h-5 text-indigo-400 transition-all duration-300 group-hover:scale-110 group-hover:-rotate-12"
+              class="w-5 h-5 transition-all duration-300 group-hover:scale-110 group-hover:-rotate-12"
+              :class="colors.accentColor"
             >
               <svg fill="currentColor" viewBox="0 0 24 24">
                 <path
@@ -167,25 +140,13 @@
       <div
         v-if="showMobileMenu && !isLoadingSections"
         class="md:hidden border-t py-2"
-        :class="{
-          'border-gray-200': isDayMode,
-          'border-purple-500/30': !isDayMode,
-        }"
+        :class="colors.cardBorder"
       >
         <!-- About Link (Mobile) -->
         <router-link
           to="/about"
           class="block px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium mb-1 flex items-center gap-2"
-          :class="{
-            'text-gray-700 hover:bg-gray-100':
-              isDayMode && !isSectionActive('about'),
-            'bg-purple-100 text-purple-700':
-              isDayMode && isSectionActive('about'),
-            'text-gray-300 hover:bg-white/10':
-              !isDayMode && !isSectionActive('about'),
-            'bg-purple-500/20 text-purple-300':
-              !isDayMode && isSectionActive('about'),
-          }"
+          :class="isSectionActive('about') ? colors.navHeaderLinkActive : colors.navHeaderLink"
         >
           <component :is="getSectionIcon('about', 'w-5 h-5')" />
           <span>About</span>
@@ -196,16 +157,7 @@
           :key="section.id"
           :to="`/post/${section.id}`"
           class="block px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium mb-1 flex items-center gap-2"
-          :class="{
-            'text-gray-700 hover:bg-gray-100':
-              isDayMode && !isSectionActive(section.id),
-            'bg-purple-100 text-purple-700':
-              isDayMode && isSectionActive(section.id),
-            'text-gray-300 hover:bg-white/10':
-              !isDayMode && !isSectionActive(section.id),
-            'bg-purple-500/20 text-purple-300':
-              !isDayMode && isSectionActive(section.id),
-          }"
+          :class="isSectionActive(section.id) ? colors.navHeaderLinkActive : colors.navHeaderLink"
         >
           <component :is="getSectionIcon(section.id, 'w-5 h-5')" />
           <span>{{ section.title }}</span>
@@ -217,10 +169,15 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
+import { HugeiconsIcon } from "@hugeicons/vue";
+import { AiMagicIcon } from "@hugeicons/core-free-icons";
 import { getAllSectionDescriptions } from "@/config/sectionDescriptions";
 import { getSectionIcon } from "@/config/sectionIcons";
 import { apiWithCache } from "@/services/apiWithCache";
+import { useTheme } from "@/stores/themeStore";
 import router from "@/router";
+
+const { strings, colors } = useTheme();
 
 defineProps<{
   isDayMode: boolean;

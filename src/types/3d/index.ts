@@ -323,6 +323,14 @@ export interface SceneConfig {
   renderer: RendererConfig;
   controls: ControlsConfig;
   fog?: FogConfig;
+  background?: {
+    day: string | number;
+    night: string | number;
+  };
+  fogByMode?: {
+    day: FogConfig;
+    night: FogConfig;
+  };
 }
 
 export interface CameraConfig {
@@ -391,6 +399,120 @@ export interface PreloaderState {
   loadedAssets: number;
 }
 
+// Theme color tokens for a single lighting mode (dark or light)
+export interface ThemeColorTokens {
+  // Page / Canvas Backgrounds
+  pageBackground: string;
+  pageBackgroundHex: string;
+  
+  // 3D Scene Background & Fog
+  sceneClearColor: string | number;
+  sceneFogColor: number;
+  sceneFogNear?: number;
+  sceneFogFar?: number;
+
+  // Header in 3D Scene
+  header3DBackground: string;
+  header3DTitle: string;
+  header3DSubtitle: string;
+  header3DButtonBg: string;
+  header3DLogoButton: string;
+
+  // Standard Navigation Header (2D pages)
+  navHeaderBackground: string;
+  navHeaderTitle: string;
+  navHeaderSubtitle: string;
+  navHeaderLink: string;
+  navHeaderLinkActive: string;
+  navHeaderButtonBg?: string;
+  navHeaderLogoButton?: string;
+
+  // Panels & Cards
+  panelBackground: string;
+  panelBorder: string;
+  panelTitle: string;
+  panelText: string;
+  panelTextMuted: string;
+  panelCloseButton: string;
+  cardBackground: string;
+  cardBorder: string;
+  cardHoverBorder: string;
+  cardTitle: string;
+  cardText: string;
+  cardTextMuted: string;
+  proseClass: string;
+
+  // Buttons
+  primaryButtonBg: string;
+  primaryButtonHover: string;
+  primaryButtonText: string;
+  primaryGradient?: string;
+  primaryGradientText?: string;
+  secondaryButtonBg: string;
+  secondaryButtonBorder: string;
+  secondaryButtonText: string;
+
+  // Accents, Dividers & Badges
+  accentColor: string;
+  accentBg: string;
+  accentBorder: string;
+  dividerGradient?: string;
+  badgeBg: string;
+  badgeText: string;
+  badgeBorder: string;
+
+  // Ready State Badges
+  readyBadgeBg: string;
+  readyBadgeText: string;
+  readyBadgeBorder: string;
+  readyBadgeDot?: string;
+
+  // Preloader UI
+  preloaderBackdrop: string;
+  preloaderTitle: string;
+  preloaderSubtitle: string;
+  preloaderCardBorder: string;
+  preloaderStatusBadge: string;
+  preloaderProgressTrack: string;
+  preloaderStatusText: string;
+  preloaderStatusMuted: string;
+
+  // Ambient Overlay in 3D scene
+  ambientOverlay?: {
+    radial1: string;
+    radial2: string;
+  };
+
+  // Scrollbar
+  scrollbarThumb: string;
+  scrollbarThumbHover: string;
+  scrollbarTrack: string;
+}
+
+// Full UI theme containing both color modes and transitions
+export interface ThemeUiConfig {
+  dark: ThemeColorTokens;
+  light: ThemeColorTokens;
+  preloaderProgressGradient: string;
+}
+
+// Theme textual strings and templates (no hardcoded copy!)
+export interface ThemeStringsConfig {
+  authorName: string;
+  siteTitle: string;
+  siteSubtitle: string;
+  themeTitle: string;
+  themeSubtitle: string;
+  aboutPrompt: string;
+  loadingStatus: string;
+  readyStatus: string;
+  enterButton: string;
+  exploreHint: string;
+  objectSearchPrompt: string;
+  artifactsHeader: string;
+  aboutModalTitle: string;
+}
+
 // Theme configuration types
 export interface ThemeConfig {
   name: string;
@@ -398,6 +520,8 @@ export interface ThemeConfig {
   lighting: LightingConfiguration;
   particles: ParticlesConfiguration;
   scene: SceneConfig;
+  ui?: ThemeUiConfig;
+  strings?: ThemeStringsConfig;
   metadata: ThemeMetadata;
 }
 

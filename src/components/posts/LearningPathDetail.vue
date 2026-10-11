@@ -3,14 +3,14 @@
     <header class="w-full text-center mb-6">
       <h1
         class="text-4xl font-bold mb-4"
-        :class="{ 'text-gray-900': isDayMode, 'text-white': !isDayMode }"
+        :class="colors.panelTitle"
       >
         {{ post.data.title || "Learning Path" }}
       </h1>
       <p
         v-if="post.data.description"
         class="text-lg mb-4"
-        :class="{ 'text-gray-700': isDayMode, 'text-gray-300': !isDayMode }"
+        :class="colors.panelTextMuted"
       >
         {{ post.data.description }}
       </p>
@@ -20,7 +20,7 @@
     <div v-if="post.data.topics" class="mb-6">
       <h2
         class="text-2xl font-semibold mb-3 text-center"
-        :class="{ 'text-gray-800': isDayMode, 'text-white': !isDayMode }"
+        :class="colors.panelTitle"
       >
         Topics Covered
       </h2>
@@ -28,18 +28,15 @@
         <div
           v-for="(topic, index) in post.data.topics"
           :key="index"
-          class="p-3 rounded-lg transition-all duration-200"
-          :class="{
-            'bg-green-100 hover:bg-green-200': isDayMode,
-            'bg-green-500/20 hover:bg-green-500/30': !isDayMode,
-          }"
+          class="p-3 rounded-lg transition-all duration-200 border"
+          :class="[
+            colors.badgeBg,
+            colors.badgeBorder,
+          ]"
         >
           <span
             class="font-medium"
-            :class="{
-              'text-green-700': isDayMode,
-              'text-green-300': !isDayMode,
-            }"
+            :class="colors.badgeText"
           >
             {{ index + 1 }}. {{ topic }}
           </span>
@@ -50,12 +47,12 @@
     <!-- Content -->
     <div
       class="prose max-w-none mx-auto"
-      :class="{ 'prose-invert': !isDayMode }"
+      :class="colors.proseClass"
     >
       <p v-if="post.data.content" class="whitespace-pre-wrap">
         {{ post.data.content }}
       </p>
-      <p v-else class="text-center text-gray-500">
+      <p v-else class="text-center" :class="colors.cardTextMuted">
         More details about this learning path coming soon...
       </p>
     </div>
@@ -65,6 +62,9 @@
 <script setup lang="ts">
 import type { ContentItem } from "@/types";
 import BasePostDetail from "./BasePostDetail.vue";
+import { useTheme } from "@/stores/themeStore";
+
+const { colors } = useTheme();
 
 interface Props {
   post: ContentItem<any>;

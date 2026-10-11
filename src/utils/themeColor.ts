@@ -3,17 +3,17 @@
  * This affects the browser navigation bar color on mobile devices
  */
 
-const DAY_MODE_COLOR = "#f2f2f2"; // Light gray background for day mode
-const NIGHT_MODE_COLOR = "#1e1b4b"; // Dark indigo for night mode
+import { defaultThemeUi } from "@/config/themeUi";
 
 export function updateThemeColor(isDayMode: boolean) {
+  const color = isDayMode
+    ? defaultThemeUi.light.pageBackgroundHex
+    : defaultThemeUi.dark.pageBackgroundHex;
+
   // Update the theme-color meta tag
   const metaThemeColor = document.querySelector('meta[name="theme-color"]');
   if (metaThemeColor) {
-    metaThemeColor.setAttribute(
-      "content",
-      isDayMode ? DAY_MODE_COLOR : NIGHT_MODE_COLOR
-    );
+    metaThemeColor.setAttribute("content", color);
   }
 
   // Update color-scheme for better browser integration

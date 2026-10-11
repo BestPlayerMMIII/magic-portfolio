@@ -1,11 +1,7 @@
 <template>
   <div
     class="h-screen w-screen flex flex-col"
-    :class="{
-      'bg-[rgb(242,242,242)]': isDayMode,
-      'bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900':
-        !isDayMode,
-    }"
+    :class="colors.pageBackground"
   >
     <!-- Navigation Header -->
     <NavigationHeader
@@ -21,12 +17,9 @@
       >
         <div
           class="w-16 h-16 border-4 rounded-full animate-spin mb-4"
-          :class="{
-            'border-gray-300 border-t-purple-600': isDayMode,
-            'border-gray-700 border-t-purple-400': !isDayMode,
-          }"
+          :class="isDayMode ? 'border-stone-300 border-t-amber-600' : 'border-slate-700 border-t-amber-400'"
         ></div>
-        <p :class="{ 'text-gray-700': isDayMode, 'text-gray-300': !isDayMode }">
+        <p :class="colors.panelText">
           Loading {{ sectionTitle }}...
         </p>
       </div>
@@ -39,7 +32,7 @@
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="h-16 w-16 mb-2"
-          :class="{ 'text-gray-400': isDayMode, 'text-gray-600': !isDayMode }"
+          :class="colors.panelTextMuted"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -53,13 +46,13 @@
         </svg>
         <h2
           class="text-2xl font-semibold"
-          :class="{ 'text-gray-600': isDayMode, 'text-gray-300': !isDayMode }"
+          :class="colors.panelTitle"
         >
           Section not found
         </h2>
         <p
           class="mb-2"
-          :class="{ 'text-gray-500': isDayMode, 'text-gray-400': !isDayMode }"
+          :class="colors.panelTextMuted"
         >
           {{ error }}
         </p>
@@ -80,9 +73,7 @@
           <div
             class="h-px w-full"
             :style="{
-              background: sectionDescription
-                ? `linear-gradient(90deg, transparent, ${sectionDescription.color.accent}80, transparent)`
-                : 'rgba(128, 128, 128, 0.3)',
+              background: colors.dividerGradient || 'linear-gradient(90deg, transparent, rgba(128, 128, 128, 0.3), transparent)',
             }"
           ></div>
         </div>
@@ -140,7 +131,7 @@
             class="text-lg"
             :class="{ 'text-gray-600': isDayMode, 'text-gray-400': !isDayMode }"
           >
-            No content available yet. Check back later! ✨
+            No content available yet. Check back later!
           </p>
         </div>
 
@@ -151,7 +142,7 @@
       </div>
 
       <!-- Footer -->
-      <AppFooter :isDayMode="isDayMode" authorName="BestPlayer" />
+      <AppFooter :isDayMode="isDayMode" />
     </div>
   </div>
 </template>
@@ -173,8 +164,10 @@ import FunFactsList from "@/components/sections/FunFactsList.vue";
 import { getSectionById } from "@/config/sectionDescriptions";
 import type { ContentItem, SchemaType } from "@/types";
 import { useViewMode } from "@/stores/viewModeStore";
+import { useTheme } from "@/stores/themeStore";
 
-// Use day mode from store
+// Use theme and day mode
+const { colors } = useTheme();
 const { isDayMode, toggleDayMode } = useViewMode();
 
 const schemaId = ref<string>("");

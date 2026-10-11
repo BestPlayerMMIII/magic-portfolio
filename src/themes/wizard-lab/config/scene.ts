@@ -29,9 +29,25 @@ export const wizardLabScene: SceneConfig = {
     maxPolarAngle: Math.PI / 2,
   },
   fog: {
-    color: 0x1a1a2e,
+    color: 0x0f1322,
     near: 10,
     far: 50,
+  },
+  background: {
+    night: 0x0a0d16,
+    day: 0x24201c,
+  },
+  fogByMode: {
+    night: {
+      color: 0x0f1322,
+      near: 10,
+      far: 50,
+    },
+    day: {
+      color: 0x2a2520,
+      near: 10,
+      far: 50,
+    },
   },
 };
 

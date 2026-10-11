@@ -15,8 +15,8 @@ export interface CategoryConfig {
   description: string;
   longDescription: string;
 
-  // Styling
-  color: {
+  // Styling (optional/legacy, active themes provide palette)
+  color?: {
     from: string;
     to: string;
     accent: string;
@@ -70,7 +70,7 @@ export const categories: Record<string, CategoryConfig> = {
   project: {
     id: "project",
     title: "Projects",
-    emoji: "🔮",
+    emoji: "",
     description: "Explore my magical creations",
     longDescription:
       "Welcome to my collection of projects! Here you'll find the applications, tools, and experiments I've crafted using various technologies. Each project represents a journey of learning and problem-solving.",
@@ -88,7 +88,7 @@ export const categories: Record<string, CategoryConfig> = {
   "blog-post": {
     id: "blog-post",
     title: "Blog Posts",
-    emoji: "📖",
+    emoji: "",
     description: "Read my thoughts and experiences",
     longDescription:
       "Dive into my blog where I share insights, tutorials, and experiences from my journey in software development. From technical deep-dives to personal reflections, you'll find a variety of content here.",
@@ -107,7 +107,7 @@ export const categories: Record<string, CategoryConfig> = {
   "work-in-progress": {
     id: "work-in-progress",
     title: "Work in Progress",
-    emoji: "⚗️",
+    emoji: "",
     description: "Peek at what I'm currently brewing",
     longDescription:
       "Get a sneak peek at the projects I'm currently working on! This section shows my ongoing experiments, upcoming features, and works in progress. Watch this space for updates as these ideas evolve.",
@@ -125,7 +125,7 @@ export const categories: Record<string, CategoryConfig> = {
   collaboration: {
     id: "collaboration",
     title: "Collaborations",
-    emoji: "🤝",
+    emoji: "",
     description: "Discover partnerships and team projects",
     longDescription:
       "Collaboration is at the heart of great software! Here you'll find projects I've worked on with other talented developers, designers, and creators. Together, we've built something greater than the sum of its parts.",
@@ -143,7 +143,7 @@ export const categories: Record<string, CategoryConfig> = {
   "learning-path": {
     id: "learning-path",
     title: "Learning Paths",
-    emoji: "📚",
+    emoji: "",
     description: "Follow my learning journey",
     longDescription:
       "Learning never stops! This section documents my ongoing education in various technologies, frameworks, and concepts. Track my progress as I explore new areas and deepen my expertise.",
@@ -161,7 +161,7 @@ export const categories: Record<string, CategoryConfig> = {
   "fun-facts": {
     id: "fun-facts",
     title: "Fun Facts",
-    emoji: "🦉",
+    emoji: "",
     description: "Discover interesting tidbits about me",
     longDescription:
       "Want to know more about me beyond the code? Here are some fun facts, quirks, and interesting things that make me who I am. From hobbies to random knowledge, it's all here!",

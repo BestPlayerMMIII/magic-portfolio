@@ -4,12 +4,12 @@
       v-for="post in items"
       :key="post.id"
       class="blog-post-card rounded-lg p-4 sm:p-6 border transition-all duration-300"
-      :class="{
-        'bg-white/90 border-gray-300 hover:border-fuchsia-400 hover:shadow-xl':
-          isDayMode,
-        'bg-slate-800/70 border-fuchsia-500/30 hover:border-fuchsia-500/60 hover:shadow-2xl hover:shadow-fuchsia-500/20':
-          !isDayMode,
-      }"
+      :class="[
+        colors.cardBackground,
+        colors.cardBorder,
+        colors.cardHoverBorder,
+        'hover:shadow-xl',
+      ]"
     >
       <div
         class="flex flex-col sm:flex-row items-start space-y-3 sm:space-y-0 sm:space-x-4"
@@ -27,13 +27,13 @@
         <div class="flex-1 min-w-0 w-full">
           <h3
             class="text-lg sm:text-xl font-semibold mb-2"
-            :class="{ 'text-gray-900': isDayMode, 'text-white': !isDayMode }"
+            :class="colors.cardTitle"
           >
             {{ post.data.header.title }}
           </h3>
           <p
             class="mb-3 text-sm line-clamp-10"
-            :class="{ 'text-gray-700': isDayMode, 'text-gray-300': !isDayMode }"
+            :class="colors.cardText"
           >
             {{ post.data.header.excerpt }}
           </p>
@@ -42,13 +42,12 @@
             <span
               v-for="tag in post.data.header.tags"
               :key="tag"
-              class="px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition-colors"
-              :class="{
-                'bg-fuchsia-100 text-fuchsia-700 hover:bg-fuchsia-200':
-                  isDayMode,
-                'bg-fuchsia-500/20 text-fuchsia-300 hover:bg-fuchsia-500/30':
-                  !isDayMode,
-              }"
+              class="px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition-colors border"
+              :class="[
+                colors.badgeBg,
+                colors.badgeText,
+                colors.badgeBorder,
+              ]"
             >
               #{{ tag }}
             </span>
@@ -56,7 +55,7 @@
 
           <p
             class="text-xs truncate"
-            :class="{ 'text-gray-600': isDayMode, 'text-gray-400': !isDayMode }"
+            :class="colors.cardTextMuted"
           >
             By {{ post.metadata.author }} •
             {{ formatDate(post.metadata.updatedAt) }}
@@ -66,10 +65,9 @@
             <button
               :class="[
                 baseButtonLink,
-                {
-                  'bg-fuchsia-500 hover:bg-fuchsia-600 text-white': isDayMode,
-                  'bg-fuchsia-600 hover:bg-fuchsia-700 text-white': !isDayMode,
-                },
+                colors.primaryButtonBg,
+                colors.primaryButtonHover,
+                colors.primaryButtonText,
               ]"
               @click="$emit('item-click', post)"
             >
@@ -85,6 +83,9 @@
 <script setup lang="ts">
 import type { ContentItem, BlogPost } from "@/types";
 import { baseButtonLink } from "@/utils/links";
+import { useTheme } from "@/stores/themeStore";
+
+const { colors } = useTheme();
 
 defineProps<{
   items: ContentItem<BlogPost>[];

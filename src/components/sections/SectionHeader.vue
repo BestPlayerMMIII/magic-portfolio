@@ -1,39 +1,34 @@
 <template>
   <div class="section-header mb-8">
-    <div class="flex items-center justify-center mb-4">
+    <div v-if="description.emoji" class="flex items-center justify-center mb-4">
       <div
         class="text-6xl mb-2 animate-bounce-once"
-        :style="{
-          filter: `drop-shadow(0 0 20px ${description.color.accent})`,
-        }"
       >
         {{ description.emoji }}
       </div>
     </div>
     <h1
       class="text-4xl md:text-5xl font-bold text-center mb-4"
-      :class="{ 'text-gray-900': isDayMode, 'text-white': !isDayMode }"
+      :class="colors.panelTitle"
     >
       {{ description.title }}
     </h1>
     <p
       class="text-lg text-center mb-2"
-      :class="{ 'text-gray-700': isDayMode, 'text-gray-300': !isDayMode }"
+      :class="colors.panelTextMuted"
     >
       {{ description.description }}
     </p>
     <div
-      class="max-w-3xl mx-auto text-center rounded-xl p-6 backdrop-blur-sm border"
-      :style="{
-        background: isDayMode
-          ? 'rgba(255, 255, 255, 0.8)'
-          : `linear-gradient(135deg, ${description.color.from}15, ${description.color.to}15)`,
-        borderColor: `${description.color.accent}40`,
-      }"
+      class="max-w-3xl mx-auto text-center rounded-xl p-6 backdrop-blur-sm border shadow-lg"
+      :class="[
+        colors.cardBackground,
+        colors.cardBorder,
+      ]"
     >
       <p
         class="text-base leading-relaxed"
-        :class="{ 'text-gray-800': isDayMode, 'text-gray-200': !isDayMode }"
+        :class="colors.cardText"
       >
         {{ description.longDescription }}
       </p>
@@ -43,6 +38,9 @@
 
 <script setup lang="ts">
 import type { SectionDescription } from "@/config/sectionDescriptions";
+import { useTheme } from "@/stores/themeStore";
+
+const { colors } = useTheme();
 
 defineProps<{
   description: SectionDescription;
